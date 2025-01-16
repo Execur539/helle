@@ -8,6 +8,9 @@ body {
    overflow-y: hidden;
    background: #121212; /* Darker background for modern feel */
    color: #ffffff; /* White text for contrast */
+   display: flex;
+   flex-direction: column;
+   height: 100vh; /* Full height for the body */
 }
 
 .nav {
@@ -37,9 +40,7 @@ body {
 }
 
 .nav-bar {
-   left: 0;
-   right: 0;
-   height: 3.5em; /* Increased the height */
+   height: 3.5em; /* Navbar height */
    padding: 0 25px;
    background: #1e1e1e; /* Dark background for the top bar */
    box-sizing: border-box;
@@ -47,6 +48,8 @@ body {
    z-index: 100;
    width: 100vw;
    position: fixed;
+   top: 0;
+   left: 0;
 }
 
 .nav-button {
@@ -172,7 +175,11 @@ p {
 }
 
 .frame-container iframe {
-   display: none;
+   flex: 1; 
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   position: relative;
 }
 
 .frame-container iframe.active {
@@ -221,10 +228,7 @@ li:hover {
 }
 
 iframe {
-   position: absolute;
    width: 100%;
-   height: calc(100vh - 3.5em); 
+   height: 100%;
    border: none;
-   left: 0;
 }
-
