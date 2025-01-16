@@ -2,38 +2,170 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="referrer" content="no-referrer" />
-    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="shortcut icon" id="tab-favicon" href="favicon.png" />
-    <title id="t">Home</title>
-    <link rel="stylesheet" href="/assets/css/global.css?v=6" />
-    <link rel="stylesheet" href="/assets/css/t.css?v=02" />
-    <script src="assets/js/f.js"></script>
-    <script>
-      window.addEventListener("resize", navigator.keyboard.lock(["Escape"]));
-    </script>
+    <title>Void Games</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   </head>
-  <body id="no">
-    <div class="frame-container" id="frame-container"></div>
-    <script src="assets/js/t.js?v=03"></script>
-    <script src="./assets/ultra/bundle.js?v=10-02-2024"></script>
-    <script src="./assets/ultra/config.js?v=10-02-2024"></script>
-    <script src="/assets/js/mv.js?v=003"></script>
-    <!-- DO NOT REMOVE-->
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-WKJQ5QHQTJ"
-    ></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-
-      gtag("config", "G-WKJQ5QHQTJ");
-    </script>
-    <!-- DO NOT REMOVE-->
+  <body>
+    <nav class="navbar">
+      <div class="navbar-container">
+        <div class="navbar-start">
+          <h1 class="navbar-title">Void Games</h1>
+        </div>
+        <div class="navbar-center">
+          <ul class="navbar-menu">
+            <li><a href="/pages/index.html" class="navbar-link">Home</a></li>
+            <li><a href="/games.html" class="navbar-link">Games</a></li>
+            <li><a href="/apps.html" class="navbar-link">Apps</a></li>
+          </ul>
+        </div>
+        <div class="navbar-end">
+          <a class="navbar-btn">
+            <i class="fa-solid fa-search"></i>
+          </a>
+          <div class="navbar-dropdown">
+            <button class="navbar-btn">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a href="/pages/games.html" class="navbar-link">Games</a></li>
+              <li><a href="/pages/index.html" class="navbar-link">Home</a></li>
+              <li><a href="/pages/apps.html" class="navbar-link">Apps</a></li>
+              <li><a href="/pages/proxy.html" class="navbar-btn">Log in</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </nav>
   </body>
 </html>
+<style>
+/* General body styles */
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to bottom, #2a2a72, #009ffd);
+  color: #f0f0f0;
+  margin: 0;
+}
+
+/* Navbar Styles */
+.navbar {
+  position: sticky;
+  top: 0;
+  background-color: #333;
+  padding: 10px 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+/* Navbar container to center content */
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* Navbar start - title */
+.navbar-start {
+  flex: 1;
+}
+
+.navbar-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 24px;
+  color: #f0f0f0;
+}
+
+/* Navbar center - menu */
+.navbar-center {
+  display: none;
+}
+
+.navbar-menu {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 20px;
+}
+
+.navbar-link {
+  color: #f0f0f0;
+  text-decoration: none;
+  padding: 8px 16px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.navbar-link:hover {
+  background-color: #444;
+  border-color: #fff;
+}
+
+/* Navbar end - buttons */
+.navbar-end {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.navbar-btn {
+  padding: 8px 12px;
+  background-color: #444;
+  border: 2px solid #444;
+  border-radius: 8px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar-btn:hover {
+  background-color: #555;
+}
+
+/* Dropdown menu */
+.navbar-dropdown {
+  position: relative;
+}
+
+.navbar-dropdown button {
+  background-color: #444;
+  color: #fff;
+  padding: 8px;
+  border: none;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 40px;
+  background-color: #333;
+  padding: 10px;
+  list-style: none;
+  margin: 0;
+  border-radius: 8px;
+  min-width: 160px;
+}
+
+.navbar-dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+.dropdown-menu li {
+  padding: 8px 16px;
+}
+
+.dropdown-menu li a {
+  color: #f0f0f0;
+  text-decoration: none;
+}
+
+.dropdown-menu li a:hover {
+  background-color: #444;
+}
+
+</style>
