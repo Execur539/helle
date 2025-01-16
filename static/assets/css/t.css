@@ -40,7 +40,7 @@ body {
    right: 0;
    height: 2.5em;
    padding: 0 25px;
-   background: var(--background-color);
+   background: #191E24;
    box-sizing: border-box;
    transition: 0.35s ease;
    z-index: 100;
