@@ -1,3 +1,4 @@
+
 @import url("https://fonts.cdnfonts.com/css/orbitron");
 
 body {
@@ -221,10 +222,9 @@ li:hover {
 }
 
 iframe {
-   position: fixed;
-   top: 3.5em; /* Match the height of the nav-bar */
-   left: 0;
+   position: absolute;
    width: 100%;
-   height: calc(100vh - 3.5em); /* Subtract the nav-bar height from the viewport height */
+   height: calc(100vh - 10%);
    border: none;
+   left: 0;
 }
