@@ -223,7 +223,9 @@ li:hover {
 iframe {
    position: absolute;
    width: 100%;
-   height: calc(100vh - 10%);
+   height: calc(100vh - 3.5em); 
    border: none;
    left: 0;
+   top: 3.5em; 
 }
+
