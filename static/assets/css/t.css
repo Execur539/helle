@@ -171,12 +171,23 @@ p {
    font-size: 25px;
 }
 
-.frame-container iframe {
-   display: none;
+.frame-container {
+   position: relative;
+   width: 100%; /* Ensure full width */
+   height: calc(100vh - 10%); /* Occupy the remaining height minus top margin */
+   display: flex;
+   align-items: center; /* Center iframe vertically */
+   justify-content: center; /* Center iframe horizontally */
+   overflow: hidden; /* Prevent overflow */
 }
 
-.frame-container iframe.active {
-   display: block;
+.frame-container iframe {
+   width: 100%; /* Full width of the container */
+   height: 100%; /* Full height of the container */
+   max-width: 1920px; /* Optional: limit max width */
+   max-height: 1080px; /* Optional: limit max height */
+   border: none;
+   box-sizing: border-box;
 }
 
 #add-tab {
@@ -227,4 +238,10 @@ iframe {
    border: none;
    top: 10%;
    left: 0;
+}
+
+@media (max-width: 768px) {
+   .frame-container iframe {
+      height: 80vh; /* Reduce height for small screens */
+   }
 }
