@@ -225,6 +225,6 @@ iframe {
    top: 3.5em; /* Match the height of the nav-bar */
    left: 0;
    width: 100%;
-   height: calc(100vh - 3.5em); /* Subtract the nav-bar height from the viewport height */
+   height: calc(100% - 3.5em); /* Subtract the nav-bar height from the viewport height */
    border: none;
 }
