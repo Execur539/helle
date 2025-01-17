@@ -1,25 +1,23 @@
-@import url("https://fonts.cdnfonts.com/css/orbitron");
-
 body {
    font-family: "Orbitron", sans-serif;
    text-decoration: none;
    margin: 0;
    overflow-x: hidden;
    overflow-y: hidden;
-   background: #121212; /* Darker background for modern feel */
-   color: #ffffff; /* White text for contrast */
+   background: #121212;
+   color: #ffffff;
 }
 
 .nav {
-   padding: 1rem;
+   padding: 0.5rem; /* Reduced padding */
    transition: transform 0.5s ease;
    border-radius: 0 10px 10px 0;
    transform: translateX(0);
    width: 100vw;
-   height: 5%;
+   height: 4%; /* Reduced height */
    display: flex;
    align-items: center;
-   background: #333333; /* Slightly lighter for contrast */
+   background: #333333;
 }
 
 .close-tab {
@@ -33,15 +31,15 @@ body {
 }
 
 .close-tab:hover {
-   color: #e91e63; /* Accent color for hover effect */
+   color: #e91e63;
 }
 
 .nav-bar {
    left: 0;
    right: 0;
-   height: 5%; /* Adjust the height as a percentage of the viewport height */
-   padding: 0 25px;
-   background: #1e1e1e; /* Dark background for the top bar */
+   height: 4%; /* Reduced height */
+   padding: 0 20px; /* Reduced padding */
+   background: #1e1e1e;
    box-sizing: border-box;
    transition: 0.35s ease;
    z-index: 100;
@@ -53,19 +51,16 @@ body {
    border-radius: 10px;
    color: #ffffff;
    background: none;
-   height: 5%; /* You may also want to adjust this if needed */
+   height: 80%; /* Reduced height */
    border: none;
    margin-right: 10px;
    transition: 0.2s ease;
-   margin-top: 0;
-   margin-bottom: 0;
-   box-sizing: border-box;
 }
 
 .nav-button:hover {
-   transform: scale(1.3);
+   transform: scale(1.2); /* Slightly reduced scale */
    cursor: pointer;
-   color: #e91e63; /* Accent color for button hover */
+   color: #e91e63;
 }
 
 .nav-btn-left {
@@ -78,7 +73,7 @@ body {
 
 .nav-container {
    min-width: 5vw;
-   min-height: 5%;
+   min-height: 4%;
    display: inline;
 }
 
@@ -132,11 +127,10 @@ body {
 }
 
 .bar:focus {
-   background: #333333; /* Slightly darker when focused */
+   background: #333333;
    box-shadow: none;
    outline: none;
    color: #ffffff;
-   transition: 0.3s;
 }
 
 .navpost {
@@ -171,7 +165,7 @@ p {
 .frame-container iframe {
    display: none;
    width: 100%;
-   height: calc(100vh - 5%); /* Adjust iframe height to leave space for navbar */
+   height: calc(100vh - 5%);
    border: none;
 }
 
@@ -182,7 +176,7 @@ p {
 #add-tab {
    padding: 0.5rem;
    cursor: pointer;
-   background-color: #444444; /* Lighter than the background */
+   background-color: #444444;
    color: #ffffff;
    border: none;
    border-radius: 5px;
@@ -191,7 +185,7 @@ p {
 }
 
 #add-tab:hover {
-   background-color: #e91e63; /* Accent color on hover */
+   background-color: #e91e63;
 }
 
 ul {
