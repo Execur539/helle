@@ -16,7 +16,7 @@ body {
    border-radius: 0 10px 10px 0;
    transform: translateX(0);
    width: 100vw;
-   height: 0.5vw;
+   height: 5%;
    display: flex;
    align-items: center;
    background: #333333; /* Slightly lighter for contrast */
@@ -39,7 +39,7 @@ body {
 .nav-bar {
    left: 0;
    right: 0;
-   height: 10%; /* Adjust the height as a percentage of the viewport height */
+   height: 5%; /* Adjust the height as a percentage of the viewport height */
    padding: 0 25px;
    background: #1e1e1e; /* Dark background for the top bar */
    box-sizing: border-box;
@@ -222,9 +222,9 @@ li:hover {
 
 iframe {
    position: fixed;
-   top: 5.8em; /* Match the height of the nav-bar */
+   top: 10%; /* Match the height of the nav-bar */
    left: 0;
    width: 100%;
-   height: calc(100vh - 5.8em); /* Subtract the nav-bar height from the viewport height */
+   height: calc(100vh - 10%); /* Subtract the nav-bar height from the viewport height */
    border: none;
 }
