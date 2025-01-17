@@ -16,7 +16,7 @@ body {
    border-radius: 0 10px 10px 0;
    transform: translateX(0);
    width: 100vw;
-   height: 5%; /* Changed to 5% of the viewport height */
+   height: 0.5vw;
    display: flex;
    align-items: center;
    background: #333333; /* Slightly lighter for contrast */
@@ -39,7 +39,7 @@ body {
 .nav-bar {
    left: 0;
    right: 0;
-   height: 10%; /* Changed to 10% of the viewport height */
+   height: 3.5em; /* Increased the height */
    padding: 0 25px;
    background: #1e1e1e; /* Dark background for the top bar */
    box-sizing: border-box;
@@ -53,7 +53,7 @@ body {
    border-radius: 10px;
    color: #ffffff;
    background: none;
-   height: 100%; /* Fill the nav-bar height */
+   height: 3em;
    border: none;
    right: 10px;
    top: auto;
@@ -123,11 +123,12 @@ body {
 }
 
 .bar {
-   height: 5%; /* Changed to 5% of the viewport height */
+   height: 20px;
    background: none;
    border: none;
    color: #ffffff;
    width: 60vw;
+   height: 30px;
    border-radius: 5px;
    margin: 0 auto;
    transition: 0.3s;
@@ -221,9 +222,9 @@ li:hover {
 
 iframe {
    position: fixed;
-   top: 10%; /* Adjust to start after the nav-bar */
+   top: 5.8em; /* Match the height of the nav-bar */
    left: 0;
    width: 100%;
-   height: calc(90vh - 5%); /* Subtract the nav-bar and nav height from the viewport */
+   height: calc(100vh - 5.8em); /* Subtract the nav-bar height from the viewport height */
    border: none;
 }
