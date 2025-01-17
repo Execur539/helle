@@ -55,13 +55,11 @@ body {
    background: none;
    height: 3em; /* You may also want to adjust this if needed */
    border: none;
-   right: 10px;
-   top: auto;
-   box-sizing: border-box;
    margin-right: 10px;
    transition: 0.2s ease;
-   margin-top: 0 auto;
-   margin-bottom: 0 auto;
+   margin-top: 0;
+   margin-bottom: 0;
+   box-sizing: border-box;
 }
 
 .nav-button:hover {
@@ -105,7 +103,6 @@ body {
    cursor: pointer;
    font-weight: 800;
    font-family: "Orbitron", sans-serif;
-   font-style: normal;
    font-size: 3vw;
    transform: translateX(-20%);
 }
@@ -173,6 +170,9 @@ p {
 
 .frame-container iframe {
    display: none;
+   width: 100%;
+   height: calc(100vh - 5%); /* Adjust iframe height to leave space for navbar */
+   border: none;
 }
 
 .frame-container iframe.active {
@@ -218,13 +218,4 @@ li.active {
 
 li:hover {
    background-color: #e91e63;
-}
-
-iframe {
-   position: fixed;
-   top: 10%; /* Match the height of the nav-bar */
-   left: 0;
-   width: 100%;
-   height: calc(100vh - 10%); /* Subtract the nav-bar height from the viewport height */
-   border: none;
 }
