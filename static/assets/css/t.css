@@ -6,20 +6,20 @@ body {
    margin: 0;
    overflow-x: hidden;
    overflow-y: hidden;
-   background: #121212;
-   color: #ffffff;
+   background: #121212; /* Darker background for modern feel */
+   color: #ffffff; /* White text for contrast */
 }
 
 .nav {
-   padding: 1%;
+   padding: 1rem;
    transition: transform 0.5s ease;
-   border-radius: 0 2% 2% 0;
+   border-radius: 0 10px 10px 0;
    transform: translateX(0);
-   width: 100%;
-   height: 0.5%;
+   width: 100vw;
+   height: 1.75em;
    display: flex;
    align-items: center;
-   background: #333333;
+   background: #333333; /* Slightly lighter for contrast */
 }
 
 .close-tab {
@@ -29,36 +29,36 @@ body {
    color: #ffffff;
    cursor: pointer;
    transition: color 0.3s ease;
-   width: 5%;
+   width: 20px;
 }
 
 .close-tab:hover {
-   color: #e91e63;
+   color: #e91e63; /* Accent color for hover effect */
 }
 
 .nav-bar {
    left: 0;
    right: 0;
-   height: 8%;
-   padding: 0 2%;
-   background: #1e1e1e;
+   height: 3.5em; /* Increased the height */
+   padding: 0 25px;
+   background: #1e1e1e; /* Dark background for the top bar */
    box-sizing: border-box;
    transition: 0.35s ease;
    z-index: 100;
-   width: 100%;
+   width: 100vw;
    position: fixed;
 }
 
 .nav-button {
-   border-radius: 2%;
+   border-radius: 10px;
    color: #ffffff;
    background: none;
-   height: 80%;
+   height: 3em;
    border: none;
-   right: 2%;
+   right: 10px;
    top: auto;
    box-sizing: border-box;
-   margin-right: 2%;
+   margin-right: 10px;
    transition: 0.2s ease;
    margin-top: 0 auto;
    margin-bottom: 0 auto;
@@ -67,7 +67,7 @@ body {
 .nav-button:hover {
    transform: scale(1.3);
    cursor: pointer;
-   color: #e91e63;
+   color: #e91e63; /* Accent color for button hover */
 }
 
 .nav-btn-left {
@@ -79,8 +79,8 @@ body {
 }
 
 .nav-container {
-   min-width: 5%;
-   min-height: 10%;
+   min-width: 5vw;
+   min-height: 10vh;
    display: inline;
 }
 
@@ -123,18 +123,19 @@ body {
 }
 
 .bar {
-   height: 5%;
+   height: 20px;
    background: none;
    border: none;
    color: #ffffff;
-   width: 60%;
-   border-radius: 1%;
+   width: 60vw;
+   height: 30px;
+   border-radius: 5px;
    margin: 0 auto;
    transition: 0.3s;
 }
 
 .bar:focus {
-   background: #333333;
+   background: #333333; /* Slightly darker when focused */
    box-shadow: none;
    outline: none;
    color: #ffffff;
@@ -144,9 +145,9 @@ body {
 .navpost {
    padding: none;
    float: right;
-   margin-top: 0;
+   margin-top: 0em;
    color: #ffffff;
-   border-radius: 1%;
+   border-radius: 5px;
 }
 
 .overlay {
@@ -160,14 +161,14 @@ body {
 h1 {
    text-align: center;
    color: #ffffff;
-   font-size: 5vw;
+   font-size: 50px;
    white-space: nowrap;
 }
 
 p {
    text-align: center;
    color: #ffffff;
-   font-size: 2.5vw;
+   font-size: 25px;
 }
 
 .frame-container iframe {
@@ -179,18 +180,18 @@ p {
 }
 
 #add-tab {
-   padding: 1%;
+   padding: 0.5rem;
    cursor: pointer;
-   background-color: #444444;
+   background-color: #444444; /* Lighter than the background */
    color: #ffffff;
    border: none;
-   border-radius: 1%;
-   margin-right: 1%;
+   border-radius: 5px;
+   margin-right: 0.5rem;
    transition: background-color 0.3s ease;
 }
 
 #add-tab:hover {
-   background-color: #e91e63;
+   background-color: #e91e63; /* Accent color on hover */
 }
 
 ul {
@@ -200,11 +201,11 @@ ul {
 }
 
 li {
-   padding: 1%;
+   padding: 0.4rem;
    background-color: #444444;
-   margin-right: 1%;
+   margin-right: 0.5rem;
    cursor: pointer;
-   border-radius: 1%;
+   border-radius: 5px;
    transition: background-color 0.3s ease;
    display: flex;
    align-items: center;
@@ -221,9 +222,9 @@ li:hover {
 
 iframe {
    position: fixed;
-   top: 8%;
+   top: 5.8em; /* Match the height of the nav-bar */
    left: 0;
    width: 100%;
-   height: 92%;
+   height: calc(100vh - 5.25em); 
    border: none;
 }
