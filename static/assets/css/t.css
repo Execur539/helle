@@ -222,9 +222,9 @@ li:hover {
 
 iframe {
    position: fixed;
-   top: 7vh; /* Match the height of the nav-bar */
+   top: 8vh; /* Increased top margin */
    left: 0;
    width: 100%;
-   height: calc(100vh - 7vh); /* Subtract the nav-bar height from the viewport height */
+   height: calc(100vh - 8vh); /* Adjusted height accordingly */
    border: none;
 }
