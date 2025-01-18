@@ -2,103 +2,113 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="referrer" content="no-referrer" />
     <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-    <title>Void Games</title>
-    <link rel="shortcut icon" href="favicon.png" />
-    
-    <!-- External CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.min.css" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-    <link href="https://fonts.cdnfonts.com/css/orbitron" rel="stylesheet" />
-    <style>
-      body {
-        background-color: #1a1a2e;
-        color: #ffffff;
-        font-family: 'Orbitron', sans-serif;
-        margin: 0;
-        padding: 0;
-      }
-
-      .navbar {
-        background-color: #0f3460;
-      }
-
-      .btn {
-        transition: all 0.3s ease;
-      }
-
-      .btn:hover {
-        transform: translateY(-2px);
-      }
-
-      .app-card {
-        background-color: #16213e;
-        border: 1px solid #0f3460;
-        color: #ffffff;
-      }
-
-      .app-card:hover {
-        background-color: #0f3460;
-        transform: scale(1.05);
-        transition: transform 0.3s ease, background-color 0.3s ease;
-      }
-
-      .app-title {
-        font-size: 1.5rem;
-        font-weight: bold;
-      }
-
-      .app-description {
-        color: #d1d5db;
-      }
-    </style>
+    <link rel="shortcut icon" id="tab-favicon" href="favicon.png" />
+    <title id="t">Home</title>
+    <script src="./assets/ultra/bundle.js?v=10-02-2024"></script>
+    <script src="./assets/ultra/config.js?v=10-02-2024"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/assets/css/global.css?v=6" />
+    <link rel="stylesheet" href="/assets/css/container.css?v=2" />
+    <link rel="stylesheet" href="/assets/css/nav.css?v=01" />
+    <script src="/assets/js/i.js?v=03"></script>
+    <script src="assets/js/f.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6840529569014734"
+     crossorigin="anonymous"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/orbitron" rel="stylesheet">
   </head>
+  <body class="bg-gradient-to-bg-base-100 text-gray-500 relative overflow-auto">
 
-  <body>
-    <!-- Navbar -->
-    <nav class="navbar p-4 shadow-lg sticky top-0 z-10">
+    <!-- New Navigation Bar -->
+    <nav class="navbar bg-base-100 p-4 shadow-lg sticky top-0 z-10">
       <div class="container mx-auto flex justify-between items-center">
-        <h1 class="text-3xl font-bold text-primary">Void Games</h1>
-        <ul class="hidden sm:flex gap-4">
-          <li><button class="btn bg-blue-500 px-4 py-2 rounded-md hover:bg-blue-700">Home</button></li>
-          <li><button class="btn bg-green-500 px-4 py-2 rounded-md hover:bg-green-700">Games</button></li>
-          <li><button class="btn bg-red-500 px-4 py-2 rounded-md hover:bg-red-700">Apps</button></li>
-        </ul>
-        <div class="dropdown sm:hidden">
-          <button class="btn btn-ghost"><i class="fa-solid fa-bars text-xl"></i></button>
-          <ul class="dropdown-content bg-base-200 p-4 rounded-box shadow w-40 gap-2">
-            <li><button>Home</button></li>
-            <li><button>Games</button></li>
-            <li><button>Apps</button></li>
+        <div class="navbar-start">
+          <h1 class="text-primary font-orbitron text-2xl" style="font-family: 'Orbitron', sans-serif;">Void Games</h1>
+        </div>
+    
+        <div class="navbar-center hidden sm:flex">
+          <ul class="menu menu-horizontal gap-4">
+            <li><a href="/pages/index.html" class="btn btn-outline border-2 btn-primary">Home</a></li>
+            <li><a href="/pages/games.html" class="btn btn-outline border-2 btn-secondary">Games</a></li>
+            <li><a href="/pages/apps.html" class="btn btn-outline border-2 btn-accent">Apps</a></li>
           </ul>
+        </div>
+
+        <div class="navbar-end flex items-center gap-4">
+          <a href="/proxy.html" class="btn btn-primary flex items-center gap-2">
+            <i class="fa-solid fa-search"></i>
+          </a>
+    
+        <div class="navbar-end flex items-center gap-4">
+          <input id="search-input" type="text" placeholder="Search games..." class="input input-bordered w-32 md:w-64">
+          <div class="dropdown dropdown-end sm:hidden">
+            <button tabindex="0" class="btn btn-ghost">
+              <i class="fa-solid fa-bars text-xl"></i>
+            </button>
+            <ul tabindex="0" class="dropdown-content menu bg-base-200 p-4 rounded-box shadow w-40 gap-2">
+              <li><a href="/pages/index.html">Home</a></li>
+              <li><a href="/pages/games.html">Games</a></li>
+              <li><a href="/pages/apps.html">Apps</a></li>
+            </ul>
+          </div>
         </div>
       </div>
     </nav>
 
-    <!-- App Buttons Section -->
-    <section class="container mx-auto my-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div class="app-card p-6 rounded-lg shadow-md transition-transform">
-        <h2 class="app-title mb-2">App 1</h2>
-        <p class="app-description">Description of App 1 goes here. It offers amazing features!</p>
-        <button class="btn bg-blue-500 text-white py-2 px-4 mt-3 rounded-md hover:bg-blue-700">Launch</button>
-      </div>
-      <div class="app-card p-6 rounded-lg shadow-md transition-transform">
-        <h2 class="app-title mb-2">App 2</h2>
-        <p class="app-description">Description of App 2 goes here. It's highly recommended!</p>
-        <button class="btn bg-green-500 text-white py-2 px-4 mt-3 rounded-md hover:bg-green-700">Launch</button>
-      </div>
-      <div class="app-card p-6 rounded-lg shadow-md transition-transform">
-        <h2 class="app-title mb-2">App 3</h2>
-        <p class="app-description">Description of App 3 goes here. Try it today!</p>
-        <button class="btn bg-red-500 text-white py-2 px-4 mt-3 rounded-md hover:bg-red-700">Launch</button>
-      </div>
-    </section>
-
-    <!-- Scripts -->
+    <!-- Existing Content -->
+    <div class="f-nav"></div>
+    <div class="input-c">
+      <input
+        type="text"
+        id="search"
+        onkeyup="bar()"
+        placeholder="Search"
+      />
+      <select
+        title="Category"
+        id="category"
+        name="category"
+        onchange="category()"
+      >
+        <option value="all">&#65;&#108;&#108;</option>
+        <option value="android">&#65;&#110;&#100;&#114;&#111;&#105;&#100;&#32;&#69;&#109;&#117;&#108;&#97;&#116;&#111;&#114;</option>
+        <option value="social">&#83;&#111;&#99;&#105;&#97;&#108;</option>
+        <option value="stream">&#83;&#116;&#114;&#101;&#97;&#109;</option>
+        <option value="message">&#77;&#101;&#115;&#115;&#97;&#103;&#101;</option>
+        <option value="media">&#84;&#86;&#32;&amp;&#32;&#77;&#111;&#118;&#105;&#101;&#115;</option>
+        <option value="game">&#71;&#97;&#109;&#101;&#32;&#83;&#105;&#116;&#101;&#115;</option>
+        <option value="cloud">&#67;&#108;&#111;&#117;&#100;&#32;&#71;&#97;&#109;&#105;&#110;&#103;</option>
+        <option value="tool">&#84;&#111;&#111;&#108;&#115;</option>
+        <option value="ai">&#65;&#73;</option>
+        <option value="emu">&#69;&#109;&#117;&#108;&#97;&#116;&#111;&#114;</option>
+        <option value="mail">&#77;&#97;&#105;&#108;</option>
+      </select>
+    </div>
+    <div class="pinned"></div>
+    <div class="apps"></div>
     <script src="assets/js/c.js?v=06"></script>
     <script src="/assets/js/mv.js?v=003"></script>
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-WKJQ5QHQTJ"
+    ></script>
+    <!-- DO NOT REMOVE-->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-WKJQ5QHQTJ");
+    </script>
+    <!-- DO NOT REMOVE-->
   </body>
 </html>
