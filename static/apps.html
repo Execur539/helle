@@ -2,123 +2,103 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="referrer" content="no-referrer" />
     <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-    <link rel="shortcut icon" id="tab-favicon" href="favicon.png" />
-    <title id="t">Home</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Void Games</title>
+    <link rel="shortcut icon" href="favicon.png" />
     
-    <!-- CSS Files -->
-    <link rel="stylesheet" href="/assets/css/global.css?v=6" />
-    <link rel="stylesheet" href="/assets/css/container.css?v=2" />
-    <link rel="stylesheet" href="/assets/css/nav.css?v=01" />
+    <!-- External CSS -->
     <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
     <link href="https://fonts.cdnfonts.com/css/orbitron" rel="stylesheet" />
-    
-    <!-- JS Files -->
-    <script src="./assets/ultra/bundle.js?v=10-02-2024"></script>
-    <script src="./assets/ultra/config.js?v=10-02-2024"></script>
-    <script src="/assets/js/i.js?v=03"></script>
-    <script src="assets/js/f.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6840529569014734" crossorigin="anonymous"></script>
+    <style>
+      body {
+        background-color: #1a1a2e;
+        color: #ffffff;
+        font-family: 'Orbitron', sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      .navbar {
+        background-color: #0f3460;
+      }
+
+      .btn {
+        transition: all 0.3s ease;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+      }
+
+      .app-card {
+        background-color: #16213e;
+        border: 1px solid #0f3460;
+        color: #ffffff;
+      }
+
+      .app-card:hover {
+        background-color: #0f3460;
+        transform: scale(1.05);
+        transition: transform 0.3s ease, background-color 0.3s ease;
+      }
+
+      .app-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+
+      .app-description {
+        color: #d1d5db;
+      }
+    </style>
   </head>
-  
-  <body class="bg-gray-100 text-gray-700 relative overflow-y-hidden">
-    <nav class="navbar bg-white p-4 shadow-lg sticky top-0 z-10">
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar p-4 shadow-lg sticky top-0 z-10">
       <div class="container mx-auto flex justify-between items-center">
-        <div class="navbar-start flex items-left">
-          <h1 class="text-primary font-orbitron text-2xl" style="font-family: 'Orbitron', sans-serif;">Void Games</h1>
-        </div>
-  
-        <div class="navbar-center hidden sm:flex">
-          <ul class="menu menu-horizontal gap-4">
-            <li>
-              <a href="#" class="btn bg-blue-500 text-white font-bold px-4 py-2 rounded-md hover:bg-blue-600 transition-all">
-                Home
-              </a>
-            </li>
-            <li>
-              <a href="/pages/games.html" class="btn bg-green-500 text-white font-bold px-4 py-2 rounded-md hover:bg-green-600 transition-all">
-                Games
-              </a>
-            </li>
-            <li>
-              <a href="apps.html" class="btn bg-pink-500 text-white font-bold px-4 py-2 rounded-md hover:bg-pink-600 transition-all">
-                Apps
-              </a>
-            </li>
+        <h1 class="text-3xl font-bold text-primary">Void Games</h1>
+        <ul class="hidden sm:flex gap-4">
+          <li><button class="btn bg-blue-500 px-4 py-2 rounded-md hover:bg-blue-700">Home</button></li>
+          <li><button class="btn bg-green-500 px-4 py-2 rounded-md hover:bg-green-700">Games</button></li>
+          <li><button class="btn bg-red-500 px-4 py-2 rounded-md hover:bg-red-700">Apps</button></li>
+        </ul>
+        <div class="dropdown sm:hidden">
+          <button class="btn btn-ghost"><i class="fa-solid fa-bars text-xl"></i></button>
+          <ul class="dropdown-content bg-base-200 p-4 rounded-box shadow w-40 gap-2">
+            <li><button>Home</button></li>
+            <li><button>Games</button></li>
+            <li><button>Apps</button></li>
           </ul>
-        </div>
-  
-        <div class="navbar-end flex items-center gap-4">
-          <a href="/proxy.html" class="btn bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center gap-2 transition-all">
-            <i class="fa-solid fa-search"></i> Search
-          </a>
-          <div class="dropdown dropdown-end sm:hidden">
-            <button tabindex="0" class="btn btn-ghost">
-              <i class="fa-solid fa-bars text-xl"></i>
-            </button>
-            <ul tabindex="0" class="dropdown-content menu bg-base-200 p-4 rounded-box shadow w-40 gap-2">
-              <li><a href="/pages/games.html">Games</a></li>
-              <li><a href="#">Home</a></li>
-              <li><a href="apps.html">Apps</a></li>
-            </ul>
-          </div>
         </div>
       </div>
     </nav>
-    
-    <main class="container mx-auto py-8">
-      <h2 class="text-3xl font-bold text-center mb-6">Apps</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        <!-- App Button 1 -->
-        <a href="/apps/app1.html" class="block bg-white shadow-md hover:shadow-lg transition-shadow p-4 rounded-lg">
-          <div class="flex flex-col items-center">
-            <img src="assets/images/app1.png" alt="App 1" class="w-16 h-16 mb-4" />
-            <h3 class="text-xl font-semibold">App 1</h3>
-            <p class="text-sm text-gray-600">Description of App 1.</p>
-          </div>
-        </a>
-        
-        <!-- App Button 2 -->
-        <a href="/apps/app2.html" class="block bg-white shadow-md hover:shadow-lg transition-shadow p-4 rounded-lg">
-          <div class="flex flex-col items-center">
-            <img src="assets/images/app2.png" alt="App 2" class="w-16 h-16 mb-4" />
-            <h3 class="text-xl font-semibold">App 2</h3>
-            <p class="text-sm text-gray-600">Description of App 2.</p>
-          </div>
-        </a>
-        
-        <!-- App Button 3 -->
-        <a href="/apps/app3.html" class="block bg-white shadow-md hover:shadow-lg transition-shadow p-4 rounded-lg">
-          <div class="flex flex-col items-center">
-            <img src="assets/images/app3.png" alt="App 3" class="w-16 h-16 mb-4" />
-            <h3 class="text-xl font-semibold">App 3</h3>
-            <p class="text-sm text-gray-600">Description of App 3.</p>
-          </div>
-        </a>
+
+    <!-- App Buttons Section -->
+    <section class="container mx-auto my-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="app-card p-6 rounded-lg shadow-md transition-transform">
+        <h2 class="app-title mb-2">App 1</h2>
+        <p class="app-description">Description of App 1 goes here. It offers amazing features!</p>
+        <button class="btn bg-blue-500 text-white py-2 px-4 mt-3 rounded-md hover:bg-blue-700">Launch</button>
       </div>
-    </main>
-    
-    <footer class="bg-white py-4 text-center shadow-t mt-8">
-      <p class="text-sm text-gray-500">© 2025 Void Games. All rights reserved.</p>
-    </footer>
-    
+      <div class="app-card p-6 rounded-lg shadow-md transition-transform">
+        <h2 class="app-title mb-2">App 2</h2>
+        <p class="app-description">Description of App 2 goes here. It's highly recommended!</p>
+        <button class="btn bg-green-500 text-white py-2 px-4 mt-3 rounded-md hover:bg-green-700">Launch</button>
+      </div>
+      <div class="app-card p-6 rounded-lg shadow-md transition-transform">
+        <h2 class="app-title mb-2">App 3</h2>
+        <p class="app-description">Description of App 3 goes here. Try it today!</p>
+        <button class="btn bg-red-500 text-white py-2 px-4 mt-3 rounded-md hover:bg-red-700">Launch</button>
+      </div>
+    </section>
+
+    <!-- Scripts -->
     <script src="assets/js/c.js?v=06"></script>
     <script src="/assets/js/mv.js?v=003"></script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WKJQ5QHQTJ"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-      gtag("config", "G-WKJQ5QHQTJ");
-    </script>
   </body>
 </html>
