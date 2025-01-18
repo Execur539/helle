@@ -6,87 +6,66 @@
     <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <link rel="shortcut icon" id="tab-favicon" href="favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
-    <link href="https://fonts.cdnfonts.com/css/orbitron" rel="stylesheet" />
     <title id="t">Home</title>
+    <script src="./assets/ultra/bundle.js?v=10-02-2024"></script>
+    <script src="./assets/ultra/config.js?v=10-02-2024"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/assets/css/global.css?v=6" />
+    <link rel="stylesheet" href="/assets/css/container.css?v=2" />
+    <link rel="stylesheet" href="/assets/css/nav.css?v=01" />
+    <script src="/assets/js/i.js?v=03"></script>
+    <script src="assets/js/f.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6840529569014734"
+     crossorigin="anonymous"></script>
+
   </head>
-  <body class="bg-gradient-to-bg-base-100 text-gray-500 relative overflow-y-hidden">
-    <nav class="navbar bg-base-100 p-4 shadow-lg sticky top-0 z-10">
-      <div class="container mx-auto flex justify-between items-center">
-        <div class="navbar-start flex items-left">
-          <h1 class="text-primary font-orbitron text-2xl" style="font-family: 'Orbitron', sans-serif;">Search</h1>
-        </div>
-        <div class="navbar-center hidden sm:flex">
-          <ul class="menu menu-horizontal gap-4">
-            <li><a href="/" class="btn btn-outline border-2 btn-primary">Home</a></li>
-            <li><a href="/pages/games.html" class="btn btn-outline border-2 btn-secondary">Games</a></li>
-            <li><a href="/apps.html" class="btn btn-outline border-2 btn-accent">Apps</a></li>
-          </ul>
-        </div>
-        <div class="navbar-end flex items-center gap-4">
-          <input
-            type="text"
-            id="search"
-            class="input input-bordered"
-            onkeyup="bar()"
-            placeholder="Search"
-          />
-          <select
-            title="Category"
-            id="category"
-            class="select select-bordered"
-            name="category"
-            onchange="category()"
-          >
-            <option value="all">All</option>
-            <option value="android">Android Emulator</option>
-            <option value="social">Social</option>
-            <option value="stream">Stream</option>
-            <option value="message">Message</option>
-            <option value="media">TV & Movies</option>
-            <option value="game">Game Sites</option>
-            <option value="cloud">Cloud Gaming</option>
-            <option value="tool">Tools</option>
-            <option value="ai">AI</option>
-            <option value="emu">Emulator</option>
-            <option value="mail">Mail</option>
-          </select>
-        </div>
-      </div>
-    </nav>
-
-    <section class="pinned flex flex-col items-center gap-6 bg-base-200 py-12 text-center" data-aos="fade-up">
-      <div class="apps max-w-4xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div class="card bg-base-100 shadow-xl">
-          <div class="card-body">
-            <h2 class="card-title">Pinned Item</h2>
-            <p>Placeholder content for pinned item.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <footer class="footer items-center p-4 bg-base-300 text-base-content">
-      <div class="items-center grid-flow-col">
-        <p>Copyright &copy; 2025 Void Games. All rights reserved.</p>
-      </div>
-      <div class="grid-flow-col gap-4 md:place-self-center md:justify-self-end">
-        <a><i class="fa-brands fa-facebook text-lg"></i></a>
-        <a><i class="fa-brands fa-twitter text-lg"></i></a>
-        <a><i class="fa-brands fa-instagram text-lg"></i></a>
-      </div>
-    </footer>
-
-    <script src="/assets/js/c.js?v=06"></script>
+  <body>
+    <div class="f-nav"></div>
+    <div class="input-c">
+      <input
+        type="text"
+        id="search"
+        onkeyup="bar()"
+        placeholder="Search"
+      />
+      <select
+        title="Category"
+        id="category"
+        name="category"
+        onchange="category()"
+      >
+        <option value="all">&#65;&#108;&#108;</option>
+<option value="android">&#65;&#110;&#100;&#114;&#111;&#105;&#100;&#32;&#69;&#109;&#117;&#108;&#97;&#116;&#111;&#114;</option>
+<option value="social">&#83;&#111;&#99;&#105;&#97;&#108;</option>
+<option value="stream">&#83;&#116;&#114;&#101;&#97;&#109;</option>
+<option value="message">&#77;&#101;&#115;&#115;&#97;&#103;&#101;</option>
+<option value="media">&#84;&#86;&#32;&amp;&#32;&#77;&#111;&#118;&#105;&#101;&#115;</option>
+<option value="game">&#71;&#97;&#109;&#101;&#32;&#83;&#105;&#116;&#101;&#115;</option>
+<option value="cloud">&#67;&#108;&#111;&#117;&#100;&#32;&#71;&#97;&#109;&#105;&#110;&#103;</option>
+<option value="tool">&#84;&#111;&#111;&#108;&#115;</option>
+<option value="ai">&#65;&#73;</option>
+<option value="emu">&#69;&#109;&#117;&#108;&#97;&#116;&#111;&#114;</option>
+<option value="mail">&#77;&#97;&#105;&#108;</option>
+      </select>
+    </div>
+    <div class="pinned"></div>
+    <div class="apps"></div>
+    <script src="assets/js/c.js?v=06"></script>
     <script src="/assets/js/mv.js?v=003"></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-WKJQ5QHQTJ"
+    ></script>
+    <!-- DO NOT REMOVE-->
     <script>
-      AOS.init();
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-WKJQ5QHQTJ");
     </script>
+    <!-- DO NOT REMOVE-->
   </body>
 </html>
