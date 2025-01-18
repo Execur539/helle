@@ -5,11 +5,10 @@
     <meta name="referrer" content="no-referrer" />
     <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <link rel="shortcut icon" id="tab-favicon" href="favicon.png" />
     <title id="t">Home</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
     <!-- CSS Files -->
     <link rel="stylesheet" href="/assets/css/global.css?v=6" />
     <link rel="stylesheet" href="/assets/css/container.css?v=2" />
@@ -18,7 +17,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
     <link href="https://fonts.cdnfonts.com/css/orbitron" rel="stylesheet" />
-
+    
     <!-- JS Files -->
     <script src="./assets/ultra/bundle.js?v=10-02-2024"></script>
     <script src="./assets/ultra/config.js?v=10-02-2024"></script>
@@ -28,26 +27,37 @@
     <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6840529569014734" crossorigin="anonymous"></script>
   </head>
-
-  <body class="bg-gradient-to-b from-gray-900 to-gray-800 text-gray-200 overflow-y-hidden">
-    <!-- Navbar -->
+  
+  <body class="bg-gradient-to-bg-base-100 text-gray-500 relative overflow-y-hidden">
     <nav class="navbar bg-base-100 p-4 shadow-lg sticky top-0 z-10">
       <div class="container mx-auto flex justify-between items-center">
         <div class="navbar-start flex items-left">
           <h1 class="text-primary font-orbitron text-2xl" style="font-family: 'Orbitron', sans-serif;">Void Games</h1>
         </div>
-
+  
         <div class="navbar-center hidden sm:flex">
           <ul class="menu menu-horizontal gap-4">
-            <li><a href="#" class="btn btn-outline border-2 btn-primary">Home</a></li>
-            <li><a href="/pages/games.html" class="btn btn-outline border-2 btn-secondary">Games</a></li>
-            <li><a href="apps.html" class="btn btn-outline border-2 btn-accent">Apps</a></li>
+            <li>
+              <a href="#" class="btn bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold px-4 py-2 rounded-md hover:from-indigo-500 hover:to-purple-500 transition-all">
+                Home
+              </a>
+            </li>
+            <li>
+              <a href="/pages/games.html" class="btn bg-gradient-to-r from-green-500 to-teal-500 text-white font-bold px-4 py-2 rounded-md hover:from-teal-500 hover:to-green-500 transition-all">
+                Games
+              </a>
+            </li>
+            <li>
+              <a href="apps.html" class="btn bg-gradient-to-r from-pink-500 to-red-500 text-white font-bold px-4 py-2 rounded-md hover:from-red-500 hover:to-pink-500 transition-all">
+                Apps
+              </a>
+            </li>
           </ul>
         </div>
-
+  
         <div class="navbar-end flex items-center gap-4">
-          <a href="/proxy.html" class="btn btn-primary flex items-center gap-2">
-            <i class="fa-solid fa-search"></i>
+          <a href="/proxy.html" class="btn bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2 transition-all">
+            <i class="fa-solid fa-search"></i> Search
           </a>
           <div class="dropdown dropdown-end sm:hidden">
             <button tabindex="0" class="btn btn-ghost">
@@ -55,11 +65,11 @@
             </button>
             <ul tabindex="0" class="dropdown-content menu bg-base-200 p-4 rounded-box shadow w-40 gap-2">
               <li><a href="/pages/games.html">Games</a></li>
-              <li><a href="/pages/index.html">Home</a></li>
+              <li><a href="#">Home</a></li>
               <li><a href="apps.html">Apps</a></li>
             </ul>
           </div>
-
+        
           <label class="grid cursor-pointer place-items-center">
             <input type="checkbox" value="synthwave" class="toggle theme-controller bg-base-content" />
             <svg
@@ -94,36 +104,10 @@
         </div>
       </div>
     </nav>
-
-    <!-- Select Dropdown -->
-    <div class="container mx-auto p-6">
-      <div class="flex justify-center">
-        <select class="select select-bordered w-full max-w-xs">
-          <option value="all">All</option>
-          <option value="android">Android Emulator</option>
-          <option value="social">Social</option>
-          <option value="stream">Stream</option>
-          <option value="message">Message</option>
-          <option value="media">TV & Movies</option>
-          <option value="game">Game Sites</option>
-          <option value="cloud">Cloud Gaming</option>
-          <option value="tool">Tools</option>
-          <option value="ai">AI</option>
-          <option value="emu">Emulator</option>
-          <option value="mail">Mail</option>
-        </select>
-      </div>
-
-      <!-- Pinned and Apps Sections -->
-      <div class="pinned mt-6 bg-base-200 p-4 rounded shadow">
-        <!-- Content for pinned apps goes here -->
-      </div>
-      <div class="apps mt-6 bg-base-200 p-4 rounded shadow">
-        <!-- Content for apps goes here -->
-      </div>
-    </div>
-
-    <!-- Scripts -->
+    
+    <div class="pinned"></div>
+    <div class="apps"></div>
+    
     <script src="assets/js/c.js?v=06"></script>
     <script src="/assets/js/mv.js?v=003"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-WKJQ5QHQTJ"></script>
