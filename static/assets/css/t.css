@@ -222,9 +222,9 @@ li:hover {
 
 iframe {
    position: fixed;
-   top: 8vh; /* Increased top margin */
+   top: 9.5vh; /* Increased top margin */
    left: 0;
    width: 100%;
-   height: calc(100vh - 8vh); /* Adjusted height accordingly */
+   height: calc(100vh - 9.5vh); /* Adjusted height accordingly */
    border: none;
 }
