@@ -3,31 +3,31 @@
     {
       "text": "1on1soccer",
       "link": "/pages/game_page.html?game=1on1soccer",
-      "link2": "/pages/games/1on1soccer.html",
+      "link2": "/pages/games/1on1soccer/index.html",
       "image": "/pages/games/1on1soccer/logo.jpg"
     },
     {
       "text": "Burrito Bison",
       "link": "/pages/games/BurritoBison/index.html",
-      "link2": "/pages/games/BurritoBison.html",
+      "link2": "/pages/games/BurritoBison/index.html",
       "image": "/img/burrito-bison-image.png"
     },
     {
       "text": "Subway Surfers",
-      "link": "/pages/game_page?game=Subway%20Surfers",
-      "link2": "/pages/games/sub.html",
+      "link": "/pages/game_page.html?game=Subway%20Surfers",
+      "link2": "/pages/games/sub/index.html",
       "image": "/img/subwaysurfers.png"
     },
     {
       "text": "Rooftop Snipers",
       "link": "/pages/game_page.html?game=Rooftop%20Snipers",
-      "link2": "/pages/games/rooftop-snipers.html",
+      "link2": "/pages/games/rooftop-snipers/index.html",
       "image": "/img/roof.jpeg"
     },
     {
       "text": "Getaway Shootout",
       "link": "/pages/game_page.html?game=Getaway%20Shootout",
-      "link2": "/pages/games/getawayshooter",
+      "link2": "/pages/games/getawayshooter/index.html",
       "image": "/pages/games/getawayshooter/Untitled.jpeg"
     },
     {
@@ -39,31 +39,31 @@
     {
       "text": "idle breakout",
       "link": "/pages/game_page.html?game=idle%20breakout",
-      "link2": "/pages/games/idle-breakout",
+      "link2": "/pages/games/idle-breakout/index.html",
       "image": "/img/idle.png"
     },
     {
       "text": "Bit planes",
       "link": "/pages/game_page.html?game=Bit%20planes",
-      "link2": "/pages/games/bitplanes.html",
+      "link2": "/pages/games/bitplanes/index.html",
       "image": "/img/plane.jpg"
     },
     {
       "text": "Basketball Stars",
       "link": "/pages/game_page.html?game=Basketball%20Stars",
-      "link2": "/pages/games/basketball-stars.html",
+      "link2": "/pages/games/basketball-stars/index.html",
       "image": "/img/BAS.webp"
     },
     {
       "text": "Baldis Basics",
       "link": "/pages/game_page.html?game=Baldis%20Basics",
-      "link2": "/pages/games/baldis-basics.html",
+      "link2": "/pages/games/baldis-basics/index.html",
       "image": "/pages/games/basic/splash.png"
     },
     {
       "text": "Bad Piggies",
       "link": "/pages/game_page.html?game=Bad%20Piggies",
-      "link2": "/pages/games/badpiggies.html",
+      "link2": "/pages/games/badpiggies/index.html",
       "image": "/pages/games/badpiggies/badpiggies.png"
     },
     {
@@ -75,7 +75,7 @@
     {
       "text": "Cookie Clicker",
       "link": "/pages/game_page/cookies.html",
-      "link2": "/pages/games/cookies.html",
+      "link2": "/pages/games/cookies/index.html",
       "image": "/img/cookie.jpeg"
     },
     {
@@ -87,55 +87,55 @@
     {
       "text": "Monkey Mart",
       "link": "/pages/game_page.html?game=Monkey%20Mart",
-      "link2": "/pages/games/monkey.html",
+      "link2": "/pages/games/monkey/index.html",
       "image": "/img/monkey.jpeg"
     },
     {
       "text": "Paper.io 2",
       "link": "/pages/game_page.html?game=Paper.io%202",
-      "link2": "/pages/games/paperio2.html",
+      "link2": "/pages/games/paperio2/index.html",
       "image": "/pages/games/paperio2/images/icon192.png"
     },
     {
       "text": "Funny Shooter",
       "link": "/pages/game_page.html?game=Funny%20Shooter",
-      "link2": "/pages/games/funnyshooter.html",
+      "link2": "/pages/games/funnyshooter/index.html",
       "image": "/pages/games/funnyshooter/icon.jpeg"
     },
     {
       "text": "Funny Shooter 2",
       "link": "/pages/game_page.html?game=Funny%20Shooter%202",
-      "link2": "/pages/games/funnyshooter2.html",
+      "link2": "/pages/games/funnyshooter2/index.html",
       "image": "/pages/games/funnyshooter2/894abba63a6b23fed823f404831f444f.jpeg"
     },
     {
       "text": "Adventure Capitalist",
       "link": "/pages/game_page.html?game=Adventure%20Capitalist",
-      "link2": "/pages/games/adventure.html",
+      "link2": "/pages/games/adventure/index.html",
       "image": "/img/adventure.jpeg"
     },
     {
       "text": "Impossible Quiz",
       "link": "/pages/game_page.html?game=Impossible%20Quiz",
-      "link2": "/pages/games/impossiblequiz.html",
+      "link2": "/pages/games/impossiblequiz/index.html",
       "image": "/img/impossiblequiz.webp"
     },
     {
       "text": "Jetpack Joyride",
       "link": "/pages/game_page.html?game=Jetpack%20Joyride",
-      "link2": "/pages/games/jetpack-joyride.html",
+      "link2": "/pages/games/jetpack-joyride/index.html",
       "image": "/img/jetpack-joyride.webp"
     },
     {
       "text": "Learn to Fly",
       "link": "/pages/game_page.html?game=Learn%20to%20Fly",
-      "link2": "/pages/games/LearnToFly.html",
+      "link2": "/pages/games/LearnToFly/index.html",
       "image": "/img/learntofly.webp"
     },
     {
       "text": "Learn to Fly 2",
       "link": "/pages/game_page.html?game=Learn%20to%20Fly%202",
-      "link2": "/pages/games/LearnToFly2.html",
+      "link2": "/pages/games/LearnToFly2/index.html",
       "image": "/img/learntofly2.webp"
     },
     {
@@ -147,31 +147,31 @@
     {
       "text": "Moto1",
       "link": "/pages/game_page.html?game=Moto1",
-      "link2": "/pages/games/Moto1.html",
+      "link2": "/pages/games/Moto1/index.html",
       "image": "/img/Moto1.webp"
     },
     {
       "text": "Moto X3M Pool",
       "link": "/pages/game_page.html?game=Moto%20X3M%20Pool",
-      "link2": "/pages/games/motoxpool.html",
+      "link2": "/pages/games/motoxpool/index.html",
       "image": "/img/motoxpool.webp"
     },
     {
       "text": "Moto X3M Spooky",
       "link": "/pages/game_page.html?game=Moto%20X3M%20Spooky",
-      "link2": "/pages/games/moto-spook.html",
+      "link2": "/pages/games/moto-spook/index.html",
       "image": "/img/moto-spook.webp"
     },
     {
       "text": "MotoW",
       "link": "/pages/game_page.html?game=MotoW",
-      "link2": "/pages/games/MotoW.html",
+      "link2": "/pages/games/MotoW/index.html",
       "image": "/img/MotoW.webp"
     },
     {
       "text": "Clicker Heroes",
       "link": "/pages/game_page.html?game=Clicker%20Heroes",
-      "link2": "/pages/games/clickerheroes.html",
+      "link2": "/pages/games/clickerheroes/index.html",
       "image": "/pages/games/clickerheroes/clicker-heroes.png"
     },
     {
@@ -183,187 +183,187 @@
     {
       "text": "Riddle School 2",
       "link": "/pages/game_page.html?game=Riddle%20School%202",
-      "link2": "/pages/games/riddleschool2.html",
+      "link2": "/pages/games/riddleschool2/index.html",
       "image": "/img/riddleschool.webp"
     },
     {
       "text": "Riddle School 3",
       "link": "/pages/game_page.html?game=Riddle%20School%203",
-      "link2": "/pages/games/riddleschool3.html",
+      "link2": "/pages/games/riddleschool3/index.html",
       "image": "/img/riddleschool.webp"
     },
     {
       "text": "Riddle School 4",
       "link": "/pages/game_page.html?game=Riddle%20School%204",
-      "link2": "/pages/games/riddleschool4.html",
+      "link2": "/pages/games/riddleschool4/index.html",
       "image": "/img/riddleschool.webp"
     },
     {
       "text": "Riddle School 5",
       "link": "/pages/game_page.html?game=Riddle%20School%205",
-      "link2": "/pages/games/riddleschool5.html",
+      "link2": "/pages/games/riddleschool5/index.html",
       "image": "/img/riddleschool.webp"
     },
     {
       "text": "Slope",
       "link": "/pages/game_page.html?game=Slope",
-      "link2": "/pages/games/Slope.html",
+      "link2": "/pages/games/Slope/index.html",
       "image": "/img/slope.webp"
     },
     {
       "text": "Snowrider 3D",
       "link": "/pages/game_page.html?game=Snowrider%203D",
-      "link2": "/pages/games/snowride.html",
+      "link2": "/pages/games/snowride/index.html",
       "image": "/img/snowride.webp"
     },
     {
       "text": "Stack Ball",
       "link": "/pages/game_page.html?game=Stack%20Ball",
-      "link2": "/pages/games/stack-ball.html",
+      "link2": "/pages/games/stack-ball/index.html",
       "image": "/img/stack-ball.webp"
     },
     {
       "text": "Stick Slasher",
       "link": "/pages/game_page.html?game=Stick%20Slasher",
-      "link2": "/pages/games/StickSlasher.html",
+      "link2": "/pages/games/StickSlasher/index.html",
       "image": "/img/stickslasher.webp"
     },
     {
       "text": "Temple Run 2",
       "link": "/pages/game_page.html?game=Temple%20Run%202",
-      "link2": "/pages/games/temple2.html",
+      "link2": "/pages/games/temple2/index.html",
       "image": "/img/temple-run.webp"
     },
     {
       "text": "Tiny Fishing",
       "link": "/pages/game_page.html?game=Tiny%20Fishing",
-      "link2": "/pages/games/tiny-fishing.html",
+      "link2": "/pages/games/tiny-fishing/index.html",
       "image": "/img/tiny-fishing.webp"
     },
     {
       "text": "Toss the Turtle",
       "link": "/pages/game_page.html?game=Toss%20the%20Turtle",
-      "link2": "/pages/games/tosstheturtle.html",
+      "link2": "/pages/games/tosstheturtle/index.html",
       "image": "/img/tosstheturtle.webp"
     },
     {
       "text": "Vex 3",
       "link": "/pages/game_page.html?game=Vex%203",
-      "link2": "/pages/games/Vex3.html",
+      "link2": "/pages/games/Vex3/index.html",
       "image": "/img/vex3.webp"
     },
     {
       "text": "Vex 4",
       "link": "/pages/game_page.html?game=Vex%204",
-      "link2": "/pages/games/Vex4.html",
+      "link2": "/pages/games/Vex4/index.html",
       "image": "/img/vex4.webp"
     },
     {
       "text": "Vex 5",
       "link": "/pages/game_page.html?game=Vex%205",
-      "link2": "/pages/games/Vex5.html",
+      "link2": "/pages/games/Vex5/index.html",
       "image": "/img/vex5.webp"
     },
     {
       "text": "Vex 6",
       "link": "/pages/game_page.html?game=Vex%206",
-      "link2": "/pages/games/Vex6.html",
+      "link2": "/pages/games/Vex6/index.html",
       "image": "/img/vex6.webp"
     },
     {
       "text": "Vex 7",
       "link": "/pages/game_page.html?game=Vex%207",
-      "link2": "/pages/games/Vex7.html",
+      "link2": "/pages/games/Vex7/index.html",
       "image": "/img/vex7.webp"
     },
     {
       "text": "Cut the Rope",
       "link": "/pages/game_page.html?game=Cut%20the%20Rope",
-      "link2": "/pages/games/cuttherope.html",
+      "link2": "/pages/games/cuttherope/index.html",
       "image": "/pages/games/cuttherope/icon.png"
     },
     {
       "text": "Crossy Road",
       "link": "/pages/game_page.html?game=Crossy%20Road",
-      "link2": "/pages/games/crossyroad.html",
+      "link2": "/pages/games/crossyroad/index.html",
       "image": "/pages/games/crossyroad/crossyroad.png"
     },
     {
       "text": "Super Mario 64",
       "link": "/pages/game_page.html?game=Super%20Mario%2064",
-      "link2": "/pages/games/supermario64.html",
+      "link2": "/pages/games/supermario64/index.html",
       "image": "/pages/games/supermario64/icon.png"
     },
     {
       "text": "Run",
       "link": "/pages/game_page.html?game=Run",
-      "link2": "/pages/games/run.html",
+      "link2": "/pages/games/run/index.html",
       "image": "/pages/games/run/icon.jpeg"
     },
     {
       "text": "Little Alchemy",
       "link": "/pages/game_page.html?game=Little%20Alchemy",
-      "link2": "/pages/games/littlealchemy.html",
+      "link2": "/pages/games/littlealchemy/index.html",
       "image": "/pages/games/littlealchemy/images/192-alpha.png"
     },
     {
       "text": "Stick Man",
       "link": "/pages/game_page.html?game=Stick%20Man",
-      "link2": "/pages/games/stickman.html",
+      "link2": "/pages/games/stickman/index.html",
       "image": "/pages/games/stickman/icon.jpg"
     },
     {
       "text": "Fruit Ninja",
       "link": "/pages/game_page.html?game=Fruit%20Ninja",
-      "link2": "/pages/games/fruitninja.html",
+      "link2": "/pages/games/fruitninja/index.html",
       "image": "/pages/games/fruitninja/FruitNinjaTeaser.jpg"
     },
     {
       "text": "Duck Life 1",
       "link": "/pages/game_page.html?game=Duck%20Life%201",
-      "link2": "/pages/games/ducklife1.html",
+      "link2": "/pages/games/ducklife1/index.html",
       "image": "/pages/games/ducklife1/icon.png"
     },
     {
       "text": "Duck Life 2",
       "link": "/pages/game_page.html?game=Duck%20Life%202",
-      "link2": "/pages/games/ducklife2.html",
+      "link2": "/pages/games/ducklife2/index.html",
       "image": "/pages/games/ducklife2/ducklife2.png"
     },
     {
       "text": "Duck Life 3",
       "link": "/pages/game_page.html?game=Duck%20Life%203",
-      "link2": "/pages/games/ducklife3.html",
+      "link2": "/pages/games/ducklife3/index.html",
       "image": "/pages/games/ducklife3/ducklife3.png"
     },
     {
       "text": "Duck Life 4",
       "link": "/pages/game_page.html?game=Duck%20Life%204",
-      "link2": "/pages/games/ducklife4.html",
+      "link2": "/pages/games/ducklife4/index.html",
       "image": "/pages/games/ducklife4/ducklife4.png"
     },
     {
       "text": "Duck Life 5",
       "link": "/pages/game_page.html?game=Duck%20Life%205",
-      "link2": "/pages/games/ducklife5.html",
+      "link2": "/pages/games/ducklife5/index.html",
       "image": "/pages/games/ducklife5/ducklife5.png"
     },
     {
       "text": "Duck Life 6",
       "link": "/pages/game_page.html?game=Duck%20Life%206",
-      "link2": "/pages/games/ducklife6.html",
+      "link2": "/pages/games/ducklife6/index.html",
       "image": "/pages/games/ducklife6/ducklife6.png"
     },
     {
       "text": "Drive Mad",
       "link": "/pages/game_page.html?game=Drive%20Mad",
-      "link2": "/pages/games/drivemad.html",
+      "link2": "/pages/games/drivemad/index.html",
       "image": "/img/drivem.jpeg"
     },
     {
       "text": "Monster Tracks",
       "link": "/pages/game_page.html?game=Monster%20Tracks",
-      "link2": "/pages/games/monstert",
+      "link2": "/pages/games/monstert/index.html",
       "image": "/img/monstert.jpeg"
     },
     {
@@ -375,19 +375,19 @@
     {
       "text": "FNAF 2",
       "link": "/pages/game_page.html?game=FNAF%202",
-      "link2": "/pages/games/fnaf2",
+      "link2": "/pages/games/fnaf2/index.html",
       "image": "/pages/games/fnaf2/project/splash.webp"
     },
     {
       "text": "FNAF 3",
       "link": "/pages/game_page.html?game=FNAF%203",
-      "link2": "/pages/games/fnaf3",
+      "link2": "/pages/games/fnaf3/index.html",
       "image": "/pages/games/fnaf3/project/splash.webp"
     },
     {
       "text": "FNAF 4",
       "link": "/pages/game_page.html?game=FNAF%204",
-      "link2": "/pages/games/fnaf4",
+      "link2": "/pages/games/fnaf4/index.html",
       "image": "/pages/games/fnaf4/project/splash.webp"
     },
     {
@@ -399,31 +399,31 @@
     {
       "text": "Fireboy and Watergirl 2",
       "link": "/pages/game_page.html?game=Fireboy%20and%20Watergirl%202",
-      "link2": "/pages/games/fireboywatergirl2",
+      "link2": "/pages/games/fireboywatergirl2/index.html",
       "image": "/pages/games/fireboywatergirl2/Untitled.jpeg"
     },
     {
       "text": "Fireboy and Watergirl 3",
       "link": "/pages/game_page.html?game=Fireboy%20and%20Watergirl%203",
-      "link2": "/pages/games/fireboywatergirl3",
+      "link2": "/pages/games/fireboywatergirl3/index.html",
       "image": "/pages/games/fireboywatergirl3/icon.png"
     },
     {
       "text": "Fireboy and Watergirl 4",
       "link": "/pages/game_page.html?game=Fireboy%20and%20Watergirl%204",
-      "link2": "/pages/games/fireboywatergirl4",
+      "link2": "/pages/games/fireboywatergirl4/index.html",
       "image": "/pages/games/fireboywatergirl4/300.jpg"
     },
     {
       "text": "Worlds Hardest Game",
       "link": "/pages/game_page.html?game=Worlds%20Hardest%20Game",
-      "link2": "/pages/games/worlds-hardest-game.html",
+      "link2": "/pages/games/worlds-hardest-game/index.html",
       "image": "/img/worlds-hardest-game.webp"
     },
     {
       "text": "Worlds Hardest Game 2",
       "link": "/pages/game_page.html?game=Worlds%20Hardest%20Game%202",
-      "link2": "/pages/games/worlds-hardest-game2.html",
+      "link2": "/pages/games/worlds-hardest-game2/index.html",
       "image": "/img/worlds-hardest-game.webp"
     }
   ]
