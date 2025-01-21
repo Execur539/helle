@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <link rel="icon" type="image/x-icon" href="img/images.jpg" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Getaway Shootout</title>
+    <script src="Build/UnityLoader.js"></script>
+    <script src="/js/all.js"></script>
+
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: #000000;
+      }
+
+      #gameContainer {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+    <script>
+      window.onload = function () {
+        UnityLoader.instantiate("gameContainer", "GetawayShootout.json", {
+          width: window.innerWidth,
+          height: window.innerHeight
+        });
+      };
+    </script>
+  </head>
+  <body>
+    <div id="gameContainer"></div>
+  </body>
+</html>

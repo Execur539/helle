@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <link href="https://fonts.cdnfonts.com/css/orbitron" rel="stylesheet">
+  <script src="/tsave.js"></script>
+</head>
+<body class="bg-gradient-to-bg-base-100 text-gray-500 relative overflow-y-hidden">
+
+  <nav class="navbar bg-base-100 p-4 shadow-lg sticky top-0 z-10">
+    <div class="container mx-auto flex justify-between items-center">
+      <div class="navbar-start flex items-left">
+        <h1 class="text-primary font-orbitron text-2xl" style="font-family: 'Orbitron', sans-serif;">Void Games</h1>
+      </div>
+  
+      <div class="navbar-center hidden sm:flex">
+        <ul class="menu menu-horizontal gap-4">
+          <li><a href="" class="btn btn-outline border-2 btn-primary">Home</a></li>
+          <li><a href="/pages/games.html" class="btn btn-outline border-2 btn-secondary">Games</a></li>
+          <li><a href="apps.html" class="btn btn-outline border-2 btn-accent">Apps</a></li>
+        </ul>
+      </div>
+  
+      <div class="navbar-end flex items-center gap-4">
+        <a href="/proxy.html" class="btn btn-primary flex items-center gap-2">
+          <i class="fa-solid fa-search"></i>
+        </a>
+        <div class="dropdown dropdown-end sm:hidden">
+          <button tabindex="0" class="btn btn-ghost">
+            <i class="fa-solid fa-bars text-xl"></i>
+          </button>
+          <ul tabindex="0" class="dropdown-content menu bg-base-200 p-4 rounded-box shadow w-40 gap-2">
+            <li><a href="/pages/games.html">Games</a></li>
+            <li><a href="">Home</a></li>
+            <li><a href="apps.html">Apps</a></li>
+          </ul>
+        </div>
+      
+        <label class="grid cursor-pointer place-items-center">
+          <input
+            type="checkbox"
+            value="synthwave"
+            class="toggle theme-controller bg-base-content col-span-2 col-start-1 row-start-1" />
+          <svg
+            class="stroke-base-100 fill-base-100 col-start-1 row-start-1"
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5" />
+            <path
+              d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" />
+          </svg>
+          <svg
+            class="stroke-base-100 fill-base-100 col-start-2 row-start-1"
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </label>
+      </div>
+    </div>
+  </nav>
+  
+<section class="flex justify-center items-center h-screen bg-base-200 text-center">
+  <div class="flex flex-col items-center gap-6 max-w-lg" data-aos="fade-up">
+    <a class="btn btn-primary">
+      Make a Private Domain!
+      <i class="fa-solid fa-circle-arrow-right text-lg ml-2"></i>
+    </a>
+    <h1 class="font-bold text-6xl text-secondary" style="font-family: 'Orbitron', sans-serif;">
+      Void <span class="text-accent">Games</span>
+    </h1>
+
+    <p class="text-lg text-gray-300">
+      We are a site that hosts a blazingly fast web proxy and a large library of games.
+    </p>
+
+    <div class="flex gap-4">
+      <a class="btn btn-secondary flex items-center gap-2">
+        <i class="fa-solid fa-rocket"></i> Proxy
+      </a>
+
+      <a class="btn btn-accent flex items-center gap-2">
+        <i class="fa-solid fa-gamepad"></i> Games
+      </a>
+    </div>
+
+    <a class="link link-secondary text-lg">
+      About Us
+      <i class="fa-solid fa-arrow-right ml-1 text-sm"></i>
+    </a>
+  </div>
+</section>
+
+
+<footer class="footer items-center p-4 bg-base-300 text-base-content">
+  <div class="items-center grid-flow-col">
+    <p>Copyright &copy; 2025 Void Games. All rights reserved.</p>
+  </div>
+  <div class="grid-flow-col gap-4 md:place-self-center md:justify-self-end">
+    <a><i class="fa-brands fa-facebook text-lg"></i></a>
+    <a><i class="fa-brands fa-twitter text-lg"></i></a>
+    <a><i class="fa-brands fa-instagram text-lg"></i></a>
+  </div>
+</footer>
+
+
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  AOS.init();
+</script>
+</body>
+</html>
