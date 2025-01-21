@@ -303,7 +303,7 @@ const fullscreenButton = document.getElementById("fullscreen-button");
 fullscreenButton.addEventListener("click", FS);
 // Home
 function Home() {
-  window.location.href = "./";
+  window.location.href = "/proxy.html";
 }
 const homeButton = document.getElementById("home-page");
 homeButton.addEventListener("click", Home);
