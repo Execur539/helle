@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.min.css" rel="stylesheet" type="text/css" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -23,7 +24,7 @@
         <ul class="menu menu-horizontal gap-4">
           <li><a href="" class="btn btn-outline border-2 btn-primary">Home</a></li>
           <li><a href="/pages/games.html" class="btn btn-outline border-2 btn-secondary">Games</a></li>
-          <li><a href="/apps.html" class="btn btn-outline border-2 btn-accent">Apps</a></li>
+          <li><a href="apps.html" class="btn btn-outline border-2 btn-accent">Apps</a></li>
         </ul>
       </div>
   
@@ -38,7 +39,7 @@
           <ul tabindex="0" class="dropdown-content menu bg-base-200 p-4 rounded-box shadow w-40 gap-2">
             <li><a href="/pages/games.html">Games</a></li>
             <li><a href="">Home</a></li>
-            <li><a href="/apps.html">Apps</a></li>
+            <li><a href="apps.html">Apps</a></li>
           </ul>
         </div>
       
@@ -95,11 +96,11 @@
     </p>
 
     <div class="flex gap-4">
-      <a class="btn btn-secondary flex items-center gap-2">
+      <a href = "/proxy" class="btn btn-secondary flex items-center gap-2">
         <i class="fa-solid fa-rocket"></i> Proxy
       </a>
 
-      <a class="btn btn-accent flex items-center gap-2">
+      <a href = "/pages/games/" class="btn btn-accent flex items-center gap-2">
         <i class="fa-solid fa-gamepad"></i> Games
       </a>
     </div>
@@ -129,6 +130,5 @@
 <script>
   AOS.init();
 </script>
-
 </body>
 </html>
