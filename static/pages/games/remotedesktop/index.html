@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Remote Desktop (SSE)</title>
+    <style>
+      body { font-family: sans-serif; text-align: center; margin-top: 20px; }
+      #remote-view { max-width: 90%; border: 1px solid #ccc; }
+      input { margin: 5px; }
+    </style>
+  </head>
+  <body>
+    <h1>Remote Desktop (Prototype)</h1>
+    <input type="text" id="keyField" placeholder="Enter connection key" />
+    <button id="connectBtn">Connect</button>
+
+    <div>
+      <img id="remote-view" alt="Remote screen will appear here" />
+    </div>
+
+    <script>
+      let eventSource;
+      document.getElementById("connectBtn").onclick = () => {
+        const key = document.getElementById("keyField").value.trim();
+        if (!key) return alert("Please enter a key.");
+
+        // Stop any previous connection
+        if (eventSource) eventSource.close();
+
+        eventSource = new EventSource(`/sse/screenshot?key=${encodeURIComponent(key)}`);
+        eventSource.onmessage = (event) => {
+          document.getElementById("remote-view").src = event.data;
+        };
+        eventSource.onerror = () => {
+          alert("Connection error. Check your key or server status.");
+          eventSource.close();
+        };
+      };
+
+      function sendInput(type, payload) {
+        const key = document.getElementById("keyField").value.trim();
+        fetch(`/api/input?key=${encodeURIComponent(key)}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type, payload }),
+        });
+      }
+
+      // Example usage: send mouse or keyboard inputs
+      // document.addEventListener("mousemove", e => sendInput("mouse", { x: e.clientX, y: e.clientY }));
+      // document.addEventListener("keydown", e => sendInput("key", { key: e.key }));
+    </script>
+  </body>
+</html>

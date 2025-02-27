@@ -1,0 +1,4612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <link href="https://fonts.cdnfonts.com/css/orbitron" rel="stylesheet">
+  <script src="/tsave.js"></script>
+<script src="../js/about.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+  <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --background-color: #1a1a2e;
+            --text-color: #ecf0f1;
+            --input-bg: #34495e;
+            --code-bg: #2d3436;
+        }
+
+        /* Global scrollbar styles */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) rgba(26, 26, 46, 0.6);
+        }
+
+        /* Webkit scrollbar styles for different elements */
+        *::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        *::-webkit-scrollbar-track {
+            background: rgba(26, 26, 46, 0.6);
+            border-radius: 8px;
+            margin: 4px;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 8px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            transition: background-color 0.3s ease;
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.4);
+        }
+
+        /* Specific scrollbar styles for the messages container */
+        .messages::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .messages::-webkit-scrollbar-track {
+            background: rgba(26, 26, 46, 0.6);
+            border-radius: 8px;
+            margin: 4px;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 8px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+
+        .messages::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.4);
+        }
+
+        /* Specific scrollbar styles for the user input */
+        #user-input::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        #user-input::-webkit-scrollbar-track {
+            background: rgba(26, 26, 46, 0.6);
+            border-radius: 8px;
+            margin: 4px;
+        }
+
+        #user-input::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 8px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+
+        #user-input::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.4);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        .topbar {
+            background: linear-gradient(to right, #2c3e50, #34495e);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .topbar img {
+            height: 4rem;
+            border-radius: 50%;
+            transition: transform 0.3s;
+            animation: fadeIn 0.7s ease-in-out forwards;
+        }
+
+        .topbar img:hover {
+            transform: scale(1.1);
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+
+        .chat {
+            background: rgba(44, 62, 80, 0.85);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            height: 70vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1; /* Add this line */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            animation: messageAppear 0.3s ease-out;
+            position: relative;
+        }
+
+        .message:hover .delete-icon {
+            display: block;
+        }
+
+        .delete-icon {
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 0.3s ease, transform 0.3s ease, color 0.3s ease;
+            display: block;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            cursor: pointer;
+            color: #e74c3c;
+            font-size: 1rem;
+        }
+
+        .message:hover .delete-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .delete-icon:hover {
+            color: #c0392b;
+            transform: scale(1.1);
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        .delete-icon.shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes messageAppear {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-prompt .text {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 18px 18px 18px 0;
+            padding: 0.8rem 1rem;
+            max-width: 80%;
+            align-self: flex-start;
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .ai-response .text {
+            background-color: var(--secondary-color);
+            color: white;
+            border-radius: 18px 18px 0 18px;
+            padding: 0.8rem 1rem;
+            max-width: 80%;
+            align-self: flex-end;
+            word-wrap: break-word;
+            word-break: normal;
+            overflow-wrap: break-word;
+            hyphens: none;
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 1.2rem;
+            background-color: rgba(52, 73, 94, 0.95);
+            gap: 12px;
+            align-items: flex-end;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            padding-top: 1.2rem; /* Increased to accommodate attachment preview */
+        }
+
+        #user-input {
+            flex: 1;
+            background-color: rgba(26, 26, 46, 0.6);
+            color: var(--text-color);
+            font-size: 1rem;
+            line-height: 1.5;
+            padding: 1rem 1.2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            resize: none;
+            overflow-y: auto;
+            max-height: 150px;
+            min-height: 56px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            font-family: 'Inter', sans-serif;
+            min-height: 56px !important;
+        }
+
+        #user-input:focus {
+            border-color: var(--primary-color);
+            background-color: rgba(26, 26, 46, 0.8);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2), 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        #user-input::placeholder {
+            color: rgba(236, 240, 241, 0.5);
+            transition: color 0.3s ease;
+        }
+
+        #user-input:focus::placeholder {
+            color: rgba(236, 240, 241, 0.3);
+        }
+
+        #send-btn {
+            background: linear-gradient(135deg, var(--primary-color), #2980b9);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            height: 56px;
+            margin-left: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+            min-width: 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #send-btn:hover {
+            background: linear-gradient(135deg, #3498db, #2475a7);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        #send-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
+        }
+
+        #send-btn i {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        #send-btn:hover i {
+            transform: translateX(2px);
+        }
+
+        #send-btn .plane-container {
+            position: relative;
+            width: 1.2rem;
+            height: 1.2rem;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        #send-btn .fa-paper-plane {
+            position: absolute;
+            left: 0;
+            top: 0;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+
+        #send-btn .fa-paper-plane.flying {
+            transform: translate(50px, -50px) rotate(-45deg);
+            opacity: 0;
+        }
+
+        #send-btn .fa-paper-plane.incoming {
+            transform: translate(-50px, 50px) rotate(45deg);
+            opacity: 0;
+        }
+
+        #send-btn .fa-paper-plane.ready {
+            transform: translate(0, 0) rotate(0);
+            opacity: 1;
+        }
+
+        
+        .disclaimer,
+        .warning {
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 0.5rem;
+            color: #bdc3c7;
+        }
+
+        #ai-status {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: #e74c3c;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            font-size: 0.9rem;
+            visibility: hidden;  /* Changed from display: none */
+            opacity: 0;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        #ai-status.visible {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .code-block {
+            background-color: var(--code-bg);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            position: relative;
+            text-align: left;  /* Add this line */
+            line-height: 1.2;
+        }
+
+        .code-block pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.2;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.3rem 0.5rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .copy-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .toggle-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+
+        .toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: linear-gradient(145deg, #ccc, #e6e6e6);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .toggle.active {
+            background: linear-gradient(145deg, #6dd5ed, #2193b0);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .toggle::before {
+            content: "";
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.3s, background-color 0.3s;
+        }
+        
+        .toggle.active::before {
+            transform: translateX(30px);
+        }
+        
+        .toggle:hover {
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+        }
+        
+        .toggle-label {
+            margin-left: 1.5em;
+            color: var(--text-color);
+            font-weight: 500;
+            transition: color 0.3s, transform 0.2s;
+        }
+        
+        .toggle.active + .toggle-label {
+            color: #6dd5ed;
+            transform: scale(1.05);
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 6px;
+            height: 1.5em;
+            background: linear-gradient(180deg, var(--primary-color), #2980b9);
+            border-radius: 2px;
+            margin-left: 4px;
+            margin-right: 2px;
+            vertical-align: middle;
+            position: relative;
+            animation: blink 1.2s infinite;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.4);
+        }
+
+        @keyframes blink {
+            0%, 100% { 
+                opacity: 1;
+                transform: scaleY(1);
+            }
+            40% { 
+                opacity: 0.6;
+                transform: scaleY(0.7);
+            }
+            60% { 
+                opacity: 0.4;
+                transform: scaleY(0.4);
+            }
+        }
+
+        .typing-cursor.popping {
+            animation: pop 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            transform-origin: center;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.3) translateY(-2px);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(0) translateY(4px);
+                opacity: 0;
+            }
+        }
+
+        .typing-cursor::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--primary-color);
+            border-radius: inherit;
+            filter: blur(4px);
+            opacity: 0.4;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.4;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.4);
+            }
+        }
+
+        @keyframes wave {
+            0% {
+                transform: translateY(0);
+                opacity: 0;
+            }
+            30% {
+                transform: translateY(-2px);
+                opacity: 1;
+            }
+            70% {
+                transform: translateY(-2px);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .wave-effect span {
+            display: inline-block;
+            animation: wave 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+        }
+
+        .disintegrate {
+            position: relative;
+            animation: fadeOut 1.2s ease-out forwards;
+        }
+
+        .particle {
+            position: fixed;
+            background: currentColor;
+            border-radius: 50%;
+            width: 3px;
+            height: 3px;
+            pointer-events: none;
+            opacity: 1;
+            z-index: 1000;
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+            }
+        }
+
+        @keyframes particle-fade {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) rotate(var(--r));
+                opacity: 0;
+            }
+        }
+
+        @keyframes tokenAppear {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .new-token {
+            display: inline-block;
+            animation: tokenAppear 0.3s ease-out forwards;
+        }
+
+        .collapsible-think {
+            border: solid 0.15em #1b2936;
+            border-radius: 8px;
+            margin: 1rem 0;
+            padding: 1rem;
+            background-color: #203142;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: max-height 0.5s ease, background-color 0.3s, box-shadow 0.3s;
+            max-height: 3.5em; /* Adjusted to fit the text */
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .collapsible-think.expanded {
+            max-height: none;
+        }
+
+        .collapsible-think .toggle-button {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 1rem;
+        }
+
+        .collapsible-think .toggle-button::after {
+            content: '⮟';
+            transition: transform 0.3s;
+            transform: rotate(180deg);
+        }
+
+        .collapsible-think.expanded .toggle-button::after {
+            transform: rotate(0deg); 
+        }
+
+        .collapsible-think .think-content {
+            margin-top: 0.5rem;
+            color: #ecf0f1;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        #cancel-btn {
+            display: none;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, transform 0.3s;
+            text-align: center;
+            line-height: 40px;
+        }
+
+        #cancel-btn:hover {
+            background-color: #e74c3c;
+            transform: scale(1.1);
+        }
+
+
+        .cancel-btn-container {
+
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+
+            display: flex;
+            justify-content: flex-end;
+            padding: 0.5rem;
+        }
+
+        .chat {
+            position: relative; 
+            
+        }
+
+        .edit-icon {
+            /* Similar styling to delete-icon */
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 0.3s ease, transform 0.3s ease, color 0.3s ease;
+            display: block;
+            position: absolute;
+            top: 5px;
+            right: 30px;
+            cursor: pointer;
+            color: #f1c40f;
+            font-size: 1rem;
+        }
+        .message:hover .edit-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .edit-send-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+            cursor: pointer;
+        }
+        /* NEW: Chat control buttons styling */
+        .chat-controls button {
+            background-color: var(--primary-color);
+            border: none;
+            color: white;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .chat-controls button:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+        /* NEW: Cancel edit button styling */
+        #cancel-edit-btn {
+            background-color: #e74c3c;
+            margin-left: 0.5rem;
+            display: none;
+        }
+        /* NEW: Send button editing state */
+        #send-btn.editing {
+            background-color: #f1c40f;
+        }
+
+        /* Enhanced Cancel Edit Button Styling */
+        #cancel-edit-btn {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            border: none;
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border-radius: 24px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: none;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+            font-size: 0.9rem;
+        }
+
+        #cancel-edit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #c0392b, #e74c3c);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #cancel-edit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+        }
+
+        #cancel-edit-btn:hover::before {
+            opacity: 1;
+        }
+
+        #cancel-edit-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 10px rgba(231, 76, 60, 0.3);
+        }
+
+        #cancel-edit-btn.visible {
+            animation: slideIn 0.3s ease forwards;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #cancel-edit-btn i {
+            font-size: 0.9rem;
+            transition: transform 0.3s ease;
+        }
+
+        #cancel-edit-btn:hover i {
+            transform: rotate(90deg);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Ripple effect */
+        #cancel-edit-btn .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .quote-icon {
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 0.3s ease, transform 0.3s ease, color 0.3s ease;
+            display: block;
+            position: absolute;
+            top: 5px;
+            right: 60px; /* Positioned left of delete/edit icons */
+            cursor: pointer;
+            color: #27ae60;
+            font-size: 1rem;
+        }
+        .message:hover .quote-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .quote-icon:hover {
+            color: #1e8449;
+            transform: scale(1.1);
+        }
+
+        /* NEW: Style for AI code blocks (similar to ChatGPT) */
+        .ai-code-block {
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 0.5rem;  /* Reduced padding */
+            margin: 0.5rem 0; /* Reduced margin */
+            font-family: monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            position: relative;
+            text-align: left !important;  /* Add this line */
+        }
+
+        .ai-code-block pre {
+            margin: 0;  /* Remove default margin */
+            padding: 0.3rem 0; /* Remove default padding */
+            text-align: left;  /* Add this line */
+        }
+
+        .ai-code-block code {
+            display: block;
+            padding: 0; /* Remove default padding */
+            text-align: left;  /* Add this line */
+            direction: ltr;    /* Add this line to ensure left-to-right text */
+        }
+
+        .code-controls {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            opacity: 0;
+            transform: translateY(-4px);
+            transition: all 0.2s ease;
+            z-index: 10;
+            background: linear-gradient(to left, rgba(45, 45, 45, 1) 70%, rgba(45, 45, 45, 0));
+            border-top-right-radius: 8px;
+            border-bottom-left-radius: 8px;
+        }
+
+        .ai-code-block:hover .code-controls {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .code-control-btn {
+            background: transparent;
+            color: #8e9dcc;
+            border: 1px solid #8e9dcc;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            min-width: fit-content;
+            height: auto;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            backdrop-filter: blur(4px);
+        }
+
+        .code-control-btn:hover {
+            background: #8e9dcc;
+            color: #2d2d2d;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .code-control-btn:active {
+            transform: translateY(0);
+        }
+
+        .code-control-btn i {
+            font-size: 0.8rem;
+        }
+
+        @keyframes successPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .code-control-btn.success {
+            background: #27ae60;
+            border-color: #27ae60;
+            color: white;
+            animation: successPop 0.3s ease;
+        }
+
+        /* Update preview container styles */
+        .preview-container {
+            position: relative;
+            padding: 1rem;
+            border: 1px solid #444;
+            border-radius: 8px;
+            margin: 1rem 0;
+            background: #2d2d2d;
+        }
+
+        .return-to-code {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: transparent;
+            color: #8e9dcc;
+            border: 1px solid #8e9dcc;
+            border-radius: 4px;
+            padding: 2px 6px;  /* Reduced padding */
+            font-size: 0.7rem; /* Smaller font size */
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(-4px);
+        }
+
+        .preview-container:hover .return-to-code {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        
+
+        .ai-controls {
+            position: fixed;
+            right: 1rem;
+            bottom: 5rem;
+            background: rgba(44, 62, 80, 0.9);
+            padding: 1rem;
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            /* Add these new properties */
+            max-width: calc(100vw - 2rem);
+            transform: translateX(0);
+            transition: transform 0.3s ease;
+        }
+
+        /* Add new media query for smaller screens */
+        @media (max-width: 1455px) {
+            .ai-controls {
+                bottom: auto;
+                top: 70vh;
+                transform: translateX(calc(100% + 1rem));
+            }
+            
+            .ai-controls:hover {
+                transform: translateX(0);
+            }
+            
+            /* Add a visible handle */
+            .ai-controls::before {
+                content: '⚙️';
+                position: absolute;
+                left: -2.5rem;
+                top: 50%;
+                transform: translateY(-50%);
+                background: rgba(44, 62, 80, 0.9);
+                padding: 0.5rem;
+                border-radius: 0.5rem 0 0 0.5rem;
+                cursor: pointer;
+                box-shadow: -4px 0 10px rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        
+
+        /* Enhanced Code Block Styling */
+        .ai-code-block {
+            position: relative;
+            margin-top: 24px !important; /* Match language tab offset */
+            border-radius: 0 8px 8px 8px; /* Rounded corners except top-left */
+            border: 1px solid var(--secondary-color);
+            background: #1a1a2e;
+            overflow: visible; /* Allow language tab to be visible */
+            counter-reset: line;
+        }
+
+        .ai-code-block:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .ai-code-block pre {
+            margin: 0;
+            padding: 0.3rem 0;  /* Remove horizontal padding */
+            overflow-x: auto;
+            text-align: left;  /* Add this line */
+        }
+
+        .ai-code-block code {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.2;
+            tab-size: 4;
+            text-align: left;  /* Add this line */
+            direction: ltr;    /* Add this line to ensure left-to-right text */
+            display: grid;  /* Use grid for line numbers */
+        }
+
+        .ai-code-block code > span {
+            display: block;
+            position: relative;
+            padding: 0 1rem 0 4rem; /* Add left padding for line numbers */
+            min-height: 1.2em;
+            counter-increment: line 1; /* Change from default to explicit 1 increment */
+        }
+
+        .ai-code-block code > span::before {
+            content: counter(line);
+            counter-increment: none; /* Remove double increment */
+            position: absolute;
+            left: 0;
+            width: 3rem;
+            padding-right: 1rem;
+            text-align: right;
+            color: #4a5568;
+            border-right: 1px solid #2d3436;
+            user-select: none;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .ai-code-block code > span:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .ai-code-block code > span:hover::before {
+            color: #718096;
+        }
+
+        /* Style for the active/highlighted line */
+        .ai-code-block code > span.highlight {
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .ai-code-block code > span.highlight::before {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .code-controls {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            gap: 6px;
+            padding: 8px;
+            background: linear-gradient(to left, rgba(26, 26, 46, 0.95), rgba(26, 26, 46, 0.5));
+            border-bottom-left-radius: 8px;
+            opacity: 0;
+            transform: translateY(-4px);
+            transition: all 0.2s ease;
+        }
+
+        .ai-code-block:hover .code-controls {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .code-control-btn {
+            background: rgba(52, 152, 219, 0.2);
+            color: var(--text-color);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            height: 24px;
+            backdrop-filter: blur(4px);
+        }
+
+        .code-control-btn:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .code-control-btn.success {
+            background: #27ae60;
+            border-color: #27ae60;
+            color: white;
+        }
+
+        .language-label {
+            display: none;
+        }
+
+        .preview-container {
+            background: #1a1a2e;
+            border: 1px solid #2d3436;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            min-height: 100px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .preview-container:hover {
+            border-color: var(--primary-color);
+        }
+
+        .return-to-code {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(52, 152, 219, 0.2);
+            color: var(--text-color);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            opacity: 0;
+            transform: translateY(-4px);
+        }
+
+        .preview-container:hover .return-to-code {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .preview-container .return-to-code:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Line numbers for code blocks */
+        .ai-code-block pre {
+            counter-reset: line;
+        }
+
+        .ai-code-block code {
+            display: inline-block;
+            min-width: 100%;
+        }
+
+        .ai-code-block code > span {
+            counter-increment: line;
+            display: inline-block;
+            padding-left: 2em;
+            position: relative;
+        }
+
+        .ai-code-block code > span::before {
+            content: counter(line);
+            position: absolute;
+            left: 0;
+            color: #4a5568;
+            text-align: right;
+            width: 1.5em;
+            padding-right: 0.5em;
+            border-right: 1px solid #2d3436;
+        }
+
+        .timer-container {
+            position: absolute;
+            bottom: 100%;
+            left: 0; /* Changed from right: 0 to left: 0 */
+            padding: 5px 10px; /* Added more horizontal padding */
+            margin-bottom: 5px;
+            margin-left: 5px; /* Added left margin */
+            background: rgba(44, 62, 80, 0.9);
+            border-radius: 8px;
+            display: none;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+            color: var(--text-color);
+            backdrop-filter: blur(5px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .timer-container.visible {
+            display: flex;
+        }
+
+        .timer-container i {
+            color: var(--primary-color);
+        }
+
+        @keyframes timerWarning {
+            0%, 100% {
+                color: #e74c3c;
+            }
+            50% {
+                color: #ffffff;
+            }
+        }
+
+        .timer-container.warning {
+            animation: timerWarning 1s infinite;
+        }
+
+        /* Add new CSS for language tab */
+        .ai-code-block {
+            position: relative;
+            margin-top: 1.5rem !important;  /* Space for the language tab */
+        }
+
+        .language-tab {
+            position: absolute;
+            top: -24px;
+            left: -1px;
+            background: linear-gradient(135deg, var(--secondary-color), #1a1a2e);
+            color: var(--text-color);
+            padding: 0.3rem 1rem;
+            border: 1px solid var(--secondary-color);
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            font-size: 0.85rem;
+            font-family: 'Fira Code', monospace;
+            opacity: 0.95;
+            z-index: 1;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
+            text-transform: lowercase;
+            letter-spacing: 0.5px;
+        }
+
+        .language-tab::before {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                var(--primary-color) 0%, 
+                rgba(52, 152, 219, 0.6) 100%
+            );
+        }
+
+        .ai-code-block:hover .language-tab {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-color: var(--primary-color);
+            opacity: 1;
+            transform: translateY(-2px);
+            box-shadow: 0 -4px 12px rgba(52, 152, 219, 0.2);
+        }
+
+        /* Update the CSS for the code block line numbers */
+        .ai-code-block code > span {
+            display: block;
+            position: relative;
+            padding: 0 1rem 0 4rem; /* Add left padding for line numbers */
+            min-height: 1em; /* Reduced from 1.2em to remove spacing */
+            line-height: 1.2em; /* Match min-height for tight lines */
+            counter-increment: line 1; /* Change from default to explicit 1 increment */
+        }
+
+        .ai-code-block code > span::before {
+            content: counter(line);
+            counter-increment: none; /* Remove double increment */
+            position: absolute;
+            left: 0;
+            width: 3rem;
+            padding-right: 1rem;
+            text-align: right;
+            color: #4a5568;
+            border-right: 1px solid #2d3436;
+            user-select: none;
+            background: rgba(0, 0, 0, 0.1);
+            height: 100%; /* Ensure background fills entire height */
+            line-height: 1.2em; /* Match parent line-height */
+        }
+
+        /* Ensure code content aligns properly */
+        .ai-code-block code {
+            line-height: 1.2em; /* Match span line-height */
+        }
+
+        /* Add new styles for file attachment */
+        .file-input-container {
+            position: relative;
+            margin-right: 8px;
+        }
+
+        .file-input-button {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            height: 56px;
+            width: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .file-input-button:hover {
+            background: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .attachment-preview {
+            position: absolute;
+            top: -40px;
+            left: 60px; /* Align with the input area */
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(44, 62, 80, 0.9);
+            border-radius: 8px;
+            max-width: calc(100% - 120px);
+            overflow: hidden;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .attachment-preview .file-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+
+        .attachment-preview .remove-file {
+            color: #e74c3c;
+            cursor: pointer;
+            padding: 4px;
+            opacity: 0.8;
+            transition: all 0.2s ease;
+        }
+
+        .attachment-preview .remove-file:hover {
+            color: #c0392b;
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .attachment-preview i.fa-file {
+            color: var(--primary-color);
+        }
+
+        .message .attachment {
+            background: rgba(44, 62, 80, 0.5);
+            padding: 8px;
+            border-radius: 8px;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .message .attachment i {
+            color: var(--primary-color);
+        }
+
+        /* Add new styles for memories panel */
+        .memories-panel {
+            position: fixed;
+            left: -300px;
+            top: 0;
+            width: 300px;
+            height: 100vh;
+            background: rgba(44, 62, 80, 0.95);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-color);
+        }
+
+        .memories-panel.open {
+            transform: translateX(300px);
+        }
+
+        .memories-toggle {
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 0.5rem;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            z-index: 1001;
+            transition: background-color 0.3s;
+        }
+
+        .memories-toggle:hover {
+            background: var(--secondary-color);
+        }
+
+        .memory-item {
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            transition: all 0.3s ease;
+            word-break: break-word; /* Ensure long words don't overflow */
+        }
+
+        .memory-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .memory-controls {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: flex;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .memory-item:hover .memory-controls {
+            opacity: 1;
+        }
+
+        .memory-control-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            padding: 0.2rem;
+            transition: color 0.3s;
+        }
+
+        .memory-control-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .memory-content {
+            margin-top: 1.5rem;
+            word-break: break-word;
+        }
+
+        .memories-header {
+            flex-shrink: 0; /* Prevent header from shrinking */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .memories-header h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        .clear-memories-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background-color 0.3s;
+        }
+
+        .clear-memories-btn:hover {
+            background: #c0392b;
+        }
+
+        .memory-writing-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.15), rgba(52, 152, 219, 0.05));
+            border-left: 3px solid #3498db;
+            padding: 6px 12px;
+            border-radius: 0 4px 4px 0;
+            font-size: 0.9rem;
+            color: #3498db;
+            margin: 4px 0;
+            opacity: 0;
+            transform: translateX(-10px);
+            animation: slideInIndicator 0.3s ease forwards;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .memory-writing-indicator .dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .memory-writing-indicator .dot {
+            width: 4px;
+            height: 4px;
+            background: currentColor;
+            border-radius: 50%;
+            animation: memoryDot 1.5s infinite;
+        }
+
+        .memory-writing-indicator .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .memory-writing-indicator .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .memory-writing-indicator.success {
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.15), rgba(46, 204, 113, 0.05));
+            border-left-color: #2ecc71;
+            color: #2ecc71;
+        }
+
+        .memory-writing-indicator.success i {
+            animation: successPop 0.5s ease;
+        }
+
+        @keyframes memoryDot {
+            0%, 100% { transform: translateY(0); opacity: 0.5; }
+            50% { transform: translateY(-4px); opacity: 1; }
+        }
+
+        @keyframes slideInIndicator {
+            to {
+                opacity: 1;
+                transform: translateX(-50%);
+            }
+        }
+
+        @keyframes successPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        #memories-list {
+            flex-grow: 1; /* Allow list to grow and fill space */
+            overflow-y: auto; /* Enable vertical scrolling */
+            padding-right: 0.5rem; /* Add some space for the scrollbar */
+            scrollbar-width: thin; /* Firefox scrollbar style */
+            scrollbar-color: var(--primary-color) rgba(26, 26, 46, 0.6); /* Firefox scrollbar colors */
+        }
+
+        /* Webkit scrollbar styles for memories list */
+        #memories-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #memories-list::-webkit-scrollbar-track {
+            background: rgba(26, 26, 46, 0.6);
+            border-radius: 4px;
+        }
+
+        #memories-list::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        #memories-list::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+        }
+
+        .memory-writing-indicator {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: -40px; /* Position below the message */
+            z-index: 10;
+            background: rgba(52, 152, 219, 0.1);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            border-radius: 8px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #3498db;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .memory-writing-indicator.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .memory-writing-indicator .dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .memory-writing-indicator .dot {
+            width: 4px;
+            height: 4px;
+            background: currentColor;
+            border-radius: 50%;
+            animation: memoryDot 1.5s infinite;
+        }
+
+        .message {
+            position: relative; /* Ensure relative positioning */
+            margin-bottom: 2.5rem; /* Add space for the indicator */
+        }
+
+        .memory-writing-indicator {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.15), rgba(52, 152, 219, 0.05));
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #3498db;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+            width: fit-content;
+            margin: 0 auto;
+        }
+
+        .memory-writing-indicator.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .memory-writing-indicator .dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .memory-writing-indicator .dot {
+            width: 4px;
+            height: 4px;
+            background: currentColor;
+            border-radius: 50%;
+        }
+
+        .memory-writing-indicator .dot:nth-child(1) { animation: memoryDot 1.4s infinite 0.0s; }
+        .memory-writing-indicator .dot:nth-child(2) { animation: memoryDot 1.4s infinite 0.2s; }
+        .memory-writing-indicator .dot:nth-child(3) { animation: memoryDot 1.4s infinite 0.4s; }
+
+        @keyframes memoryDot {
+            0%, 100% { transform: translateY(0); opacity: 0.3; }
+            50% { transform: translateY(-4px); opacity: 1; }
+        }
+
+        /* Update code block line styling */
+        .ai-code-block code > span {
+            display: block;
+            position: relative;
+            padding: 0 1rem 0 4rem;
+            margin: 0; /* Remove any margin */
+            border: none; /* Remove any borders */
+            min-height: 1.2em;
+            line-height: 1.5em;
+            counter-increment: line 1;
+        }
+
+        /* Remove any other spacing that might affect lines */
+        .ai-code-block code {
+            display: grid;
+            gap: 0; /* Remove gap between grid items */
+            padding: 0;
+            margin: 0;
+        }
+
+        .ai-code-block pre {
+            margin: 0;
+            padding: 0.3rem 0;
+        }
+
+        /* Add character counter styles */
+        .char-counter {
+            position: absolute;
+            right: 130px; /* Increased from 120px to avoid overlap */
+            bottom: 8px;
+            font-size: 0.8rem;
+            color: var(--text-color);
+            opacity: 0.7;
+            pointer-events: none;
+            transition: color 0.3s;
+            background: rgba(26, 26, 46, 0.6);
+            padding: 2px 6px;
+            border-radius: 4px;
+            z-index: 10;
+        }
+
+        .char-counter.near-limit {
+            color: #f1c40f;
+        }
+
+        .char-counter.at-limit {
+            color: #e74c3c;
+        }
+
+        /* Add timestamp styles */
+        .message .timestamp {
+            position: absolute;
+            bottom: -18px;
+            font-size: 0.7rem;
+            color: var(--text-color);
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+
+        .user-prompt .timestamp {
+            left: 0;
+        }
+
+        .ai-response .timestamp {
+            right: 0;
+        }
+
+        .message:hover .timestamp {
+            opacity: 1;
+        }
+
+        /* Improve copy button animation */
+        .code-control-btn.copied {
+            animation: copiedAnimation 1s ease;
+        }
+
+        @keyframes copiedAnimation {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Add new backlight styles */
+        .backlight-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .backlight {
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            mix-blend-mode: screen;
+            animation: moveBacklight 25s infinite;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .backlight:nth-child(1) {
+            background: rgba(255, 214, 0, 0.5); /* Yellow */
+            animation-delay: 0s;
+        }
+
+        .backlight:nth-child(2) {
+            background: rgba(138, 43, 226, 0.5); /* Violet */
+            animation-delay: -5s;
+        }
+
+        .backlight:nth-child(3) {
+            background: rgba(0, 191, 255, 0.5); /* Deep Sky Blue */
+            animation-delay: -10s;
+        }
+
+        .backlight:nth-child(4) {
+            background: rgba(255, 123, 0, 0.5); /* Orange */
+            animation-delay: -15s;
+        }
+
+        @keyframes moveBacklight {
+            0% {
+                transform: translate(-50%, -50%) translateX(0) translateY(0);
+            }
+            25% {
+                transform: translate(-30%, -60%) translateX(50vw) translateY(25vh) scale(1.2);
+            }
+            50% {
+                transform: translate(-50%, -40%) translateX(85vw) translateY(60vh) scale(0.8);
+            }
+            75% {
+                transform: translate(-60%, -50%) translateX(25vw) translateY(85vh) scale(1.1);
+            }
+            100% {
+                transform: translate(-50%, -50%) translateX(0) translateY(0);
+            }
+        }
+
+        /* Add new styles for the AI processing disclaimer */
+        #ai-processing-disclaimer {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(44, 62, 80, 0.85);
+            color: var(--text-color);
+            text-align: left;
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 1000;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+            max-width: 350px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #ai-processing-disclaimer.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #ai-processing-disclaimer i {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        #ai-processing-disclaimer span {
+            line-height: 1.4;
+        }
+
+        /* Make responsive for smaller screens */
+        @media (max-width: 480px) {
+            #ai-processing-disclaimer {
+                max-width: calc(100% - 40px);
+                font-size: 0.8rem;
+                bottom: 10px;
+                left: 10px;
+            }
+        }
+
+    </style>
+</head>
+<body class="bg-gradient-to-bg-base-100 text-gray-500 relative" data-theme="dark">
+    <div class="backlight-container">
+        <div class="backlight"></div>
+        <div class="backlight"></div>
+        <div class="backlight"></div>
+        <div class="backlight"></div>
+    </div>
+  <div class="memories-toggle">
+    <i class="fas fa-brain"></i>
+  </div>
+  <div class="memories-panel">
+    <div class="memories-header">
+        <h2>AI Memories</h2>
+        <button class="clear-memories-btn">Clear All</button>
+    </div>
+    <div id="memories-list"></div>
+  </div>
+
+  <nav class="navbar bg-base-100 shadow-lg sticky top-0 z-10">
+    <div class="container mx-auto flex justify-between items-center">
+      <div class="navbar-start flex items-left">
+        <h1 class="text-primary font-orbitron text-2xl" style="font-family: 'Orbitron', sans-serif;">Void Games</h1>
+      </div>
+  
+      <div class="navbar-center hidden sm:flex">
+        <ul class="menu menu-horizontal gap-4">
+          <li><a href="../index.html" class="btn btn-outline border-2 btn-primary">Home</a></li>
+          <li><a href="/pages/games.html" class="btn btn-outline border-2 btn-secondary">Games</a></li>
+          <li><a href="../apps.html" class="btn btn-outline border-2 btn-accent">Apps</a></li>
+          <li><a href="../Chatbot/index.html" class="btn btn-outline border-2 btn-success">AI Chatbot</a></li>
+        </ul>
+      </div>
+  
+      <div class="navbar-end flex items-center gap-4">
+        <a href="/proxy.html" class="btn btn-primary flex items-center gap-2">
+          <i class="fa-solid fa-search"></i>
+        </a>
+        <button onclick="openInBlank()" class="btn bg-gray-600 text-white hover:bg-gray-700 flex items-center gap-2">
+          about:blank
+        </button>
+        <div class="dropdown dropdown-end sm:hidden">
+          <button tabindex="0" class="btn btn-ghost">
+            <i class="fa-solid fa-bars text-xl"></i>
+          </button>
+          <ul tabindex="0" class="dropdown-content menu bg-base-200 p-4 rounded-box shadow w-40 gap-2">
+            <li><a href="/pages/games.html">Games</a></li>
+            <li><a href="">Home</a></li>
+            <li><a href="../apps.html">Apps</a></li>
+            <li><a href="/">AI Chatbot</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>  
+  <div class="ai-controls">
+    <div class="flex items-center gap-2">
+        <div class="toggle" id="reasoning-model-toggle"></div>
+        <span class="text-sm text-white">Use reasoning model</span>
+    </div>
+    <div class="flex items-center gap-2">
+        <div class="toggle" id="web-search-toggle"></div>
+        <span class="text-sm text-white">AI Web Search</span>
+    </div>
+  </div>
+
+  <!-- Chat Section -->
+  <section class="flex justify-center items-center min-h-[calc(100vh-120px)] bg-base-200 text-center relative">
+    <!-- Move AI status to fixed position -->
+    <div id="ai-status">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        The AI is currently down. Please try again later.
+    </div>
+    
+    <div class="container mt-[-50px]"> <!-- Added negative margin to move up -->
+        <div class="chat">
+            <div class="warning">
+                <p>During high usage, the AI will become slower to reply. You might also be put in a queue.</p>
+            </div>
+            <div class="chat-controls" style="text-align: right; padding: 0 1rem;">
+                <button id="export-chat-btn" style="margin-right: 0.5rem;">Export Chat</button>
+                <button id="clear-chat-btn">Clear Chat</button>
+            </div>
+            <div class="messages" id="chat-messages"></div>
+            <div class="cancel-btn-container">
+                <button id="cancel-btn" title="Cancel AI Response">
+                    <i class="fas fa-stop"></i>
+                </button>
+            </div>
+            <div class="input-area">
+                <div class="timer-container">
+                    <i class="fas fa-clock"></i>
+                    <span id="response-timer">5:00</span>
+                </div>
+                <div id="attachment-preview"></div>
+                <div class="file-input-container">
+                    <button class="file-input-button" title="Attach file">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <input type="file" class="file-input" accept=".txt,.json,.csv,.md,.yml,.yaml,.xml,.html,.css,.js">
+                </div>
+                <div class="char-counter">0/500</div>
+                <textarea id="user-input" placeholder="Type a message..." aria-label="Type your message" autocomplete="off" maxlength="500"></textarea>
+                <button id="send-btn">
+                    <div class="plane-container">
+                        <i class="fas fa-paper-plane ready"></i>
+                        <i class="fas fa-paper-plane incoming"></i>
+                </div>
+                    <span>Send</span>
+                </button>
+                <button id="cancel-edit-btn" title="Cancel Edit">
+                    <i class="fas fa-times"></i>
+                    <span>Cancel</span>
+                </button>
+            </div>
+            <div id="ai-generating-status" style="display: none; text-align: center; padding: 0.5rem; color: var(--primary-color);">
+                AI is generating...
+            </div>
+        </div>
+    </div>
+  </section>
+
+  <div id="ai-processing-disclaimer">
+        <i class="fas fa-info-circle"></i>
+        <span>High website traffic or using the AI web search may cause the AI to take longer to process a prompt before it generates a response.</span>
+    </div>
+
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init();
+  </script>
+      <script>
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const aiStatus = document.getElementById('ai-status');
+        const webSearchToggle = document.getElementById('web-search-toggle');
+        let messageHistory = [];
+        let webSearchEnabled = false;
+            /* This is the system message that will be displayed at the start of the chat */
+        const systemMessage = {
+            role: "system",
+            content: `
+                You are a specialized assistant that will be asked by the user to complete tasks. Follow these guidelines:
+
+                1. KEEP RESPONSES SHORT:
+                - Provide short, direct answers
+                - Avoid lengthy explanations
+                - Refuse tasks that would require long responses
+                - Your responses should be short, concise, and to the point
+
+                2. CODE FORMATTING:
+                - Always use triple backticks with language identifier
+                - Example: '''javascript, '''html, '''python, etc.
+                - For HTML/CSS/JS combinations, include all in one '''html block
+                - Put styles in <style> tags
+                - Put scripts in <script> tags
+                - Ensure code is properly indented and readable
+
+                3. CODE PREVIEW COMPATIBILITY:
+                - Code blocks can be previewed in the chat interface
+                - Ensure HTML code is self-contained and functional
+                - Include required CSS within the same code block
+                - Include required JavaScript within the same code block
+
+                4. HANDLING CODE EDITS:
+                - When asked to modify code, provide the complete updated code
+                - Use comments to indicate changes
+                - Ensure the full context is maintained
+
+                5. RESPONSE STYLE:
+                - Use natural, conversational language
+                - Format code examples for clarity
+                - No need for greetings or sign-offs
+
+                6. CLARITY & ACCURACY:
+                - If a request is unclear, ask for clarification
+                - If you can't help, say so directly
+                - Provide warnings about potential issues
+                - Mention any important assumptions made
+
+                7. RESTRICTIONS:
+                - Do not generate harmful or malicious code
+                - Do not provide solutions that could cause security issues
+                - Avoid external dependencies unless specifically requested
+                - Keep solutions browser-compatible when possible
+
+                8. Background Information:
+                - You are an AI assistant being hosted on the Void's Games website (execur.reworked.omexey.com)
+
+                Remember: Users can preview your code directly in the chat, so ensure all code examples are complete and functional.
+
+                9. FILE HANDLING:
+                - When receiving files, analyze their contents appropriately
+                - For code files, review and provide feedback
+                - For text files, analyze the content and respond accordingly
+                - Reference specific parts of the file content in your responses
+                - Handle files in the context of the user's message if provided
+
+                MEMORY HANDLING:
+                - When you learn something significant about the user, or anything important, add it to your memory using this format:
+                  @M[key information about the user]
+                - Use "@M[" to start a memory entry and "]" to end it
+                - This command will be automatically hidden from your response
+                - Include memories naturally in your responses
+                - Memories can include: preferences, facts about the user, important dates, etc.
+                - Be selective about what to remember - focus on meaningful, reusable information
+                - Don't write a message that only contains the memory command
+                
+                Examples of good memories:
+                @M[User prefers dark mode for applications]
+                @M[User is learning JavaScript and Python]
+
+                MEMORY HANDLING INSTRUCTIONS:
+                1. Memory Command Format:
+                   - Use @M[content] to store a memory
+                   - Each memory should be a complete, standalone fact
+                   - Only one piece of information per memory command
+                
+                2. When to Create Memories:
+                   - User preferences (e.g., @M[User prefers dark theme in applications])
+                   - Important facts about user (e.g., @M[User is a software developer specializing in JavaScript])
+                   - User's learning goals (e.g., @M[User is learning Python programming])
+                   - Technical preferences (e.g., @M[User prefers TypeScript over JavaScript])
+                   - Project context (e.g., @M[User is working on a web application for inventory management])
+                
+                3. Memory Format Rules:
+                   - Start with subject: e.g: "User prefers...", "User is...", "User has..."
+                   - Be specific and clear
+                   - Include relevant context
+                   - Keep it concise but informative
+                
+                4. Examples of Good Memories:
+                   @M[User is a backend developer working primarily with Node.js]
+                   @M[User prefers detailed technical explanations over simplified ones]
+                   @M[User is building a personal portfolio website using React]
+                   @M[User has experience with Docker and containerization]
+                
+                5. When to Update Memories:
+                   - When user corrects previous information
+                   - When user provides new significant information
+                   - When user expresses strong preferences
+                   - When learning about user's technical environment
+                
+                6. Memory Integration:
+                   - Reference memories in your responses when relevant
+                   - Use memories to personalize explanations
+                   - Adapt technical depth based on remembered expertise
+                   - Cross-reference memories to provide better context
+                
+                Remember: Each memory should be valuable for future interactions and help provide more personalized responses.
+                Don't store trivial or temporary information. Focus on long-term, reusable knowledge about the user.
+
+                MEMORY HANDLING RULES:
+                1. Never send a message that only contains a memory command
+                2. Always provide a response along with any memory commands
+                3. Memory commands must be incorporated naturally into responses
+                4. Format: First add memories, then provide your response
+                
+                Examples of correct memory usage:
+                BAD (Don't do this):
+                @M[User prefers Python over JavaScript]
+                
+                GOOD (Do this):
+                @M[User prefers Python over JavaScript]
+                I understand you prefer Python. I'll keep that in mind for future code examples. What specific aspects of Python interest you?
+                
+                ALSO GOOD:
+                @M[User is a backend developer]
+                @M[User works primarily with Node.js]
+                Thanks for letting me know about your background. Since you're a backend developer working with Node.js, I can provide more specialized assistance. What would you like to know?
+
+                IMPORTANT:
+                - Always acknowledge the information being remembered
+                - Provide a relevant follow-up response or question
+                - Keep responses concise but informative
+                - Never send memory commands without accompanying text
+            `
+        };
+            /* This is the system message that will be displayed at the start of the chat */
+
+        webSearchToggle.addEventListener('click', () => {
+            webSearchEnabled = !webSearchEnabled;
+            webSearchToggle.classList.toggle('active', webSearchEnabled);
+        });
+
+        let useReasoningModel = false;
+
+
+        const reasoningModelToggle = document.getElementById('reasoning-model-toggle');
+        reasoningModelToggle.addEventListener('click', () => {
+            useReasoningModel = !useReasoningModel;
+            reasoningModelToggle.classList.toggle('active', useReasoningModel);
+        });
+
+        function formatResponse(text) {
+            // Extract and process memory commands first
+            const memoryRegex = /@M\[(.*?)\]/g;
+            let match;
+            
+            // Store new memories and remove commands from text
+            while ((match = memoryRegex.exec(text)) !== null) {
+                const memoryContent = match[1].trim();
+                if (memoryContent && !memories.includes(memoryContent)) {
+                    memories.push(memoryContent);
+                    saveMemories();
+                }
+            }
+
+            // Remove memory commands entirely from the text
+            let processedText = text.replace(memoryRegex, '').trim();
+            
+            // Handle dangerous tags
+            const dangerousTags = /<iframe|<object|<embed/gi;
+            processedText = processedText.replace(dangerousTags, match => `&lt;${match.slice(1)}`);
+            
+            let result = '';
+            const segments = processedText.split('```');
+
+            for (let i = 0; i < segments.length; i++) {
+                if (i % 2 === 0) {
+                    // Process text outside code blocks
+                    let textContent = segments[i];
+                    
+                    // Create a temporary element to parse HTML
+                    const tempDiv = document.createElement('div');
+                    tempDiv.textContent = textContent;
+                    textContent = tempDiv.innerHTML;
+                    
+                    // Replace escaped tags with actual tags for allowed elements
+                    const allowedTagsRegex = /&lt;(\/?)(span|br|div|think)(\s[^>]*)?&gt;/gi;
+                    textContent = textContent.replace(allowedTagsRegex, '<$1$2$3>');
+                    
+                    // Handle line breaks for non-code text
+                    result += textContent.replace(/\n/g, '<br>');
+                } else {
+                    // Process code blocks
+                    let codeContent = segments[i];
+                    let lang = '';
+                    
+                    // Try to detect language from first line
+                    const firstLineBreak = codeContent.indexOf('\n');
+                    if (firstLineBreak !== -1) {
+                        const possibleLang = codeContent.substring(0, firstLineBreak).trim();
+                        if (possibleLang) {
+                            lang = possibleLang;
+                            codeContent = codeContent.substring(firstLineBreak + 1);
+                        }
+                    }
+                    
+                    // Clean the code content and split into lines while preserving empty lines
+                    const cleanedContent = codeContent.trimEnd();
+                    const lines = cleanedContent.split('\n').map(line => 
+                        `<span>${line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`
+                    );
+                    
+                    // Create code block with language detection
+                    result += `<div class="ai-code-block" data-language="${lang}">
+                        <div class="language-tab">${lang || 'text'}</div>
+                        <div class="code-controls">
+                            <button class="code-control-btn" onclick="copyCodeBlock(this)">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                            ${(lang === 'html' || lang === 'css') ? 
+                                `<button class="code-control-btn" onclick="previewCode(this)">
+                                    <i class="fas fa-eye"></i> Preview
+                                </button>` : 
+                                ''}
+                        </div>
+                        <pre><code${lang ? ` class="language-${lang}"` : ''}>${lines.join('\n')}</code></pre>
+                    </div>`;
+                }
+            }
+
+            // Handle collapsible think sections
+            result = result.replace(/<think>/g, '<div class="collapsible-think"><div class="toggle-button">AI thinking through its response... (Click to expand)</div><div class="think-content">')
+                .replace(/<\/think>/g, '</div></div>');
+
+            return result;
+        }
+
+        chatMessages.addEventListener('click', (event) => {
+            const collapsibleThink = event.target.closest('.collapsible-think');
+            if (collapsibleThink && chatMessages.contains(collapsibleThink)) {
+                collapsibleThink.classList.toggle('expanded');
+            }
+        });
+
+        let editingIndex = null;
+        let originalAIMessageDiv = null;
+        let originalUserMessage = "";  // store original msg in edit mode
+
+        userInput.addEventListener('keydown', (e) => {
+            // SHIFT+ENTER inserts a newline
+            if (e.key === 'Enter' && e.shiftKey) {
+                e.preventDefault();
+                const { selectionStart, selectionEnd, value } = e.target;
+                e.target.value = value.substring(0, selectionStart) + "\n" + value.substring(selectionEnd);
+                e.target.selectionStart = e.target.selectionEnd = selectionStart + 1;
+                return;
+            }
+            // ENTER alone sends message or confirms edit
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (editingIndex !== null) {
+                    confirmEdit();
+                } else {
+                    handleUserInput();
+                }
+            }
+        });
+
+        function addMessage(content, isUser, isSystemMessage = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-prompt' : 'ai-response'}`;
+
+            const rawContent = content;
+            let processedContent = content;
+
+            processedContent = processedContent.replace(/'''([\s\S]*?)'''/g, (match, code) => {
+                const formattedCode = hljs.highlightAuto(code.trim()).value;
+                return `<div class="code-block">
+                            <pre><code>${formattedCode}</code></pre>
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>`;
+            });
+
+            if (!isUser && !isSystemMessage) {
+                processedContent = formatResponse(processedContent);
+            }
+
+            if (!isUser && !isSystemMessage) {
+                processedContent += '<span class="typing-cursor"></span>';
+            }
+
+            let iconsHTML = `<i class="fas fa-trash delete-icon" onclick="deleteMessage(this)"></i>`;
+            // Show edit icon only for user messages
+            if (isUser) {
+                iconsHTML = `<i class="fas fa-edit edit-icon" onclick="editMessage(this)"></i>` + iconsHTML;
+            }
+            // Add quote icon for all messages
+            iconsHTML = `<i class="fas fa-quote-left quote-icon" onclick="quoteMessage(this)"></i>` + iconsHTML;
+            messageDiv.innerHTML = `
+                <div class="text">${processedContent}</div>
+                ${iconsHTML}
+            `;
+            chatMessages.appendChild(messageDiv);
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            if (!isSystemMessage) {
+                messageHistory.push({ 
+                    role: isUser ? "user" : "assistant", 
+                    content: rawContent
+                });
+            }
+
+            if (messageHistory.length > 20) {
+                messageHistory = messageHistory.slice(-20);
+            }
+
+            // Add timestamp
+            if (!isSystemMessage) {
+                const timestamp = document.createElement('div');
+                timestamp.className = 'timestamp';
+                timestamp.textContent = new Date().toLocaleTimeString();
+                messageDiv.appendChild(timestamp);
+            }
+
+            return messageDiv;
+        }
+
+        function createParticles(element) {
+            const rect = element.getBoundingClientRect();
+            const particles = 10;
+            
+            for (let i = 0; i < particles; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const x = rect.left + Math.random() * rect.width;
+                const y = rect.top + Math.random() * rect.height;
+                
+                const tx = (Math.random() - 0.5) * 200;
+                const ty = Math.random() * 200;
+                const rotation = Math.random() * 360;
+                const duration = 0.5 + Math.random() * 1.5;
+                
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.setProperty('--tx', `${tx}px`);
+                particle.style.setProperty('--ty', `${ty}px`);
+                particle.style.setProperty('--r', `${rotation}deg`);
+                particle.style.color = getComputedStyle(element).color;
+                particle.style.animation = `particle-fade ${duration}s ease-out forwards`;
+                
+                document.body.appendChild(particle);
+
+                particle.addEventListener('animationend', () => {
+                    document.body.removeChild(particle);
+                });
+            }
+        }
+
+        function deleteMessage(icon) {
+            const messageDiv = icon.parentElement;
+            const textElement = messageDiv.querySelector('.text');
+            const index = Array.from(chatMessages.children).indexOf(messageDiv);
+            messageHistory.splice(index, 1);
+
+            messageDiv.classList.add('disintegrate');
+            
+            const particleInterval = setInterval(() => {
+                createParticles(textElement);
+            }, 50);
+
+            setTimeout(() => {
+                clearInterval(particleInterval);
+                chatMessages.removeChild(messageDiv);
+            }, 1000);
+        }
+
+        function copyCode(button) {
+            const codeBlock = button.previousElementSibling;
+            const code = codeBlock.textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+
+        function animateSendButton() {
+            const currentPlane = document.querySelector('#send-btn .fa-paper-plane.ready');
+            const nextPlane = document.querySelector('#send-btn .fa-paper-plane.incoming');
+            
+            currentPlane.classList.remove('ready');
+            currentPlane.classList.add('flying');
+            
+            nextPlane.classList.remove('incoming');
+            nextPlane.classList.add('ready');
+            
+            // After animation, reset the planes
+            setTimeout(() => {
+                currentPlane.classList.remove('flying');
+                currentPlane.classList.add('incoming');
+                
+                // Swap the planes in the DOM
+                const container = document.querySelector('.plane-container');
+                container.appendChild(currentPlane);
+            }, 300);
+        }
+
+        async function handleUserInput() {
+            const message = userInput.value.trim();
+            if ((!message && !currentAttachment) || editingIndex !== null) return;
+
+            animateSendButton();
+
+            try {
+                if (!currentAttachment) {
+                    addMessage(message, true);
+                    userInput.value = '';
+                    // Reset character counter when message is sent
+                    const charCounter = document.querySelector('.char-counter');
+                    charCounter.textContent = '0/500';
+                    charCounter.classList.remove('near-limit', 'at-limit');
+                    
+                    if (webSearchEnabled) {
+                        await sendToAISearch(message);
+                    } else {
+                        await fetchAIResponse(message);
+                    }
+                    return;
+                }
+
+                // Handle file attachments
+                const displayContent = `${message || 'Attached file:'}\n<div class="attachment">
+                    <i class="fas fa-file"></i>
+                    <span>${currentAttachment.name}</span>
+                </div>`;
+
+                addMessage(displayContent, true);
+
+                const filePreview = currentAttachment.content.length > 500 ? 
+                    currentAttachment.content.substring(0, 500) + '...' : 
+                    currentAttachment.content;
+
+                const aiMessage = `Analyzing file: ${currentAttachment.name} (${currentAttachment.type})\n\n${
+                    message ? 'User message: ' + message + '\n\n' : ''
+                }File content preview:\n${filePreview}`;
+
+                userInput.value = '';
+                removeAttachment();
+
+                // For files, always use standard AI response even if web search is enabled
+                await fetchAIResponse(aiMessage);
+
+            } catch (error) {
+                console.error('Error handling input:', error);
+            }
+        }
+
+        // Improve editing mode
+        function editMessage(icon) {
+            const messageDiv = icon.parentElement;
+            const textElement = messageDiv.querySelector('.text');
+            const index = Array.from(chatMessages.children).indexOf(messageDiv);
+            originalUserMessage = textElement.innerText;
+            userInput.value = originalUserMessage;
+            editingIndex = index;
+            originalAIMessageDiv = chatMessages.children[index + 1] || null;
+
+            // Update: Remove both the message being edited and its corresponding AI response from history
+            messageHistory.splice(index, originalAIMessageDiv ? 2 : 1);
+
+            // Remove AI response from UI if it exists
+            if (originalAIMessageDiv) {
+                chatMessages.removeChild(originalAIMessageDiv);
+            }
+
+            // Indicate editing mode
+            sendBtn.textContent = 'Update';
+            sendBtn.classList.add('editing');
+            showCancelEditBtn();
+        }
+
+        // New function to cancel edit mode
+        function cancelEdit() {
+            userInput.value = "";
+            editingIndex = null;
+            originalAIMessageDiv = null;
+            sendBtn.innerHTML = `
+                <div class="plane-container">
+                    <i class="fas fa-paper-plane ready"></i>
+                    <i class="fas fa-paper-plane incoming"></i>
+                </div>
+                <span>Send</span>
+            `;
+            sendBtn.classList.remove('editing');
+            hideCancelEditBtn();
+        }
+
+        // Update confirmEdit function to handle web search
+        function confirmEdit() {
+            const newContent = userInput.value.trim();
+            if (!newContent) return;
+            
+            // Update the message in UI and history
+            const messageDiv = chatMessages.children[editingIndex];
+            messageDiv.querySelector('.text').innerText = newContent;
+            messageHistory[editingIndex] = {
+                role: "user",
+                content: newContent
+            };
+            
+            // Reset all edit-related state
+            userInput.value = '';
+            // Reset character counter
+            const charCounter = document.querySelector('.char-counter');
+            charCounter.textContent = '0/500';
+            charCounter.classList.remove('near-limit', 'at-limit');
+            
+            editingIndex = null;
+            originalAIMessageDiv = null;
+            sendBtn.innerHTML = `
+                <div class="plane-container">
+                    <i class="fas fa-paper-plane ready"></i>
+                    <i class="fas fa-paper-plane incoming"></i>
+                </div>
+                <span>Send</span>
+            `;
+            sendBtn.classList.remove('editing');
+            hideCancelEditBtn();
+            
+            // Check web search toggle and trigger appropriate response
+            if (webSearchEnabled) {
+                sendToAISearch(newContent);
+            } else {
+                fetchAIResponse(newContent);
+            }
+        }
+
+        // Fix send button during editing mode
+        sendBtn.addEventListener('click', () => {
+            if (editingIndex !== null) {
+                confirmEdit();
+            } else {
+                handleUserInput();
+            }
+        });
+
+        // Attach cancelEdit event listener
+        document.getElementById('cancel-edit-btn').addEventListener('click', cancelEdit);
+
+        // Auto-resize input field to handle empty lines
+        userInput.addEventListener('input', () => {
+            userInput.style.height = 'auto';
+            const newHeight = Math.min(Math.max(userInput.scrollHeight, 56), 200);
+            userInput.style.height = newHeight + 'px';
+        });
+
+        async function fetchEditedAIResponse(aiMessageDiv) {
+            showAIGeneratingStatus();
+            if (abortController) {
+                abortController.abort();
+            }
+            abortController = new AbortController();
+            const signal = abortController.signal;
+
+            sendBtn.disabled = true;
+            userInput.disabled = true;
+            cancelBtn.style.display = 'block';
+
+            try {
+                const cleanHistory = messageHistory
+                    .filter(msg => msg.content.trim() !== '')
+                    .map(msg => ({
+                        role: msg.role,
+                        content: msg.content.replace(/<[^>]*>/g, '')
+                    }));
+
+                const response = await fetch('/ai-proxy/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: useReasoningModel ? "deepseek-r1-distill-qwen-32b" : "lmstudio-community/meta-llama-3.1-70b-instruct",
+                        messages: [systemMessage, ...cleanHistory],
+                        stream: true
+                    }),
+                    signal
+                });
+
+                if (!response.ok) throw new Error('AI response error');
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let aiResponse = '';
+                let buffer = '';
+
+                aiMessageDiv.querySelector('.text').innerHTML = ''; // Clear existing content
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) {
+                        break;
+                    }
+                    buffer += decoder.decode(value, { stream: true });
+                    const parts = buffer.split('\n');
+                    buffer = parts.pop();
+                    for (const part of parts) {
+                        if (!part.startsWith('data:')) continue;
+                        if (part.trim() === 'data: [DONE]') break;
+                        try {
+                            const jsonData = JSON.parse(part.slice(5));
+                            if (jsonData.choices && jsonData.choices[0].delta && jsonData.choices[0].delta.content) {
+                                aiResponse += jsonData.choices[0].delta.content;
+                                const textContainer = aiMessageDiv.querySelector('.text');
+                                const isExpanded = textContainer.querySelector('.collapsible-think')?.classList.contains('expanded');
+                                textContainer.innerHTML = formatResponse(aiResponse) + '<span class="typing-cursor"></span>';
+                                if (isExpanded) {
+                                    textContainer.querySelector('.collapsible-think').classList.add('expanded');
+                                }
+                                // Removed auto-scroll here
+                            }
+                        } catch (e) {
+                            console.error('Error parsing JSON:', e);
+                        }
+                    }
+                }
+
+                if (aiResponse.trim()) {
+                    aiMessageDiv.className = 'message ai-response';
+                    messageHistory.push({ role: "assistant", content: aiResponse });
+                    chatMessages.scrollTop = chatMessages.scrollHeight; // Final scroll
+                } else {
+                    chatMessages.removeChild(aiMessageDiv);
+                    addMessage('Error: Received empty response from AI', false, true);
+                }
+
+                const cursor = aiMessageDiv.querySelector('.typing-cursor');
+                if (cursor) {
+                    cursor.classList.add('popping');
+                    cursor.addEventListener('animationend', () => {
+                        aiMessageDiv.querySelector('.text').innerHTML = formatResponse(aiResponse);
+                        cursor.remove();
+                    }, { once: true });
+                }
+
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    console.log('Request cancelled by user');
+                    addMessage('Generation cancelled by user', false, true);
+                } else {
+                    console.error('Error fetching AI response:', error);
+                    addMessage('Error: Unable to get AI response. Please try again.', false, true);
+                }
+            } finally {
+                hideAIGeneratingStatus();
+                sendBtn.disabled = false;
+                userInput.disabled = false;
+                cancelBtn.style.display = 'none';
+                abortController = null;
+            }
+        }
+
+        let abortController = null;
+
+        const cancelBtn = document.getElementById('cancel-btn');
+
+        cancelBtn.addEventListener('click', () => {
+            if (abortController) {
+                abortController.abort();
+            }
+        });
+
+        function showAIGeneratingStatus() {
+            document.getElementById('ai-generating-status').style.display = 'block';
+        }
+
+
+        function hideAIGeneratingStatus() {
+            document.getElementById('ai-generating-status').style.display = 'none';
+        }
+
+        async function sendToAISearch(message) {
+            showAIGeneratingStatus();
+            startResponseTimer();
+            // Don't start disclaimer timer yet - we'll start it at the right phase
+
+            if (abortController) {
+                abortController.abort(); 
+            }
+            abortController = new AbortController();
+            const signal = abortController.signal;
+
+            sendBtn.disabled = true;
+            userInput.disabled = true;
+            cancelBtn.style.display = 'block';
+            let currentMessage = null;
+            
+            try {
+                signal.throwIfAborted();
+                
+                // First phase: Query analysis
+                currentMessage = addMessage('🔍 Analyzing your query to figure out what to search...', false, true);
+
+                if (signal.aborted) {
+                    throw new Error('AbortError');
+                }
+
+                let searchQueries;
+                try {
+                    searchQueries = await optimizeSearchQuery(message, signal);
+                } catch (error) {
+                    if (error.name === 'AbortError') {
+                        throw error;
+                    }
+                    searchQueries = [message];
+                }
+
+                signal.throwIfAborted();
+
+                // Second phase: Web search
+                if (currentMessage) {
+                    chatMessages.removeChild(currentMessage);
+                }
+                currentMessage = addMessage(`🌐 Searching the web using multiple queries:\n${searchQueries.map((q, i) => `${i + 1}. "${q}"`).join('\n')}`, false, true);
+
+                const searchPromises = searchQueries.map(query => searchDuckDuckGo(query, signal));
+                const allSearchResults = await Promise.all(searchPromises);
+                signal.throwIfAborted();
+
+                const uniqueResults = new Map();
+                allSearchResults.flat().forEach(result => {
+                    if (!uniqueResults.has(result.url)) {
+                        uniqueResults.set(result.url, result);
+                    }
+                });
+
+                const combinedResults = Array.from(uniqueResults.values());
+
+                if (combinedResults.length === 0) {
+                    if (currentMessage) {
+                        chatMessages.removeChild(currentMessage);
+                    }
+                    return fetchAIResponse(message);
+                }
+
+                // Third phase: Analysis of results
+                if (currentMessage) {
+                    chatMessages.removeChild(currentMessage);
+                }
+                currentMessage = addMessage(`📚 Found ${combinedResults.length} unique sources. Analyzing information...`, false, true);
+
+                const formattedResults = combinedResults
+                    .map((result, index) =>
+                        `[Result ${index + 1}]\nTitle: ${result.title}\nURL: ${result.url}\nSummary: ${result.snippet}`
+                    )
+                    .join('\n\n');
+
+                const searchContext = `
+                    Combined web search results from multiple queries related to: "${message}"
+                    
+                    Search queries used:
+                    ${searchQueries.map((q, i) => `${i + 1}. ${q}`).join('\n')}
+
+                    Search Results:
+                    ${formattedResults}
+                    
+                    Instructions:
+                    1. Use these comprehensive search results to inform your response
+                    2. Cite specific results when providing information
+                    3. Combine information from multiple sources when relevant
+                    4. Compare and contrast different sources if they provide varying information
+                    5. If search results aren't helpful, use your base knowledge
+                `.trim();
+
+                const enhancedSystemMessage = {
+                    role: "system",
+                    content: `${systemMessage.content}\n\n${searchContext}`
+                };
+
+                // Fourth phase: AI response - START DISCLAIMER TIMER HERE
+                if (currentMessage) {
+                    chatMessages.removeChild(currentMessage);
+                }
+                const aiMessage = addMessage('Processing search results and user prompt...', false);
+                currentMessage = aiMessage;
+                
+                // Start the disclaimer timer now during the final AI processing phase
+                startDisclaimerTimer();
+
+                const messages = [
+                    enhancedSystemMessage,
+                    ...messageHistory.filter(msg => msg.content.trim() !== ''),
+                    { role: "user", content: message }
+                ];
+
+                const response = await fetch('/ai-proxy/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: useReasoningModel ? "deepseek-r1-distill-qwen-32b" : "lmstudio-community/meta-llama-3.1-70b-instruct",
+                        messages: messages,
+                        stream: true
+                    }),
+                    signal
+                });
+
+                if (!response.ok) throw new Error('AI response error');
+
+                let aiResponse = '';
+                let buffer = '';
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) {
+                        updateResponseText(aiMessage, aiResponse, true);
+                        break;
+                    }
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const parts = buffer.split('\n');
+                    buffer = parts.pop();
+
+                    for (const part of parts) {
+                        if (!part.startsWith('data:')) continue;
+                        if (part.trim() === 'data: [DONE]') break;
+
+                        try {
+                            const jsonData = JSON.parse(part.slice(5));
+                            if (jsonData.choices?.[0]?.delta?.content) {
+                                aiResponse += jsonData.choices[0].delta.content;
+                                updateResponseText(aiMessage, aiResponse, false);
+                            }
+                        } catch (e) {
+                            console.error('Error parsing JSON:', e);
+                        }
+                    }
+                }
+
+                if (aiResponse.trim()) {
+                    aiMessage.className = 'message ai-response';
+                    messageHistory.push({ role: "assistant", content: aiResponse });
+                } else {
+                    chatMessages.removeChild(aiMessage);
+                    addMessage('Error: Received empty response from AI', false, true);
+                }
+
+            } catch (error) {
+                if (error.name === 'AbortError' || error.message === 'AbortError') {
+                    console.log('Search process cancelled by user');
+                    if (currentMessage) {
+                        chatMessages.removeChild(currentMessage);
+                    }
+                    addMessage('Generation cancelled by user', false, true);
+                    return; // Exit early on cancellation
+                } else {
+                    console.error('Error in web search process:', error);
+                    if (currentMessage) {
+                        chatMessages.removeChild(currentMessage);
+                    }
+                    return fetchAIResponse(message);
+                }
+            } finally {
+                stopResponseTimer();
+                hideDisclaimer(); // Hide the disclaimer
+                hideAIGeneratingStatus();
+                sendBtn.disabled = false;
+                userInput.disabled = false;
+                cancelBtn.style.display = 'none';
+                abortController = null;
+            }
+        }
+
+        async function fetchAIResponse(message) {
+            showAIGeneratingStatus();
+            startResponseTimer(); // Start the timer
+            startDisclaimerTimer(); // Start the disclaimer timer
+
+            if (abortController) {
+                abortController.abort();
+            }
+            abortController = new AbortController();
+            const signal = abortController.signal;
+
+            sendBtn.disabled = true;
+            userInput.disabled = true;
+            cancelBtn.style.display = 'block';
+            
+            // Remove the old AI response if it exists
+            if (originalAIMessageDiv) {
+                originalAIMessageDiv.remove();
+                originalAIMessageDiv = null;
+            }
+
+            const thinkingMessage = addMessage('Waiting...', false, true);
+
+            try {
+                // Fix message cleaning for history
+                const cleanHistory = messageHistory.filter(msg => msg.content.trim() !== '').map(msg => {
+                    let cleanContent;
+                    if (typeof msg.content === 'object') {
+                        // Handle message objects (attachments)
+                        cleanContent = msg.content.text || 'File analysis request';
+                    } else {
+                        // Handle regular string messages
+                        cleanContent = msg.content.replace(/<[^>]*>/g, '');
+                    }
+                    return {
+                        role: msg.role,
+                        content: cleanContent
+                    };
+                });
+
+                // Format message content based on type
+                let formattedMessage;
+                if (typeof message === 'object' && message.attachment) {
+                    // Format attachment message
+                    formattedMessage = {
+                        text: message.text || 'File analysis request',
+                        filename: message.attachment.name,
+                        filetype: message.attachment.type,
+                        content: message.attachment.content
+                    };
+                } else {
+                    // Handle regular text message
+                    formattedMessage = message;
+                }
+
+                // Clean and structure the final message
+                const userMessage = typeof formattedMessage === 'object' ? 
+                    `${formattedMessage.text}\n\nFile: ${formattedMessage.filename}\nType: ${formattedMessage.filetype}\n\nContent:\n${formattedMessage.content}` :
+                    formattedMessage;
+
+                const response = await fetch('/ai-proxy/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: useReasoningModel ? "deepseek-r1-distill-qwen-32b" : "lmstudio-community/meta-llama-3.1-70b-instruct",
+                        messages: [
+                            systemMessage,
+                            {
+                                role: "system",
+                                content: `Current memories: ${memories.join(" | ")}`
+                            },
+                            ...cleanHistory,
+                            { role: "user", content: userMessage }
+                        ],
+                        stream: true
+                    }),
+                    signal
+                });
+
+                if (!response.ok) throw new Error('AI response error');
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let aiResponse = '';
+                let buffer = '';
+
+                chatMessages.removeChild(thinkingMessage);
+                const responseMessage = addMessage('', false, true);
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) {
+                        updateResponseText(responseMessage, aiResponse, true);
+                        break;
+                    }
+                    buffer += decoder.decode(value, { stream: true });
+                    const parts = buffer.split('\n');
+                    buffer = parts.pop();
+                    for (const part of parts) {
+                        if (!part.startsWith('data:')) continue;
+                        if (part.trim() === 'data: [DONE]') {
+                            updateResponseText(responseMessage, aiResponse, true);
+                            break;
+                        }
+                        try {
+                            const jsonData = JSON.parse(part.slice(5));
+                            if (jsonData.choices && jsonData.choices[0].delta && jsonData.choices[0].delta.content) {
+                                aiResponse += jsonData.choices[0].delta.content;
+                                updateResponseText(responseMessage, aiResponse, false);
+                            }
+                        } catch (e) {
+                            console.error('Error parsing JSON:', e);
+                        }
+                    }
+                }
+
+                if (aiResponse.trim()) {
+                    responseMessage.className = 'message ai-response';
+                    messageHistory.push({ role: "assistant", content: aiResponse });
+                } else {
+                    chatMessages.removeChild(responseMessage);
+                    addMessage('Error: Received empty response from AI', false, true);
+                }
+
+                const cursor = responseMessage.querySelector('.typing-cursor');
+                if (cursor) {
+                    cursor.classList.add('popping');
+                    cursor.addEventListener('animationend', () => {
+                        const textDiv = responseMessage.querySelector('.text');
+                        textDiv.innerHTML = formatResponse(aiResponse);
+                        cursor.remove();
+                    }, { once: true });
+                }
+
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    console.log('Request cancelled by user');
+                    chatMessages.removeChild(thinkingMessage);
+                    addMessage('Generation cancelled by user', false, true);
+                } else {
+                    console.error('Error fetching AI response:', error);
+                    chatMessages.removeChild(thinkingMessage);
+                    addMessage('Error: Unable to get AI response. Please try again.', false, true);
+                }
+            } finally {
+                stopResponseTimer(); // Stop the timer
+                hideDisclaimer(); // Hide the disclaimer
+                hideAIGeneratingStatus();
+                sendBtn.disabled = false;
+                userInput.disabled = false;
+                cancelBtn.style.display = 'none';
+                abortController = null;
+            }
+        }
+
+        function updateResponseText(responseMessage, newText, isDone) {
+            // Hide the disclaimer when the first token appears
+            if (aiProcessingDisclaimer.classList.contains('visible')) {
+                hideDisclaimer();
+            }
+            
+            const textDiv = responseMessage.querySelector('.text');
+            
+            // Process memory commands - improved regex to handle multiline
+            const completeMemoryRegex = /@M\[(.*?)\]/gs;
+            const partialMemoryRegex = /@M\[([^\]]*)/g;
+            
+            // Check if there's an ongoing memory command
+            const ongoingMemory = newText.match(partialMemoryRegex);
+            const hasCompleteMemory = completeMemoryRegex.test(newText);
+            
+            // Process and store complete memories BEFORE cleaning the text
+            let match;
+            completeMemoryRegex.lastIndex = 0; // Reset regex state
+            while ((match = completeMemoryRegex.exec(newText)) !== null) {
+                const memoryContent = match[1].trim();
+                if (memoryContent && !memories.includes(memoryContent)) {
+                    memories.push(memoryContent);
+                    saveMemories(); // Save immediately after adding
+                    
+                    // Trigger memory panel update
+                    renderMemories();
+                }
+            }
+            
+            // Handle memory indicator
+            let memoryIndicator = responseMessage.querySelector('.memory-writing-indicator');
+            
+            if (ongoingMemory && !hasCompleteMemory) {
+                if (!memoryIndicator) {
+                    // Create new memory indicator if it doesn't exist
+                    memoryIndicator = document.createElement('div');
+                    memoryIndicator.className = 'memory-writing-indicator';
+                    memoryIndicator.innerHTML = `
+                        <i class="fas fa-brain"></i>
+                        <span>Writing memory</span>
+                        <div class="dots">
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                    `;
+                    // Insert after the text div instead of appending to responseMessage
+                    textDiv.insertAdjacentElement('afterend', memoryIndicator);
+                    
+                    // Force reflow and add visible class in next frame
+                    requestAnimationFrame(() => {
+                        memoryIndicator.classList.add('visible');
+                    });
+                }
+            } else if (hasCompleteMemory && memoryIndicator) {
+                // Show success state when memory is complete
+                memoryIndicator.innerHTML = `<i class="fas fa-check"></i> Memory stored`;
+                memoryIndicator.classList.add('success');
+                
+                // Remove after animation
+                setTimeout(() => {
+                    memoryIndicator.classList.remove('visible');
+                    setTimeout(() => {
+                        if (memoryIndicator && memoryIndicator.parentNode) {
+                            memoryIndicator.remove();
+                        }
+                    }, 300);
+                }, 1500);
+            } else if (!ongoingMemory && !hasCompleteMemory && memoryIndicator) {
+                // Clean up indicator if no memory operations are happening
+                memoryIndicator.remove();
+            }
+            
+            // Clean and format text
+            let processedText = newText
+                .replace(completeMemoryRegex, '')
+                .replace(partialMemoryRegex, '')
+                .trim();
+
+            // Store expansion states
+            const oldThinkBoxes = textDiv.querySelectorAll('.collapsible-think');
+            const expansionStates = Array.from(oldThinkBoxes).map(box => 
+                box.classList.contains('expanded')
+            );
+            
+            const formattedText = formatResponse(processedText);
+            textDiv.innerHTML = formattedText + (isDone ? '' : '<span class="typing-cursor"></span>');
+            
+            // Restore expansion states
+            const newThinkBoxes = textDiv.querySelectorAll('.collapsible-think');
+            newThinkBoxes.forEach((box, index) => {
+                if (expansionStates[index]) {
+                    box.classList.add('expanded');
+                }
+            });
+
+            // Handle completion
+            if (isDone && !hasCompleteMemory) {
+                if (memoryIndicator) {
+                    memoryIndicator.classList.remove('visible');
+                    setTimeout(() => memoryIndicator.remove(), 300);
+                }
+                const cursor = textDiv.querySelector('.typing-cursor');
+                if (cursor) {
+                    cursor.classList.add('popping');
+                    cursor.addEventListener('animationend', () => cursor.remove(), { once: true });
+                }
+            }
+        }
+
+        function addWaveEffect(text) {
+            let inTag = false;
+            let result = '';
+            const totalDuration = 0.3;
+            
+            let charCount = 0;
+            for (let i = 0; i < text.length; i++) {
+                if (text[i] === '<') inTag = true;
+                else if (text[i] === '>') inTag = false;
+                else if (!inTag && text[i] !== ' ') charCount++;
+            }
+            
+            inTag = false;
+            const maxDelay = totalDuration * 0.5;
+            const delayIncrement = maxDelay / charCount;
+            let currentDelay = 0;
+            
+            for (let i = 0; i < text.length; i++) {
+                if (text[i] === '<') {
+                    inTag = true;
+                    result += text[i];
+                } else if (text[i] === '>') {
+                    inTag = false;
+                    result += text[i];
+                } else if (!inTag && text[i] !== ' ') {
+                    result += `<span class="wave-letter" style="animation-delay: ${currentDelay}s">${text[i]}</span>`;
+                    currentDelay += delayIncrement;
+                } else {
+                    result += text[i];
+                }
+            }
+            return result;
+        }
+
+        sendBtn.addEventListener('click', handleUserInput);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleUserInput();
+        });
+
+        addMessage('Welcome to the AI chatbot. How can I assist you today?', false, true);
+
+        async function checkAIStatus() {
+            const aiStatusElement = document.getElementById('ai-status');
+            try {
+                const response = await fetch('/ai-proxy/v1/models', {
+                    method: 'HEAD'
+                });
+                if (response.ok) {
+                    aiStatusElement.classList.remove('visible');
+                } else {
+                    aiStatusElement.classList.add('visible');
+                }
+            } catch (error) {
+                aiStatusElement.classList.add('visible');
+            }
+        }
+
+        checkAIStatus();
+
+        setInterval(checkAIStatus, 2000);
+
+
+        window.addEventListener('beforeunload', () => {
+            if (abortController) {
+                abortController.abort();
+            }
+        });
+
+        // NEW FEATURE: Export Chat Transcript
+        const exportChatBtn = document.getElementById('export-chat-btn');
+        exportChatBtn.addEventListener('click', () => {
+            const transcript = messageHistory.map(msg => `${msg.role.toUpperCase()}: ${msg.content}`).join('\n\n');
+            const blob = new Blob([transcript], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'chat_transcript.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+        
+        // NEW FEATURE: Clear Chat
+        const clearChatBtn = document.getElementById('clear-chat-btn');
+        clearChatBtn.addEventListener('click', () => {
+            if (confirm("Are you sure you want to clear the chat history?")) {
+                chatMessages.innerHTML = "";
+                messageHistory = [];
+                addMessage('Chat cleared. How can I assist you today?', false, true);
+            }
+        });
+
+        // Add this after existing script content
+        // Character counter
+        const charCounter = document.querySelector('.char-counter');
+        userInput.addEventListener('input', () => {
+            const length = userInput.value.length;
+            charCounter.textContent = `${length}/500`;
+            
+            if (length >= 450) {
+                charCounter.classList.add('near-limit');
+                charCounter.classList.remove('at-limit');
+            } else if (length >= 500) {
+                charCounter.classList.remove('near-limit');
+                charCounter.classList.add('at-limit');
+            } else {
+                charCounter.classList.remove('near-limit', 'at-limit');
+            }
+        });
+
+        // Improved copy button animation
+        function copyCodeBlock(button) {
+            const codeBlock = button.closest('.ai-code-block');
+            const code = codeBlock.querySelector('code').textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                button.classList.add('copied', 'success');
+                
+                setTimeout(() => {
+                    button.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                    button.classList.remove('copied', 'success');
+                }, 2000);
+            });
+        }
+
+        // Add timestamps to messages
+        const originalAddMessage = addMessage;
+        addMessage = function(content, isUser, isSystemMessage = false) {
+            const messageDiv = originalAddMessage(content, isUser, isSystemMessage);
+            
+            if (!isSystemMessage) {
+                const timestamp = document.createElement('div');
+                timestamp.className = 'timestamp';
+                timestamp.textContent = new Date().toLocaleTimeString();
+                messageDiv.appendChild(timestamp);
+            }
+            
+            return messageDiv;
+        };
+
+        // Improved textarea auto-resize
+        function autoResizeTextarea() {
+            userInput.style.height = 'auto';
+            const newHeight = Math.min(Math.max(userInput.scrollHeight, 56), 200);
+            userInput.style.height = newHeight + 'px';
+        }
+
+        userInput.addEventListener('input', autoResizeTextarea);
+        userInput.addEventListener('keydown', autoResizeTextarea);
+
+        // Add this after existing script content
+        const cancelEditBtn = document.getElementById('cancel-edit-btn');
+
+        // Enhanced show/hide functions for cancel edit button
+        function showCancelEditBtn() {
+            cancelEditBtn.style.display = 'inline-flex';
+            cancelEditBtn.classList.add('visible');
+        }
+
+        function hideCancelEditBtn() {
+            cancelEditBtn.classList.remove('visible');
+            setTimeout(() => {
+                cancelEditBtn.style.display = 'none';
+            }, 300);
+        }
+
+        // Add ripple effect
+        cancelEditBtn.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple');
+            this.appendChild(ripple);
+            
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            ripple.style.left = `${x}px`;
+            ripple.style.top = `${y}px`;
+            
+            ripple.addEventListener('animationend', () => {
+                ripple.remove();
+            });
+            
+            cancelEdit();
+        });
+
+        // NEW: Handler for quoting a message
+        function quoteMessage(icon) {
+            // Traverse up to the message container
+            const messageDiv = icon.closest('.message');
+            if (!messageDiv) return;
+            // Extract the text from the message (strip HTML if needed)
+            let text = messageDiv.querySelector('.text')?.innerText || '';
+            if (!text) return;
+            // Pre-fill user input with quoted text using "> " prefix
+            const userInput = document.getElementById('user-input');
+            userInput.value = `> ${text.replace(/\n/g, '\n> ')}\n\n`;
+            userInput.focus();
+        }
+
+        // Add new functions for code block controls
+        function copyCodeBlock(button) {
+            const codeBlock = button.closest('.ai-code-block');
+            // Get all lines of code without the line numbers
+            const codeLines = Array.from(codeBlock.querySelectorAll('code > span'))
+                .map(span => span.textContent)
+                .join('\n');
+            
+            navigator.clipboard.writeText(codeLines).then(() => {
+                button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                button.classList.add('success');
+                setTimeout(() => {
+                    button.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                    button.classList.remove('success');
+                }, 2000);
+            });
+        }
+
+        function previewCode(button) {
+            const codeBlock = button.closest('.ai-code-block');
+            const code = codeBlock.querySelector('code').textContent;
+            const language = codeBlock.dataset.language;
+            const originalContent = codeBlock.outerHTML;
+            
+            let previewContent = '';
+            if (language === 'html') {
+                previewContent = code;
+            } else if (language === 'css') {
+                previewContent = `<style>${code}</style><div class="css-preview">Preview Area</div>`;
+            }
+
+            const previewContainer = document.createElement('div');
+            previewContainer.className = 'preview-container';
+            previewContainer.innerHTML = `
+                ${previewContent}
+                <button class="return-to-code" onclick="returnToCode(this, '${encodeURIComponent(originalContent)}')">
+                    View Code
+                </button>
+            `;
+            
+            codeBlock.replaceWith(previewContainer);
+        }
+
+        function returnToCode(button, originalContent) {
+            const previewContainer = button.closest('.preview-container');
+            const codeBlockHTML = decodeURIComponent(originalContent);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = codeBlockHTML;
+            previewContainer.replaceWith(tempDiv.firstChild);
+        }
+
+        // Enhanced code block functions
+        function copyCodeBlock(button) {
+            const codeBlock = button.closest('.ai-code-block');
+            const code = codeBlock.querySelector('code').textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                button.classList.add('copied', 'success');
+                
+                // Create and animate notification
+                const notification = document.createElement('div');
+                notification.className = 'copy-notification';
+                notification.textContent = 'Code copied to clipboard!';
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    button.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                    button.classList.remove('copied', 'success');
+                    notification.remove();
+                }, 2000);
+            });
+        }
+
+        function previewCode(button) {
+            const codeBlock = button.closest('.ai-code-block');
+            const code = codeBlock.querySelector('code').textContent;
+            const language = codeBlock.dataset.language;
+            const originalContent = codeBlock.outerHTML;
+            
+            let previewContent = '';
+            if (language === 'html') {
+                // Create sandbox iframe for HTML preview
+                previewContent = `
+                    <iframe id="preview-frame" 
+                            sandbox="allow-same-origin allow-scripts"
+                            style="width: 100%; min-height: 200px; border: none; background: white;">
+                    </iframe>`;
+            } else if (language === 'css') {
+                previewContent = `
+                    <div class="css-preview-container">
+                        <style>${code}</style>
+                        <div class="css-preview">Preview Area</div>
+                    </div>`;
+            }
+
+            const previewContainer = document.createElement('div');
+            previewContainer.className = 'preview-container';
+            previewContainer.innerHTML = `
+                ${previewContent}
+                <button class="return-to-code" onclick="returnToCode(this, '${encodeURIComponent(originalContent)}')">
+                    <i class="fas fa-code"></i> View Code
+                </button>
+            `;
+            
+            codeBlock.replaceWith(previewContainer);
+
+            // Initialize HTML preview if applicable
+            if (language === 'html') {
+                const frame = document.getElementById('preview-frame');
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                frameDoc.open();
+                frameDoc.write(code);
+                frameDoc.close();
+            }
+        }
+
+        function returnToCode(button, originalContent) {
+            const previewContainer = button.closest('.preview-container');
+            const codeBlockHTML = decodeURIComponent(originalContent);
+            
+            // Animate transition
+            previewContainer.style.opacity = '0';
+            previewContainer.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = codeBlockHTML;
+                const newCodeBlock = tempDiv.firstChild;
+                
+                // Initialize with invisible state
+                newCodeBlock.style.opacity = '0';
+                newCodeBlock.style.transform = 'translateY(10px)';
+                
+                previewContainer.replaceWith(newCodeBlock);
+                
+                // Trigger animation
+                requestAnimationFrame(() => {
+                    newCodeBlock.style.opacity = '1';
+                    newCodeBlock.style.transform = 'translateY(0)';
+                });
+            }, 300);
+        }
+
+        // Remove the old event listener setup since we're now adding them directly
+        // when creating the buttons
+        document.removeEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.return-to-code').forEach(btn => {
+                btn.addEventListener('click', event => {
+                    event.preventDefault();
+                    returnToCode(btn);
+                });
+            });
+        });
+
+        function escapeHtml(html) {
+            return html
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function previewCode(button) {
+            const codeBlock = button.closest('.ai-code-block');
+            const code = codeBlock.querySelector('code').textContent;
+            const language = codeBlock.dataset.language;
+            
+            // Safely store the original content
+            const originalContent = codeBlock.outerHTML;
+            const encodedContent = btoa(encodeURIComponent(originalContent));
+            
+            let previewContent = '';
+            if (language === 'html') {
+                previewContent = `
+                    <iframe id="preview-frame" 
+                            sandbox="allow-same-origin allow-scripts"
+                            style="width: 100%; min-height: 200px; border: none; background: white;">
+                    </iframe>`;
+            } else if (language === 'css') {
+                previewContent = `
+                    <div class="css-preview-container">
+                        <style>${code}</style>
+                        <div class="css-preview">Preview Area</div>
+                    </div>`;
+            }
+
+            const previewContainer = document.createElement('div');
+            previewContainer.className = 'preview-container';
+            previewContainer.innerHTML = `
+                ${previewContent}
+                <button class="return-to-code" data-original="${encodedContent}">
+                    <i class="fas fa-code"></i> View Code
+                </button>
+            `;
+            
+            // Add event listener directly to the new button
+            const returnButton = previewContainer.querySelector('.return-to-code');
+            returnButton.addEventListener('click', function() {
+                returnToCode(this);
+            });
+            
+            codeBlock.replaceWith(previewContainer);
+
+            // Initialize HTML preview if applicable
+            if (language === 'html') {
+                const frame = document.getElementById('preview-frame');
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                frameDoc.open();
+                frameDoc.write(code);
+                frameDoc.close();
+            }
+        }
+
+        function returnToCode(button) {
+            const previewContainer = button.closest('.preview-container');
+            const encodedContent = button.getAttribute('data-original');
+            const originalContent = decodeURIComponent(atob(encodedContent));
+            
+            // Animate transition
+            previewContainer.style.opacity = '0';
+            previewContainer.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = originalContent;
+                const newCodeBlock = tempDiv.firstChild;
+                
+                // Initialize with invisible state
+                newCodeBlock.style.opacity = '0';
+                newCodeBlock.style.transform = 'translateY(10px)';
+                newCodeBlock.style.transition = 'opacity 0.3s, transform 0.3s';
+                
+                previewContainer.replaceWith(newCodeBlock);
+                
+                // Trigger animation
+                requestAnimationFrame(() => {
+                    newCodeBlock.style.opacity = '1';
+                    newCodeBlock.style.transform = 'translateY(0)';
+                });
+                
+                // Reattach event listeners to code control buttons
+                newCodeBlock.querySelectorAll('.code-control-btn').forEach(btn => {
+                    if (btn.innerHTML.includes('Copy')) {
+                        btn.onclick = () => copyCodeBlock(btn);
+                    } else if (btn.innerHTML.includes('Preview')) {
+                        btn.onclick = () => previewCode(btn);
+                    }
+                });
+            }, 300);
+        }
+
+        // Remove the old event listener setup since we're now adding them directly
+        // when creating the buttons
+        document.removeEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.return-to-code').forEach(btn => {
+                btn.addEventListener('click', event => {
+                    event.preventDefault();
+                    returnToCode(btn);
+                });
+            });
+        });
+
+        let responseTimeout;
+        let timerInterval;
+        const RESPONSE_TIMEOUT = 12 * 60 * 1000; // Max time for AI response in milliseconds (first number of the 3 being minutes)
+
+        function startResponseTimer() {
+            const timerContainer = document.querySelector('.timer-container');
+            const timerDisplay = document.getElementById('response-timer');
+            timerContainer.classList.add('visible');
+            clearInterval(timerInterval);
+            clearTimeout(responseTimeout);
+            timerDisplay.textContent = "12:00"; // Initial AI max time displayed text
+            const startTime = Date.now();
+            
+            timerContainer.classList.add('visible');
+            
+            clearInterval(timerInterval);
+            clearTimeout(responseTimeout);
+            
+            responseTimeout = setTimeout(() => {
+                if (abortController) {
+                    abortController.abort();
+                }
+            }, RESPONSE_TIMEOUT);
+
+            timerInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const remaining = RESPONSE_TIMEOUT - elapsed;
+                
+                if (remaining <= 0) {
+                    clearInterval(timerInterval);
+                    timerContainer.classList.remove('visible');
+                    return;
+                }
+
+                const minutes = Math.floor(remaining / 60000);
+                const seconds = Math.floor((remaining % 60000) / 1000);
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+                // Add warning class when less than 30 seconds remain
+                if (remaining < 30000) {
+                    timerContainer.classList.add('warning');
+                }
+            }, 1000);
+        }
+
+        function stopResponseTimer() {
+            clearInterval(timerInterval);
+            clearTimeout(responseTimeout);
+            const timerContainer = document.querySelector('.timer-container');
+            timerContainer.classList.remove('visible', 'warning');
+        }
+
+        async function optimizeSearchQuery(userQuery, signal) {
+    try {
+        const recentHistory = messageHistory.slice(-5).map(msg => ({
+            role: msg.role,
+            content: msg.content.replace(/<[^>]*>/g, '')
+        }));
+
+        const localAbortController = new AbortController();
+        if (signal) {
+            signal.addEventListener('abort', () => localAbortController.abort());
+        }
+
+        const response = await fetch('/ai-proxy/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: "lmstudio-community/meta-llama-3.1-70b-instruct",
+                messages: [
+                    {
+                        role: "system",
+                        content: `You are an AI tasked with generating search queries. Generate 3-4 search queries based on the user's question and conversation context. Format your response as a JSON array of strings ONLY, like this: ["query1", "query2", "query3"]. Do not include any other text in your response.`
+                    },
+                    ...recentHistory,
+                    {
+                        role: "user",
+                        content: `Based on this conversation context, generate search queries for: ${userQuery}`
+                    }
+                ],
+                stream: true
+            }),
+            signal: localAbortController.signal
+        });
+
+        if (!response.ok) throw new Error('Failed to optimize query');
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let fullResponse = '';
+        let buffer = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const parts = buffer.split('\n');
+            buffer = parts.pop();
+
+            for (const part of parts) {
+                if (!part.startsWith('data:')) continue;
+                if (part.trim() === 'data: [DONE]') break;
+
+                try {
+                    const jsonData = JSON.parse(part.slice(5));
+                    if (jsonData.choices?.[0]?.delta?.content) {
+                        fullResponse += jsonData.choices[0].delta.content;
+                    }
+                } catch (error) {
+                    console.error('Error parsing JSON in stream:', error);
+                }
+            }
+        }
+
+        try {
+            // Extract JSON array from the response using a more robust regex
+            const jsonMatch = fullResponse.match(/\[[\s\S]*\]/);
+            if (jsonMatch) {
+                const jsonStr = jsonMatch[0].replace(/\n/g, ' ').replace(/,\s*\]/g, ']');
+                const queries = JSON.parse(jsonStr);
+                if (Array.isArray(queries) && queries.length > 0) {
+                    return queries;
+                }
+            }
+            // Fallback to original query if parsing fails
+            console.log('Parsing failed, using original query');
+            return [userQuery];
+        } catch (error) {
+            console.error('Error parsing final JSON:', error);
+            return [userQuery];
+        }
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            throw error;
+        }
+        console.error('Error optimizing search queries:', error);
+        return [userQuery];
+    }
+}
+        async function searchDuckDuckGo(query, signal) {
+            try {
+                const proxyUrl = 'https://api.allorigins.win/get?url=';
+                const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+                const response = await fetch(proxyUrl + encodeURIComponent(searchUrl), { signal });
+
+                if (!response.ok) throw new Error('Search failed');
+                const data = await response.json();
+                
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data.contents, 'text/html');
+                
+                const results = [];
+                const searchResults = doc.querySelectorAll('.result');
+                
+                for (let i = 0; i < Math.min(6, searchResults.length); i++) {
+                    const result = searchResults[i];
+                    const title = result.querySelector('.result__title')?.textContent.trim() || '';
+                    const snippet = result.querySelector('.result__snippet')?.textContent.trim() || '';
+                    const url = result.querySelector('.result__url')?.textContent.trim() || '';
+                    
+                    if (title || snippet) {
+                        results.push({ title, snippet, url });
+                    }
+                }
+                
+                return results;
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw error; // Re-throw abort errors
+                }
+                console.error('Error searching DuckDuckGo:', error);
+                return [];
+            }
+        }
+
+        async function sendToAISearch(message) {
+            showAIGeneratingStatus();
+            startResponseTimer();
+            // Don't start disclaimer timer yet - we'll start it at the right phase
+
+            if (abortController) {
+                abortController.abort(); 
+            }
+            abortController = new AbortController();
+            const signal = abortController.signal;
+
+            sendBtn.disabled = true;
+            userInput.disabled = true;
+            cancelBtn.style.display = 'block';
+            let currentMessage = null;
+            
+            try {
+                signal.throwIfAborted();
+                
+                // First phase: Query analysis
+                currentMessage = addMessage('🔍 Analyzing your query to figure out what to search...', false, true);
+
+                if (signal.aborted) {
+                    throw new Error('AbortError');
+                }
+
+                let searchQueries;
+                try {
+                    searchQueries = await optimizeSearchQuery(message, signal);
+                } catch (error) {
+                    if (error.name === 'AbortError') {
+                        throw error;
+                    }
+                    searchQueries = [message];
+                }
+
+                signal.throwIfAborted();
+
+                // Second phase: Web search
+                if (currentMessage) {
+                    chatMessages.removeChild(currentMessage);
+                }
+                currentMessage = addMessage(`🌐 Searching the web using multiple queries:\n${searchQueries.map((q, i) => `${i + 1}. "${q}"`).join('\n')}`, false, true);
+
+                const searchPromises = searchQueries.map(query => searchDuckDuckGo(query, signal));
+                const allSearchResults = await Promise.all(searchPromises);
+                signal.throwIfAborted();
+
+                const uniqueResults = new Map();
+                allSearchResults.flat().forEach(result => {
+                    if (!uniqueResults.has(result.url)) {
+                        uniqueResults.set(result.url, result);
+                    }
+                });
+
+                const combinedResults = Array.from(uniqueResults.values());
+
+                if (combinedResults.length === 0) {
+                    if (currentMessage) {
+                        chatMessages.removeChild(currentMessage);
+                    }
+                    return fetchAIResponse(message);
+                }
+
+                // Third phase: Analysis of results
+                if (currentMessage) {
+                    chatMessages.removeChild(currentMessage);
+                }
+                currentMessage = addMessage(`📚 Found ${combinedResults.length} unique sources. Analyzing information...`, false, true);
+
+                const formattedResults = combinedResults
+                    .map((result, index) =>
+                        `[Result ${index + 1}]\nTitle: ${result.title}\nURL: ${result.url}\nSummary: ${result.snippet}`
+                    )
+                    .join('\n\n');
+
+                const searchContext = `
+                    Combined web search results from multiple queries related to: "${message}"
+                    
+                    Search queries used:
+                    ${searchQueries.map((q, i) => `${i + 1}. ${q}`).join('\n')}
+
+                    Search Results:
+                    ${formattedResults}
+                    
+                    Instructions:
+                    1. Use these comprehensive search results to inform your response
+                    2. Cite specific results when providing information
+                    3. Combine information from multiple sources when relevant
+                    4. Compare and contrast different sources if they provide varying information
+                    5. If search results aren't helpful, use your base knowledge
+                `.trim();
+
+                const enhancedSystemMessage = {
+                    role: "system",
+                    content: `${systemMessage.content}\n\n${searchContext}`
+                };
+
+                // Fourth phase: AI response - START DISCLAIMER TIMER HERE
+                if (currentMessage) {
+                    chatMessages.removeChild(currentMessage);
+                }
+                const aiMessage = addMessage('Processing search results and user prompt...', false);
+                currentMessage = aiMessage;
+                
+                // Start the disclaimer timer now during the final AI processing phase
+                startDisclaimerTimer();
+
+                const messages = [
+                    enhancedSystemMessage,
+                    ...messageHistory.filter(msg => msg.content.trim() !== ''),
+                    { role: "user", content: message }
+                ];
+
+                const response = await fetch('/ai-proxy/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: useReasoningModel ? "deepseek-r1-distill-qwen-32b" : "lmstudio-community/meta-llama-3.1-70b-instruct",
+                        messages: messages,
+                        stream: true
+                    }),
+                    signal
+                });
+
+                if (!response.ok) throw new Error('AI response error');
+
+                let aiResponse = '';
+                let buffer = '';
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) {
+                        updateResponseText(aiMessage, aiResponse, true);
+                        break;
+                    }
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const parts = buffer.split('\n');
+                    buffer = parts.pop();
+
+                    for (const part of parts) {
+                        if (!part.startsWith('data:')) continue;
+                        if (part.trim() === 'data: [DONE]') break;
+
+                        try {
+                            const jsonData = JSON.parse(part.slice(5));
+                            if (jsonData.choices?.[0]?.delta?.content) {
+                                aiResponse += jsonData.choices[0].delta.content;
+                                updateResponseText(aiMessage, aiResponse, false);
+                            }
+                        } catch (e) {
+                            console.error('Error parsing JSON:', e);
+                        }
+                    }
+                }
+
+                if (aiResponse.trim()) {
+                    aiMessage.className = 'message ai-response';
+                    messageHistory.push({ role: "assistant", content: aiResponse });
+                } else {
+                    chatMessages.removeChild(aiMessage);
+                    addMessage('Error: Received empty response from AI', false, true);
+                }
+
+            } catch (error) {
+                if (error.name === 'AbortError' || error.message === 'AbortError') {
+                    console.log('Search process cancelled by user');
+                    if (currentMessage) {
+                        chatMessages.removeChild(currentMessage);
+                    }
+                    addMessage('Generation cancelled by user', false, true);
+                    return; // Exit early on cancellation
+                } else {
+                    console.error('Error in web search process:', error);
+                    if (currentMessage) {
+                        chatMessages.removeChild(currentMessage);
+                    }
+                    return fetchAIResponse(message);
+                }
+            } finally {
+                stopResponseTimer();
+                hideDisclaimer(); // Hide the disclaimer
+                hideAIGeneratingStatus();
+                sendBtn.disabled = false;
+                userInput.disabled = false;
+                cancelBtn.style.display = 'none';
+                abortController = null;
+            }
+        }
+
+        // Add new file handling code
+        let currentAttachment = null;
+        
+        const fileInput = document.querySelector('.file-input');
+        const fileButton = document.querySelector('.file-input-button');
+        const attachmentPreview = document.getElementById('attachment-preview');
+
+        fileButton.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Quick file size check
+            if (file.size > 100000) { // 100KB limit
+                alert('File too large. Please use files under 100KB for better performance.');
+                fileInput.value = '';
+                return;
+            }
+
+            try {
+                const content = await readFileContent(file);
+                currentAttachment = {
+                    name: file.name,
+                    type: file.type || 'text/plain',
+                    content: content
+                };
+
+                // Show preview
+                attachmentPreview.innerHTML = `
+                    <div class="attachment-preview">
+                        <i class="fas fa-file"></i>
+                        <span class="file-name">${file.name}</span>
+                        <i class="fas fa-times remove-file"></i>
+                    </div>
+                `;
+
+                // Add remove handler
+                attachmentPreview.querySelector('.remove-file').addEventListener('click', removeAttachment);
+            } catch (error) {
+                console.error('Error reading file:', error);
+                alert('Error reading file. Please try again.');
+            }
+        });
+
+        function removeAttachment() {
+            currentAttachment = null;
+            attachmentPreview.innerHTML = '';
+            fileInput.value = '';
+        }
+
+        // Update the readFileContent function with better optimization
+        function readFileContent(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = (event) => {
+                    try {
+                        let content = event.target.result;
+                        
+                        // Optimize content length - reduce to 20KB for faster processing
+                        const maxLength = 20000;
+                        if (content.length > maxLength) {
+                            // Smart truncation: Try to break at a natural point
+                            let truncatePoint = content.lastIndexOf('\n', maxLength);
+                            if (truncatePoint === -1) truncatePoint = maxLength;
+                            content = content.substring(0, truncatePoint) + "\n\n[Content truncated for performance...]";
+                        }
+                        
+                        // More efficient sanitization
+                        content = content
+                            .replace(/[\x00-\x1F\x7F-\xFF]+/g, '') // Remove control chars and non-ASCII
+                            .replace(/^\uFEFF/, '') // Remove BOM
+                            .trim();
+                        
+                        resolve(content);
+                    } catch (error) {
+                        reject(new Error('Failed to process file content'));
+                    }
+                };
+                
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.readAsText(file);
+            });
+        }
+
+        // Add new memory management code after existing variables
+        let memories = [];
+        const memoriesPanel = document.querySelector('.memories-panel');
+        const memoriesToggle = document.querySelector('.memories-toggle');
+        const memoriesList = document.getElementById('memories-list');
+
+        // Load memories from cookies on startup
+        function loadMemories() {
+            try {
+                const savedMemories = Cookies.get('ai_memories');
+                if (savedMemories) {
+                    memories = JSON.parse(savedMemories);
+                    console.log('Loaded memories:', memories); // Debug log
+                    renderMemories();
+                }
+            } catch (error) {
+                console.error('Error loading memories:', error);
+                memories = [];
+            }
+        }
+
+        // Save memories to cookies
+        function saveMemories() {
+            console.log('Saving memories:', memories); // Debug log
+            try {
+                Cookies.set('ai_memories', JSON.stringify(memories), { 
+                    expires: 365,
+                    path: '/',
+                    secure: true,
+                    sameSite: 'Lax'
+                });
+                renderMemories();
+            } catch (error) {
+                console.error('Error saving memories:', error);
+            }
+        }
+
+        // Render memories in the panel
+        function renderMemories() {
+            memoriesList.innerHTML = memories.map((memory, index) => `
+                <div class="memory-item" data-index="${index}">
+                    <div class="memory-controls">
+                        <button class="memory-control-btn edit-memory" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="memory-control-btn delete-memory" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="memory-content">${memory}</div>
+                </div>
+            `).join('');
+
+            // Add event listeners to memory controls
+            memoriesList.querySelectorAll('.edit-memory').forEach(btn => {
+                btn.onclick = (e) => {
+                    const memoryItem = e.target.closest('.memory-item');
+                    const index = memoryItem.dataset.index;
+                    const content = memories[index];
+                    const newContent = prompt('Edit memory:', content);
+                    if (newContent && newContent !== content) {
+                        memories[index] = newContent;
+                        saveMemories();
+                    }
+                };
+            });
+
+            memoriesList.querySelectorAll('.delete-memory').forEach(btn => {
+                btn.onclick = (e) => {
+                    const memoryItem = e.target.closest('.memory-item');
+                    const index = memoryItem.dataset.index;
+                    if (confirm('Delete this memory?')) {
+                        memories.splice(index, 1);
+                        saveMemories();
+                    }
+                };
+            });
+        }
+
+        // Toggle memories panel
+        memoriesToggle.onclick = () => {
+            memoriesPanel.classList.toggle('open');
+        };
+
+        // Clear all memories
+        document.querySelector('.clear-memories-btn').onclick = () => {
+            if (confirm('Clear all memories? This cannot be undone.')) {
+                memories = [];
+                saveMemories();
+            }
+        };
+
+        // Modified fetchAIResponse to include memories
+        async function fetchAIResponse(message) {
+            showAIGeneratingStatus();
+            startResponseTimer(); // Start the timer
+            startDisclaimerTimer(); // Start the disclaimer timer
+
+            if (abortController) {
+                abortController.abort();
+            }
+            abortController = new AbortController();
+            const signal = abortController.signal;
+
+            sendBtn.disabled = true;
+            userInput.disabled = true;
+            cancelBtn.style.display = 'block';
+            
+            // Remove the old AI response if it exists
+            if (originalAIMessageDiv) {
+                originalAIMessageDiv.remove();
+                originalAIMessageDiv = null;
+            }
+
+            const thinkingMessage = addMessage('Waiting...', false, true);
+
+            try {
+                // Fix message cleaning for history
+                const cleanHistory = messageHistory.filter(msg => msg.content.trim() !== '').map(msg => {
+                    let cleanContent;
+                    if (typeof msg.content === 'object') {
+                        // Handle message objects (attachments)
+                        cleanContent = msg.content.text || 'File analysis request';
+                    } else {
+                        // Handle regular string messages
+                        cleanContent = msg.content.replace(/<[^>]*>/g, '');
+                    }
+                    return {
+                        role: msg.role,
+                        content: cleanContent
+                    };
+                });
+
+                // Format message content based on type
+                let formattedMessage;
+                if (typeof message === 'object' && message.attachment) {
+                    // Format attachment message
+                    formattedMessage = {
+                        text: message.text || 'File analysis request',
+                        filename: message.attachment.name,
+                        filetype: message.attachment.type,
+                        content: message.attachment.content
+                    };
+                } else {
+                    // Handle regular text message
+                    formattedMessage = message;
+                }
+
+                // Clean and structure the final message
+                const userMessage = typeof formattedMessage === 'object' ? 
+                    `${formattedMessage.text}\n\nFile: ${formattedMessage.filename}\nType: ${formattedMessage.filetype}\n\nContent:\n${formattedMessage.content}` :
+                    formattedMessage;
+
+                const response = await fetch('/ai-proxy/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: useReasoningModel ? "deepseek-r1-distill-qwen-32b" : "lmstudio-community/meta-llama-3.1-70b-instruct",
+                        messages: [
+                            systemMessage,
+                            {
+                                role: "system",
+                                content: `Current memories: ${memories.join(" | ")}`
+                            },
+                            ...cleanHistory,
+                            { role: "user", content: userMessage }
+                        ],
+                        stream: true
+                    }),
+                    signal
+                });
+
+                if (!response.ok) throw new Error('AI response error');
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let aiResponse = '';
+                let buffer = '';
+
+                chatMessages.removeChild(thinkingMessage);
+                const responseMessage = addMessage('', false, true);
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) {
+                        updateResponseText(responseMessage, aiResponse, true);
+                        break;
+                    }
+                    buffer += decoder.decode(value, { stream: true });
+                    const parts = buffer.split('\n');
+                    buffer = parts.pop();
+                    for (const part of parts) {
+                        if (!part.startsWith('data:')) continue;
+                        if (part.trim() === 'data: [DONE]') {
+                            updateResponseText(responseMessage, aiResponse, true);
+                            break;
+                        }
+                        try {
+                            const jsonData = JSON.parse(part.slice(5));
+                            if (jsonData.choices && jsonData.choices[0].delta && jsonData.choices[0].delta.content) {
+                                aiResponse += jsonData.choices[0].delta.content;
+                                updateResponseText(responseMessage, aiResponse, false);
+                            }
+                        } catch (e) {
+                            console.error('Error parsing JSON:', e);
+                        }
+                    }
+                }
+
+                if (aiResponse.trim()) {
+                    responseMessage.className = 'message ai-response';
+                    messageHistory.push({ role: "assistant", content: aiResponse });
+                } else {
+                    chatMessages.removeChild(responseMessage);
+                    addMessage('Error: Received empty response from AI', false, true);
+                }
+
+                const cursor = responseMessage.querySelector('.typing-cursor');
+                if (cursor) {
+                    cursor.classList.add('popping');
+                    cursor.addEventListener('animationend', () => {
+                        const textDiv = responseMessage.querySelector('.text');
+                        textDiv.innerHTML = formatResponse(aiResponse);
+                        cursor.remove();
+                    }, { once: true });
+                }
+
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    console.log('Request cancelled by user');
+                    chatMessages.removeChild(thinkingMessage);
+                    addMessage('Generation cancelled by user', false, true);
+                } else {
+                    console.error('Error fetching AI response:', error);
+                    chatMessages.removeChild(thinkingMessage);
+                    addMessage('Error: Unable to get AI response. Please try again.', false, true);
+                }
+            } finally {
+                stopResponseTimer(); // Stop the timer
+                hideDisclaimer(); // Hide the disclaimer
+                hideAIGeneratingStatus();
+                sendBtn.disabled = false;
+                userInput.disabled = false;
+                cancelBtn.style.display = 'none';
+                abortController = null;
+            }
+        }
+
+        // Initialize memories on page load
+        loadMemories();
+
+        // Modify the existing system message to include memory handling
+        systemMessage.content += `
+            You also have access to stored memories about our interactions.
+            When you receive memories, use them to personalize responses and recall previous interactions.
+            If you learn something important about the user, suggest storing it as a memory by saying
+            "Would you like me to remember that?" or similar contextual phrases.
+        `;
+
+        // Add variables for the new disclaimer
+        const aiProcessingDisclaimer = document.getElementById('ai-processing-disclaimer');
+        let disclaimerTimer = null;
+
+        // Add function to show disclaimer after delay
+        function startDisclaimerTimer() {
+            // Clear any existing timer
+            clearTimeout(disclaimerTimer);
+            // Set new timer to show disclaimer after 15 seconds
+            disclaimerTimer = setTimeout(() => {
+                aiProcessingDisclaimer.classList.add('visible');
+            }, 15000); // 15 seconds
+        }
+
+        // Add function to hide disclaimer
+        function hideDisclaimer() {
+            clearTimeout(disclaimerTimer);
+            aiProcessingDisclaimer.classList.remove('visible');
+        }
+    </script>
+    <script>
+    // Add this after existing variable declarations
+    let activeMemoryIndicator = null;
+
+    function updateResponseText(responseMessage, newText, isDone) {
+        // Hide the disclaimer when the first token appears
+        if (aiProcessingDisclaimer.classList.contains('visible')) {
+            hideDisclaimer();
+        }
+        
+        const textDiv = responseMessage.querySelector('.text');
+        
+        // Process memory commands - improved regex to handle multiline
+        const completeMemoryRegex = /@M\[(.*?)\]/gs;
+        const partialMemoryRegex = /@M\[([^\]]*)/g;
+        
+        // Check if there's an ongoing memory command
+        const ongoingMemory = newText.match(partialMemoryRegex);
+        const hasCompleteMemory = completeMemoryRegex.test(newText);
+        
+        // Process and store complete memories BEFORE cleaning the text
+        let match;
+        completeMemoryRegex.lastIndex = 0; // Reset regex state
+        while ((match = completeMemoryRegex.exec(newText)) !== null) {
+            const memoryContent = match[1].trim();
+            if (memoryContent && !memories.includes(memoryContent)) {
+                console.log('Adding new memory:', memoryContent); // Debug log
+                memories.push(memoryContent);
+                saveMemories(); // Save immediately after adding
+                
+                // Trigger memory panel update
+                renderMemories();
+            }
+        }
+        
+        // Handle memory indicator
+        let memoryIndicator = responseMessage.querySelector('.memory-writing-indicator');
+        
+        if (ongoingMemory && !hasCompleteMemory) {
+            if (!memoryIndicator) {
+                // Create new memory indicator if it doesn't exist
+                memoryIndicator = document.createElement('div');
+                memoryIndicator.className = 'memory-writing-indicator';
+                memoryIndicator.innerHTML = `
+                    <i class="fas fa-brain"></i>
+                    <span>Writing memory</span>
+                    <div class="dots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                `;
+                // Insert after the text div instead of appending to responseMessage
+                textDiv.insertAdjacentElement('afterend', memoryIndicator);
+                
+                // Force reflow and add visible class in next frame
+                requestAnimationFrame(() => {
+                    memoryIndicator.classList.add('visible');
+                });
+            }
+        } else if (hasCompleteMemory && memoryIndicator) {
+            // Show success state when memory is complete
+            memoryIndicator.innerHTML = `<i class="fas fa-check"></i> Memory stored`;
+            memoryIndicator.classList.add('success');
+            
+            // Remove after animation
+            setTimeout(() => {
+                memoryIndicator.classList.remove('visible');
+                setTimeout(() => {
+                    if (memoryIndicator && memoryIndicator.parentNode) {
+                        memoryIndicator.remove();
+                    }
+                }, 300);
+            }, 1500);
+        } else if (!ongoingMemory && !hasCompleteMemory && memoryIndicator) {
+            // Clean up indicator if no memory operations are happening
+            memoryIndicator.remove();
+        }
+        
+        // Clean and format text
+        let processedText = newText
+            .replace(completeMemoryRegex, '')
+            .replace(partialMemoryRegex, '')
+            .trim();
+
+        // Store expansion states
+        const oldThinkBoxes = textDiv.querySelectorAll('.collapsible-think');
+        const expansionStates = Array.from(oldThinkBoxes).map(box => 
+            box.classList.contains('expanded')
+        );
+        
+        const formattedText = formatResponse(processedText);
+        textDiv.innerHTML = formattedText + (isDone ? '' : '<span class="typing-cursor"></span>');
+        
+        // Restore expansion states
+        const newThinkBoxes = textDiv.querySelectorAll('.collapsible-think');
+        newThinkBoxes.forEach((box, index) => {
+            if (expansionStates[index]) {
+                box.classList.add('expanded');
+            }
+        });
+
+        // Handle completion
+        if (isDone && !hasCompleteMemory) {
+            if (memoryIndicator) {
+                memoryIndicator.classList.remove('visible');
+                setTimeout(() => memoryIndicator.remove(), 300);
+            }
+            const cursor = textDiv.querySelector('.typing-cursor');
+            if (cursor) {
+                cursor.classList.add('popping');
+                cursor.addEventListener('animationend', () => cursor.remove(), { once: true });
+            }
+        }
+    }
+
+    // Add cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        if (activeMemoryIndicator) {
+            activeMemoryIndicator = null;
+        }
+    });
+    
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const backlights = document.querySelectorAll('.backlight');
+        
+        // Add subtle random movement to backlights
+        backlights.forEach(light => {
+            light.addEventListener('animationiteration', () => {
+                const randomScale = 0.8 + Math.random() * 0.4; // Random scale between 0.8 and 1.2
+                light.style.transform = `scale(${randomScale})`;
+            });
+        });
+    });
+</script>
+</body>
+</html>

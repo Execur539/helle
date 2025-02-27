@@ -1,0 +1,37 @@
+
+/* Define common color variables */
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2c3e50;
+    --accent-color: #e74c3c;
+    --background-color: #1a1a2e;
+    --text-color: #ecf0f1;
+}
+
+/* Apply consistent font */
+body {
+    font-family: 'Orbitron', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+/* Navbar styles */
+.navbar {
+    background-color: var(--secondary-color);
+}
+
+/* Button styles */
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-secondary {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+/* Toggle styles */
+.toggle {
+    background-color: var(--primary-color);
+}

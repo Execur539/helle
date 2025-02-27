@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <link href="https://fonts.cdnfonts.com/css/orbitron" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    (function(){
+      emailjs.init("-DJ48iZZk67Tl_vFF"); // Replace 'YOUR_USER_ID' with your actual EmailJS user ID
+    })();
+  </script>
+  <script src="js/about.js"></script>
+</head>
+<body class="bg-gradient-to-bg-base-100 text-gray-500 flex flex-col min-h-screen" data-theme="dark">
+
+    <nav class="navbar bg-base-100 p-4 shadow-lg sticky top-0 z-10">
+        <div class="container mx-auto flex justify-between items-center">
+          <div class="navbar-start flex items-left">
+            <h1 class="text-primary font-orbitron text-2xl" style="font-family: 'Orbitron', sans-serif;">Void Games</h1>
+          </div>
+      
+          <div class="navbar-center hidden sm:flex">
+            <ul class="menu menu-horizontal gap-4">
+              <li><a href="" class="btn btn-outline border-2 btn-primary">Home</a></li>
+              <li><a href="/pages/games.html" class="btn btn-outline border-2 btn-secondary">Games</a></li>
+              <li><a href="../apps.html" class="btn btn-outline border-2 btn-accent">Apps</a></li>
+              <li><a href="../Chatbot/index.html" class="btn btn-outline border-2 btn-success">AI Chatbot</a></li>
+            </ul>
+          </div>
+      
+          <div class="navbar-end flex items-center gap-4">
+            <a href="/proxy.html" class="btn btn-primary flex items-center gap-2">
+              <i class="fa-solid fa-search"></i>
+            </a>
+            <button onclick="openInBlank()" class="btn bg-gray-600 text-white hover:bg-gray-700 flex items-center gap-2">
+              about:blank
+            </button>
+            <div class="dropdown dropdown-end sm:hidden">
+              <button tabindex="0" class="btn btn-ghost">
+                <i class="fa-solid fa-bars text-xl"></i>
+              </button>
+              <ul tabindex="0" class="dropdown-content menu bg-base-200 p-4 rounded-box shadow w-40 gap-2">
+                <li><a href="../pages/games.html">Games</a></li>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../apps.html">Apps</a></li>
+                <li><a href="../Chatbot/index.html">AI Chatbot</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </nav>
+  
+  <section class="flex-1 flex justify-center items-center bg-base-200 text-center">
+    <div class="flex flex-col items-center gap-6 max-w-lg" data-aos="fade-up">
+      <h1 class="font-bold text-6xl text-secondary" style="font-family: 'Orbitron', sans-serif;">
+        Request a <span class="text-accent">Game</span>
+      </h1>
+      <p class="text-lg text-gray-300">
+        Let us know what game you want to see on our site!
+      </p>
+      <form id="requestForm" class="flex flex-col gap-4 w-full">
+        <input type="text" name="game" placeholder="Enter the game name" class="input input-bordered w-full" required>
+        <textarea name="message" placeholder="Why do you want this game?" class="textarea textarea-bordered w-full" required></textarea>
+        <button type="submit" class="btn btn-primary flex items-center gap-2">
+          <i class="fa-solid fa-paper-plane"></i> Send Request
+        </button>
+      </form>
+    </div>
+  </section>
+  
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init();
+
+    document.getElementById('requestForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const game = event.target.game.value;
+      const message = event.target.message.value;
+
+      console.log("Sending email with the following details:");
+      console.log("Game:", game);
+      console.log("Message:", message);
+
+      emailjs.send("service_d9sr3v3", "template_f1x0fd2", {
+        game: game,
+        message: message,
+        to_email: 'voidgengames@gmail.com'
+      }).then(function(response) {
+        console.log('Email sent successfully:', response.status, response.text);
+        alert('We might add your requested game soon!');
+      }, function(error) {
+        console.error('Failed to send email:', error);
+        alert('There was too many game requests. Please try again next month.');
+      });
+    });
+  </script>
+</body>
+</html>

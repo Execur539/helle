@@ -1,0 +1,14 @@
+.language-indicator {
+    background-color: #2d2d2d;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px 4px 0 0;
+    font-size: 12px;
+    font-family: monospace;
+    display: inline-block;
+    margin-bottom: -4px;
+}
+
+pre {
+    margin-top: 0;
+}
