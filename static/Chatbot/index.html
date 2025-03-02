@@ -1985,6 +1985,197 @@
             }
         }
 
+        /* Add new styles for saved chats panel */
+        .saved-chats-panel {
+            position: fixed;
+            right: -300px;
+            top: 0;
+            width: 300px;
+            height: 100vh;
+            background: rgba(44, 62, 80, 0.95);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-color);
+        }
+
+        .saved-chats-panel.open {
+            transform: translateX(-300px);
+        }
+
+        .saved-chats-toggle {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 0.5rem;
+            border-radius: 8px 0 0 8px;
+            cursor: pointer;
+            z-index: 1001;
+            transition: background-color 0.3s;
+        }
+
+        .saved-chats-toggle:hover {
+            background: var(--secondary-color);
+        }
+
+        #saved-chats-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) rgba(26, 26, 46, 0.6);
+        }
+
+        #saved-chats-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #saved-chats-list::-webkit-scrollbar-track {
+            background: rgba(26, 26, 46, 0.6);
+            border-radius: 4px;
+        }
+
+        #saved-chats-list::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        #saved-chats-list::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+        }
+
+        .saved-chat-item {
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            transition: all 0.3s ease;
+            word-break: break-word;
+            cursor: pointer;
+        }
+
+        .saved-chat-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            background: rgba(26, 26, 46, 0.9);
+        }
+
+        .saved-chat-controls {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: flex;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .saved-chat-item:hover .saved-chat-controls {
+            opacity: 1;
+        }
+
+        .saved-chat-control-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            padding: 0.2rem;
+            transition: color 0.3s;
+        }
+
+        .saved-chat-control-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .saved-chat-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            padding-right: 2.5rem;
+        }
+
+        .saved-chat-preview {
+            color: var(--text-color);
+            opacity: 0.8;
+            font-size: 0.9rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .saved-chat-date {
+            font-size: 0.8rem;
+            color: var(--text-color);
+            opacity: 0.6;
+            margin-top: 0.5rem;
+        }
+
+        .saved-chats-header {
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .saved-chats-header h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        .clear-saved-chats-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background-color 0.3s;
+        }
+
+        .clear-saved-chats-btn:hover {
+            background: #c0392b;
+        }
+
+        .chat-save-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(44, 62, 80, 0.9);
+            color: var(--text-color);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .chat-save-indicator.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .chat-save-indicator i {
+            color: var(--primary-color);
+        }
     </style>
 </head>
 <body class="bg-gradient-to-bg-base-100 text-gray-500 relative" data-theme="dark">
@@ -2003,6 +2194,24 @@
         <button class="clear-memories-btn">Clear All</button>
     </div>
     <div id="memories-list"></div>
+  </div>
+  
+  <!-- Add saved chats panel -->
+  <div class="saved-chats-toggle">
+    <i class="fas fa-bookmark"></i>
+  </div>
+  <div class="saved-chats-panel">
+    <div class="saved-chats-header">
+        <h2>Saved Chats</h2>
+        <button class="clear-saved-chats-btn">Clear All</button>
+    </div>
+    <div id="saved-chats-list"></div>
+  </div>
+
+  <!-- Add chat save indicator -->
+  <div class="chat-save-indicator">
+    <i class="fas fa-check-circle"></i>
+    <span>Chat saved successfully!</span>
   </div>
 
   <nav class="navbar bg-base-100 shadow-lg sticky top-0 z-10">
@@ -2066,6 +2275,7 @@
                 <p>During high usage, the AI will become slower to reply. You might also be put in a queue.</p>
             </div>
             <div class="chat-controls" style="text-align: right; padding: 0 1rem;">
+                <button id="save-chat-btn" style="margin-right: 0.5rem;">Save Chat</button>
                 <button id="export-chat-btn" style="margin-right: 0.5rem;">Export Chat</button>
                 <button id="clear-chat-btn">Clear Chat</button>
             </div>
@@ -4470,6 +4680,245 @@
             clearTimeout(disclaimerTimer);
             aiProcessingDisclaimer.classList.remove('visible');
         }
+
+        // Add saved chats management
+        let savedChats = [];
+        const savedChatsPanel = document.querySelector('.saved-chats-panel');
+        const savedChatsToggle = document.querySelector('.saved-chats-toggle');
+        const savedChatsList = document.getElementById('saved-chats-list');
+        const saveChatBtn = document.getElementById('save-chat-btn');
+        const chatSaveIndicator = document.querySelector('.chat-save-indicator');
+
+        // Load saved chats from localStorage on startup
+        function loadSavedChats() {
+            try {
+                const saved = localStorage.getItem('saved_chats');
+                if (saved) {
+                    savedChats = JSON.parse(saved);
+                    renderSavedChats();
+                }
+            } catch (error) {
+                console.error('Error loading saved chats:', error);
+                savedChats = [];
+            }
+        }
+
+        // Save chats to localStorage
+        function saveSavedChats() {
+            try {
+                localStorage.setItem('saved_chats', JSON.stringify(savedChats));
+                renderSavedChats();
+            } catch (error) {
+                console.error('Error saving chats:', error);
+            }
+        }
+
+        // Render saved chats in the panel
+        function renderSavedChats() {
+            savedChatsList.innerHTML = savedChats.length === 0 ? 
+                '<div style="text-align: center; padding: 1rem; opacity: 0.7;">No saved chats yet</div>' :
+                savedChats.map((chat, index) => `
+                    <div class="saved-chat-item" data-index="${index}">
+                        <div class="saved-chat-controls">
+                            <button class="saved-chat-control-btn rename-chat" title="Rename">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="saved-chat-control-btn delete-chat" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="saved-chat-title">${chat.title}</div>
+                        <div class="saved-chat-preview">${getPreview(chat.messages)}</div>
+                        <div class="saved-chat-date">${formatDate(chat.date)}</div>
+                    </div>
+                `).join('');
+
+            // Add event listeners
+            savedChatsList.querySelectorAll('.saved-chat-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    // Don't load if clicking on controls
+                    if (!e.target.closest('.saved-chat-controls')) {
+                        loadChat(parseInt(item.dataset.index));
+                    }
+                });
+            });
+
+            savedChatsList.querySelectorAll('.rename-chat').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    const chatItem = e.target.closest('.saved-chat-item');
+                    const index = parseInt(chatItem.dataset.index);
+                    const newTitle = prompt('Enter new name for chat:', savedChats[index].title);
+                    if (newTitle && newTitle.trim() !== '') {
+                        savedChats[index].title = newTitle.trim();
+                        saveSavedChats();
+                    }
+                };
+            });
+
+            savedChatsList.querySelectorAll('.delete-chat').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    const chatItem = e.target.closest('.saved-chat-item');
+                    const index = parseInt(chatItem.dataset.index);
+                    if (confirm('Delete this saved chat?')) {
+                        savedChats.splice(index, 1);
+                        saveSavedChats();
+                    }
+                };
+            });
+        }
+
+        // Helper to get preview text from messages
+        function getPreview(messages) {
+            // Find the last user message for preview
+            const lastUserMsg = [...messages].reverse().find(msg => msg.role === 'user');
+            if (lastUserMsg) {
+                return truncateText(stripHtml(lastUserMsg.content), 60);
+            }
+            return "Empty chat";
+        }
+
+        // Helper to format date
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleString();
+        }
+
+        // Helper to truncate text
+        function truncateText(text, maxLength) {
+            if (text.length <= maxLength) return text;
+            return text.substring(0, maxLength) + '...';
+        }
+
+        // Helper to strip HTML
+        function stripHtml(html) {
+            const temp = document.createElement('div');
+            temp.innerHTML = html;
+            return temp.textContent || temp.innerText || '';
+        }
+
+        // Save current chat
+        function saveCurrentChat() {
+            if (messageHistory.length < 2) {
+                alert('Chat is too short to save');
+                return;
+            }
+
+            // Get title from first few messages
+            let firstUserMsg = messageHistory.find(msg => msg.role === 'user');
+            let defaultTitle = firstUserMsg ? 
+                truncateText(stripHtml(firstUserMsg.content), 30) : 
+                'Chat ' + new Date().toLocaleDateString();
+
+            const title = prompt('Enter a name for this chat:', defaultTitle);
+            if (!title || title.trim() === '') return;
+
+            const newChat = {
+                title: title.trim(),
+                date: Date.now(),
+                messages: [...messageHistory],
+                id: Date.now().toString() // Unique ID
+            };
+
+            // Check for existing chat with same title
+            const existingIndex = savedChats.findIndex(chat => chat.title === newChat.title);
+            if (existingIndex >= 0) {
+                if (confirm(`A chat named "${newChat.title}" already exists. Overwrite it?`)) {
+                    savedChats[existingIndex] = newChat;
+                    showSaveIndicator('Chat updated successfully!');
+                } else {
+                    return; // User canceled
+                }
+            } else {
+                // Add new chat
+                savedChats.push(newChat);
+                showSaveIndicator('Chat saved successfully!');
+            }
+
+            saveSavedChats();
+        }
+
+        // Show save indicator
+        function showSaveIndicator(message) {
+            const indicator = document.querySelector('.chat-save-indicator');
+            indicator.querySelector('span').textContent = message;
+            indicator.classList.add('visible');
+            setTimeout(() => {
+                indicator.classList.remove('visible');
+            }, 3000);
+        }
+
+        // Load a saved chat
+        function loadChat(index) {
+            if (index < 0 || index >= savedChats.length) return;
+            
+            if (messageHistory.length > 1 && !confirm('Loading this chat will replace your current conversation. Continue?')) {
+                return;
+            }
+
+            const chat = savedChats[index];
+            
+            // Clear current chat
+            chatMessages.innerHTML = '';
+            messageHistory = [];
+            
+            // Load saved messages
+            chat.messages.forEach(msg => {
+                if (msg.role === 'user') {
+                    addMessage(msg.content, true);
+                } else if (msg.role === 'assistant') {
+                    // Add AI message without the animated cursor
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'message ai-response';
+                    
+                    // Process content but don't add typing cursor
+                    const processedContent = formatResponse(msg.content);
+                    
+                    messageDiv.innerHTML = `<div class="text">${processedContent}</div>
+                        <i class="fas fa-quote-left quote-icon" onclick="quoteMessage(this)"></i>
+                        <i class="fas fa-trash delete-icon" onclick="deleteMessage(this)"></i>`;
+                    
+                    chatMessages.appendChild(messageDiv);
+                    messageHistory.push({ role: "assistant", content: msg.content });
+                    
+                    // Add timestamp
+                    const timestamp = document.createElement('div');
+                    timestamp.className = 'timestamp';
+                    timestamp.textContent = formatDate(chat.date);
+                    messageDiv.appendChild(timestamp);
+                }
+            });
+
+            // Close the panel after loading
+            savedChatsPanel.classList.remove('open');
+            showSaveIndicator('Chat loaded successfully!');
+        }
+
+        // Toggle saved chats panel
+        savedChatsToggle.onclick = () => {
+            savedChatsPanel.classList.toggle('open');
+            // Close memories panel if it's open
+            if (savedChatsPanel.classList.contains('open') && memoriesPanel.classList.contains('open')) {
+                memoriesPanel.classList.remove('open');
+            }
+        };
+
+        // Clear all saved chats
+        document.querySelector('.clear-saved-chats-btn').onclick = () => {
+            if (confirm('Clear all saved chats? This cannot be undone.')) {
+                savedChats = [];
+                saveSavedChats();
+            }
+        };
+
+        // Add save chat button functionality
+        saveChatBtn.addEventListener('click', saveCurrentChat);
+
+        // Initialize saved chats on page load
+        loadSavedChats();
+        
+        // ...existing code...
     </script>
     <script>
     // Add this after existing variable declarations
