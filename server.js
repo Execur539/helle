@@ -10,10 +10,90 @@ import basicAuth from "express-basic-auth";
 import mime from "mime";
 import fetch from "node-fetch";
 import https from "node:https";
+import os from "node:os"; // Added to get server IP
 
 import config from "./config.js";
 
-console.log(chalk.yellow("🚀 Starting server..."));
+// ===== Enhanced Logging System =====
+const logger = {
+  startTime: new Date(),
+  
+  // Format timestamps consistently
+  timestamp() {
+    const now = new Date();
+    return chalk.dim(`[${now.toLocaleTimeString()}]`);
+  },
+  
+  // Primary log levels
+  info(message) {
+    console.log(`${this.timestamp()} ${chalk.blue('ℹ️ INFO')} ${message}`);
+  },
+  
+  success(message) {
+    console.log(`${this.timestamp()} ${chalk.green('✅ SUCCESS')} ${message}`);
+  },
+  
+  warn(message) {
+    console.log(`${this.timestamp()} ${chalk.yellow('⚠️ WARNING')} ${message}`);
+  },
+  
+  error(message) {
+    console.log(`${this.timestamp()} ${chalk.red('❌ ERROR')} ${message}`);
+  },
+  
+  // Visitor tracking specific logs
+  visitor: {
+    new(visitorNum, path) {
+      console.log(`${logger.timestamp()} ${chalk.green('👋 NEW VISITOR')} #${visitorNum} requested: ${path}`);
+    },
+    
+    return(visitorNum, path) {
+      console.log(`${logger.timestamp()} ${chalk.magenta('🔄 RETURN VISITOR')} #${visitorNum} requested: ${path}`);
+    },
+    
+    navigation(visitorNum, path) {
+      console.log(`${logger.timestamp()} ${chalk.yellow('🧭 NAVIGATION')} Visitor #${visitorNum} navigated to: ${path}`);
+    },
+    
+    developer(path) {
+      console.log(`${logger.timestamp()} ${chalk.cyan('👨‍💻 DEVELOPER')} accessed: ${path}`);
+    }
+  },
+  
+  // System events
+  system: {
+    startup() {
+      console.log(`\n${chalk.bold.blue('='.repeat(50))}`);
+      console.log(`${logger.timestamp()} ${chalk.bold.green('🚀 SERVER STARTING')}`);
+      console.log(`${chalk.bold.blue('='.repeat(50))}\n`);
+    },
+    
+    ready(protocol, port) {
+      console.log(`${logger.timestamp()} ${chalk.green('🌐 READY')} ${protocol} server running on port ${chalk.bold(port)}`);
+    },
+    
+    stats(totalVisitors, activeVisitors, uptimeHours) {
+      console.log(`${logger.timestamp()} ${chalk.blue('📊 STATISTICS')} ${totalVisitors} total visitors, ${activeVisitors} active (10m), Uptime: ${uptimeHours}h`);
+    }
+  },
+  
+  // File logging
+  fileLog(message) {
+    fs.appendFile(path.join(process.cwd(), 'visitor_log.txt'), `${new Date().toISOString()} - ${message}\n`, (err) => {
+      if (err) this.error(`Failed to write to log file: ${err.message}`);
+    });
+  },
+  
+  // Truncate long paths for display
+  truncatePath(path, maxLength = 50) {
+    if (path.length <= maxLength) return path;
+    const start = path.substring(0, maxLength / 2 - 2);
+    const end = path.substring(path.length - (maxLength / 2 - 1));
+    return `${start}...${end}`;
+  }
+};
+
+logger.system.startup();
 
 const __dirname = process.cwd();
 const key = fs.readFileSync(path.join(__dirname, "key.pem"));
@@ -27,11 +107,190 @@ const HTTP_PORT = 80;
 const cache = new Map();
 const CACHE_TTL = 30 * 24 * 60 * 60 * 1000; 
 
-if (config.challenge !== false) {
-  console.log(
-    chalk.green("🔒 Password protection is enabled! Listing logins below"),
-  );
+// Visitor tracking system
+const visitorLog = new Map(); // Stores last visit time for each IP
+const activeSessions = new Map(); // Stores active visitor sessions
+const requestLog = new Map(); // Track recent requests to prevent duplicates
+const visitorNumbers = new Map(); // Maps IPs to visitor numbers
+let visitorCounter = 0; // Counts total unique visitors
+const TEN_MINUTES = 10 * 60 * 1000; // 10 minutes in milliseconds
+const DEDUPE_WINDOW = 1000; // 1 second deduplication window
 
+// Get server's own IP addresses
+const getServerIPs = () => {
+  const interfaces = os.networkInterfaces();
+  const ips = [];
+  
+  Object.keys(interfaces).forEach((ifname) => {
+    interfaces[ifname].forEach((iface) => {
+      // Skip internal and non-IPv4 addresses
+      if (iface.internal === false && iface.family === 'IPv4') {
+        ips.push(iface.address);
+      }
+    });
+  });
+  
+  // Add localhost addresses
+  ips.push('127.0.0.1', 'localhost', '::1');
+  return ips;
+};
+
+const serverIPs = getServerIPs();
+logger.info(`Server IP addresses: ${serverIPs.join(', ')}`);
+
+// Middleware for logging visitors
+app.use((req, res, next) => {
+  // Get visitor IP (handling proxies)
+  const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || 
+             req.socket.remoteAddress || 
+             'unknown';
+  
+  // Enhanced check for asset requests
+  const isAssetRequest = 
+      // API and special paths
+      req.path.startsWith('/e/') || 
+      req.path.startsWith('/fq/') || 
+      req.path.startsWith('/ai-proxy/') ||
+      
+      // Common asset directories
+      req.path.startsWith('/img/') ||
+      req.path.startsWith('/images/') ||
+      req.path.startsWith('/assets/') ||
+      req.path.startsWith('/static/') ||
+      req.path.startsWith('/media/') ||
+      req.path.startsWith('/fonts/') ||
+      req.path.startsWith('/icons/') ||
+      req.path.startsWith('/css/') ||
+      req.path.startsWith('/js/') ||
+      
+      // File extensions for various assets
+      /\.(js|css|png|jpe?g|gif|svg|ico|webp|bmp|tiff|avif|woff2?|ttf|otf|eot|mp[34]|webm|ogg|wav|flac|json|xml|csv|txt|pdf|map|zip|rar|gz|7z|docx?|xlsx?|pptx?)$/i.test(req.path);
+  
+  // Don't log asset requests
+  if (isAssetRequest) {
+    return next();
+  }
+  
+  const now = Date.now();
+  
+  // Check for duplicate requests (same IP and path within deduplication window)
+  const requestKey = `${ip}:${req.path}`;
+  const lastRequest = requestLog.get(requestKey);
+  if (lastRequest && (now - lastRequest < DEDUPE_WINDOW)) {
+    // Skip logging this duplicate request
+    return next();
+  }
+  
+  // Record this request to prevent duplicates
+  requestLog.set(requestKey, now);
+  
+  // Clean up old entries from requestLog periodically
+  if (requestLog.size > 1000) { // Prevent memory growth
+    for (const [key, timestamp] of requestLog.entries()) {
+      if (now - timestamp > DEDUPE_WINDOW * 2) {
+        requestLog.delete(key);
+      }
+    }
+  }
+  
+  const referrer = req.headers.referer || '';
+  const lastVisit = visitorLog.get(ip) || 0;
+  const isServerIP = serverIPs.includes(ip);
+  
+  // Assign a visitor number if this IP doesn't have one yet
+  if (!visitorNumbers.has(ip) && !isServerIP) {
+    visitorCounter++;
+    visitorNumbers.set(ip, visitorCounter);
+    logger.info(`New visitor registered with ID #${visitorCounter}`);
+  }
+  
+  // Get the visitor number for this IP
+  const visitorNum = visitorNumbers.get(ip) || 'Dev';
+  
+  // Truncate the path for display in logs
+  const displayPath = logger.truncatePath(req.path);
+  
+  // More accurate internal navigation check:
+  // Only count as internal if referrer is from our site and different from current path
+  const referrerUrl = referrer ? new URL(referrer) : null;
+  const isInternalNavigation = referrerUrl && 
+      referrerUrl.hostname === req.hostname && 
+      referrerUrl.pathname !== req.path;
+  
+  // Prioritize log categories - only log one type per request
+  if (isServerIP) {
+    logger.visitor.developer(displayPath);
+  } 
+  else if (isInternalNavigation) {
+    // Internal navigation - user navigating within the site
+    logger.visitor.navigation(visitorNum, displayPath);
+  }
+  else if (!lastVisit || (now - lastVisit > TEN_MINUTES)) {
+    // Unique visit - first time or returning after 10+ minutes
+    logger.visitor.new(visitorNum, displayPath);
+    
+    // Log unique visits to file
+    logger.fileLog(`UNIQUE - Visitor #${visitorNum} - IP: ${ip} - Path: ${req.path}`);
+    
+    // Update last visit time for this IP
+    visitorLog.set(ip, now);
+  } 
+  else {
+    // Non-unique visit - returning within 10 minutes
+    logger.visitor.return(visitorNum, displayPath);
+    
+    // Log non-unique visits to file as well
+    logger.fileLog(`NON-UNIQUE - Visitor #${visitorNum} - IP: ${ip} - Path: ${req.path}`);
+  }
+  
+  // Track active session
+  activeSessions.set(ip, now);
+  
+  next();
+});
+
+// Clean up expired sessions periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, time] of activeSessions.entries()) {
+    if (now - time > TEN_MINUTES) {
+      activeSessions.delete(ip);
+    }
+  }
+  
+  // Clean up old request log entries
+  for (const [key, timestamp] of requestLog.entries()) {
+    if (now - timestamp > DEDUPE_WINDOW * 2) {
+      requestLog.delete(key);
+    }
+  }
+}, 60 * 1000); // Check every minute
+
+// Periodically log visitor statistics
+setInterval(() => {
+  const now = Date.now();
+  const activeCount = activeSessions.size;
+  const uptime = Math.floor((now - logger.startTime) / (60 * 60 * 1000));
+  
+  logger.system.stats(visitorCounter, activeCount, uptime);
+  
+  // Clean up expired sessions
+  for (const [ip, time] of activeSessions.entries()) {
+    if (now - time > TEN_MINUTES) {
+      activeSessions.delete(ip);
+    }
+  }
+  
+  // Clean up old request log entries
+  for (const [key, timestamp] of requestLog.entries()) {
+    if (now - timestamp > DEDUPE_WINDOW * 2) {
+      requestLog.delete(key);
+    }
+  }
+}, 60 * 60 * 1000); // Log stats every hour
+
+if (config.challenge !== false) {
+  logger.success("Password protection is enabled");
 
   app.use(basicAuth({ users: config.users, challenge: true }));
 }
@@ -359,7 +618,7 @@ serverHTTPS.on("upgrade", (req, socket, head) => {
 });
 
 serverHTTPS.on("listening", () => {
-  console.log(chalk.green(`🔒 HTTPS server is running on https://localhost:${HTTPS_PORT}`));
+  logger.system.ready("HTTPS", HTTPS_PORT);
 });
 
 serverHTTPS.listen(HTTPS_PORT);
@@ -381,7 +640,7 @@ serverHTTP.on("upgrade", (req, socket, head) => {
 });
 
 serverHTTP.on("listening", () => {
-  console.log(chalk.green(`🌍 HTTP server is running on http://localhost:${HTTP_PORT}`));
+  logger.system.ready("HTTP", HTTP_PORT);
 });
 
 serverHTTP.listen(HTTP_PORT);
