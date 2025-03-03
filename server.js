@@ -11,12 +11,401 @@ import mime from "mime";
 import fetch from "node-fetch";
 import https from "node:https";
 import os from "node:os"; // Added to get server IP
+import readline from "node:readline"; // Added for terminal control
 
 import config from "./config.js";
+
+// ===== Terminal Manager for Bottom Visitor List =====
+const terminalManager = {
+  // Track terminal dimensions
+  height: process.stdout.rows || 24,
+  width: process.stdout.columns || 80,
+  
+  // Track reserved lines at bottom for visitor list
+  reservedLines: 5,
+  isInitialized: false,
+  
+  // Scroll state for visitor list
+  scrollPosition: 0,
+  visitorList: [], // Cache the full list of visitors
+  
+  // Initialize terminal tracking
+  init() {
+    if (this.isInitialized) return;
+    
+    // Update terminal dimensions when resized
+    process.stdout.on('resize', () => {
+      this.height = process.stdout.rows;
+      this.width = process.stdout.columns;
+      
+      // When terminal is resized, reset scrolling region and re-render
+      this.setupScrollRegion();
+      this.drawSeparator();
+      this.renderVisitorList();
+    });
+    
+    // Initial size detection
+    this.height = process.stdout.rows || 24;
+    this.width = process.stdout.columns || 80;
+    this.isInitialized = true;
+    
+    // Initial terminal setup
+    this.setupScrollRegion();
+    
+    // Setup keyboard input for scrolling
+    this.setupKeyboardInput();
+    
+    // Setup periodic rendering and separator maintenance
+    setInterval(() => {
+      this.drawSeparator(); // Ensure separator stays intact
+      this.renderVisitorList();
+    }, 5000);
+  },
+  
+  // Setup keyboard input capture for arrow keys
+  setupKeyboardInput() {
+    if (!process.stdin.isTTY) return;
+    
+    // Enable raw mode to capture keystrokes
+    readline.emitKeypressEvents(process.stdin);
+    if (process.stdin.setRawMode) {
+      process.stdin.setRawMode(true);
+    }
+    
+    // Listen for key events
+    process.stdin.on('keypress', (str, key) => {
+      if (key && (key.name === 'up' || key.name === 'down' || 
+                  key.name === 'left' || key.name === 'right')) {
+        // Handle scroll events
+        if (key.name === 'down' || key.name === 'right') {
+          this.scrollDown();
+        } else if (key.name === 'up' || key.name === 'left') {
+          this.scrollUp();
+        }
+        
+        // Immediately redraw the visitor list
+        this.renderVisitorList();
+        
+        // Prevent default handling
+        return false;
+      }
+      
+      // CTRL+C should still exit
+      if (key && key.ctrl && key.name === 'c') {
+        process.exit();
+      }
+    });
+    
+    logger.info('Arrow key scrolling enabled for visitor list');
+  },
+  
+  // Scroll the visitor list down
+  scrollDown() {
+    if (this.visitorList.length === 0) return;
+    
+    // Calculate maximum scroll position (last entry should be visible)
+    const maxScroll = Math.max(0, this.visitorList.length - 1);
+    
+    // Increment scroll position, but don't go beyond the end
+    if (this.scrollPosition < maxScroll) {
+      this.scrollPosition++;
+    } else {
+      // Optional: wrap around to the beginning
+      this.scrollPosition = 0;
+    }
+  },
+  
+  // Scroll the visitor list up
+  scrollUp() {
+    if (this.visitorList.length === 0) return;
+    
+    // Decrement scroll position, but don't go below zero
+    if (this.scrollPosition > 0) {
+      this.scrollPosition--;
+    } else {
+      // Optional: wrap around to the end
+      this.scrollPosition = Math.max(0, this.visitorList.length - 1);
+    }
+  },
+  
+  // Set up terminal scrolling region to exclude visitor list area
+  setupScrollRegion() {
+    if (!process.stdout.isTTY) return;
+    
+    // Leave one extra line for the separator that won't scroll
+    const scrollableArea = this.height - this.reservedLines - 1;
+    
+    // Clear screen and set up scrolling region
+    process.stdout.write('\x1B[2J'); // Clear entire screen
+    process.stdout.write(`\x1B[1;${scrollableArea}r`); // Set scrolling region from line 1 to (height-reserved-1)
+    process.stdout.write('\x1B[H'); // Move cursor to top-left
+    
+    // Draw the initial separator
+    this.drawSeparator();
+    
+    // Move cursor back to top for continued logging
+    process.stdout.write('\x1B[H');
+  },
+  
+  // Draw a robust separator line that won't be part of the scrolling region
+  drawSeparator() {
+    if (!process.stdout.isTTY) return;
+    
+    // Save cursor position
+    process.stdout.write('\x1B7');
+    
+    // Calculate separator line position (just outside scrolling region)
+    const separatorLine = this.height - this.reservedLines;
+    
+    // Move to separator line position
+    process.stdout.write(`\x1B[${separatorLine};0H`);
+    
+    // Clear the entire line first to remove any corruption
+    process.stdout.write('\x1B[2K');
+    
+    // Draw a more robust separator with distinct characters
+    const separatorChar = '═'; // Using a double line character for better visibility
+    process.stdout.write(chalk.bold.blue(separatorChar.repeat(this.width)));
+    
+    // Restore cursor position
+    process.stdout.write('\x1B8');
+  },
+  
+  // Clear specific lines in the terminal
+  clearLines(startLine, count) {
+    let result = '';
+    // Move to position
+    result += `\x1B[${startLine};0H`;
+    // Clear lines one by one
+    for (let i = 0; i < count; i++) {
+      result += '\x1B[2K'; // Clear entire line
+      if (i < count - 1) result += '\x1B[1B'; // Move down one line
+    }
+    process.stdout.write(result);
+  },
+  
+  // Render the visitor list at the bottom of the terminal
+  renderVisitorList() {
+    // Don't render if terminal is not interactive
+    if (!process.stdout.isTTY) return;
+    
+    // Save cursor position
+    process.stdout.write('\x1B7');
+    
+    // Calculate where to start rendering (outside scrolling region)
+    const startLine = this.height - this.reservedLines + 1;
+    
+    // Move to the fixed area (using direct positioning, not relative to scrolling region)
+    process.stdout.write(`\x1B[${startLine};0H`);
+    
+    // Clear the reserved area for visitor list
+    for (let i = 0; i < this.reservedLines - 1; i++) {
+      process.stdout.write('\x1B[2K'); // Clear entire line
+      process.stdout.write('\x1B[1B'); // Move down one line
+    }
+    
+    // Return to the start of the fixed area
+    process.stdout.write(`\x1B[${startLine};0H`);
+    
+    // Build the full visitor list first
+    const now = Date.now();
+    this.visitorList = [];
+    
+    visitorNumbers.forEach((id, ip) => {
+      const lastVisit = visitorLog.get(ip) || 0;
+      // Only include visitors from the past 10 minutes
+      if (now - lastVisit < TEN_MINUTES) {
+        // Filter out server IPs
+        if (!serverIPs.includes(ip)) {
+          this.visitorList.push({ id, ip });
+        }
+      }
+    });
+    
+    // Sort by ID for consistent ordering
+    this.visitorList.sort((a, b) => a.id - b.id);
+    
+    // Adjust scroll position if needed (in case visitors left the list)
+    if (this.visitorList.length > 0) {
+      // Make sure scroll position is within bounds
+      this.scrollPosition = Math.max(0, Math.min(this.scrollPosition, this.visitorList.length - 1));
+    } else {
+      // Reset scroll position if no visitors
+      this.scrollPosition = 0;
+    }
+    
+    // Prepare the content
+    const visitorCount = this.visitorList.length;
+    
+    // Determine how many rows we have for visitor entries
+    // We need at most 2 rows for indicators (above/below)
+    const maxVisibleRows = this.reservedLines - 2; // Room for header and maybe indicators
+    
+    // Create header with count and scroll indicators
+    let header = chalk.bold('🔍 ACTIVE VISITORS');
+    if (visitorCount > 0) {
+      header += chalk.bold(` (${visitorCount} total)`);
+      
+      // Add scrolling indicator if needed
+      if (visitorCount > maxVisibleRows - 1) {
+        header += chalk.dim(' [Use ↑/↓ keys to scroll]');
+      }
+    }
+    process.stdout.write(`${header}\n`);
+    
+    // If no visitors, show message and return early
+    if (visitorCount === 0) {
+      process.stdout.write(chalk.gray('  No active visitors\n'));
+      process.stdout.write('\x1B8'); // Restore cursor position
+      return;
+    }
+    
+    // Calculate how many visitors we can show
+    // If we need "more above" indicator, reduce by 1
+    // If we need "more below" indicator, reduce by 1
+    const needsAboveIndicator = this.scrollPosition > 0;
+    const needsBelowIndicator = this.scrollPosition + maxVisibleRows - (needsAboveIndicator ? 1 : 0) < visitorCount;
+    
+    // Calculate available rows for actual visitor entries
+    const availableRows = maxVisibleRows - (needsAboveIndicator ? 1 : 0) - (needsBelowIndicator ? 1 : 0);
+    
+    // Show indicator that you can scroll up if not showing the first visitor
+    if (needsAboveIndicator) {
+      process.stdout.write(chalk.yellow('  ▲ more above\n'));
+    }
+    
+    // Calculate range of visitors to show (not using modulo to avoid wrapping)
+    const startIdx = this.scrollPosition;
+    const endIdx = Math.min(startIdx + availableRows, visitorCount);
+    
+    // Extract and format the slice of visitors to show
+    const visitorEntries = [];
+    for (let i = startIdx; i < endIdx; i++) {
+      const visitor = this.visitorList[i];
+      visitorEntries.push(`  ${chalk.cyan(`#${visitor.id}`)}${chalk.dim(' → ')}${visitor.ip}`);
+    }
+    
+    // Write out the visitor entries
+    process.stdout.write(visitorEntries.join('\n'));
+    
+    // If we have more visitors below, show indicator
+    if (needsBelowIndicator) {
+      process.stdout.write('\n' + chalk.yellow('  ▼ more below'));
+    }
+    
+    // Restore cursor position (back to the scrollable region)
+    process.stdout.write('\x1B8');
+  },
+  
+  // Make sure cursor is in the correct region before writing logs
+  ensureLoggingRegion() {
+    if (!process.stdout.isTTY) return;
+    
+    // Get current cursor position
+    let cursorPos;
+    try {
+      // This is a hack to get cursor position in Node.js
+      // Not 100% reliable but helps in many cases
+      const currentCursorPos = readline.cursorTo;
+      if (currentCursorPos && currentCursorPos.y >= this.height - this.reservedLines - 1) {
+        // If cursor is in or near the fixed area, move it back to scrolling region
+        process.stdout.write(`\x1B[${this.height - this.reservedLines - 2};0H`);
+      }
+    } catch (e) {
+      // If we can't get cursor position, do nothing
+    }
+  },
+  
+  // Estimate the current cursor line position
+  getCurrentCursorLine() {
+    if (!process.stdout.isTTY) return 0;
+    
+    // This is an approximation since Node.js doesn't have a direct way
+    // to get the current cursor position
+    const scrollableArea = this.height - this.reservedLines - 1;
+    
+    // We'll use a simple counter that wraps within the scrollable region
+    this._currentLine = (this._currentLine || 1) + 1;
+    if (this._currentLine >= scrollableArea) {
+      this._currentLine = 1; // Wrap around when reaching the bottom
+    }
+    
+    return this._currentLine;
+  }
+};
 
 // ===== Enhanced Logging System =====
 const logger = {
   startTime: new Date(),
+  
+  // Track repeated visitor actions
+  actionTracker: {
+    // Maps visitorId -> { action, path, count, timestamp, linePosition }
+    visitorActions: new Map(),
+    // Store last cursor position after each log
+    lastCursorLine: 0,
+    
+    // Check if an action is being repeated and track it
+    track(visitorNum, actionType, path) {
+      const key = `${visitorNum}`;
+      const now = Date.now();
+      
+      // Get or create tracking info for this visitor
+      let trackedAction = this.visitorActions.get(key);
+      if (!trackedAction) {
+        trackedAction = { 
+          action: null, 
+          path: null, 
+          count: 0, 
+          timestamp: now,
+          linePosition: 0,  // Terminal line where this message was last logged
+        };
+        this.visitorActions.set(key, trackedAction);
+      }
+      
+      // Check if this is the same action+path as before
+      const isRepeated = trackedAction.action === actionType && trackedAction.path === path;
+      if (isRepeated) {
+        // Same action, increment counter
+        trackedAction.count++;
+        trackedAction.timestamp = now;
+        return { 
+          count: trackedAction.count, 
+          isRepeated, 
+          linePosition: trackedAction.linePosition 
+        };
+      } else {
+        // New action, reset counter and update line position 
+        trackedAction.action = actionType;
+        trackedAction.path = path;
+        trackedAction.count = 1;
+        trackedAction.timestamp = now;
+        trackedAction.linePosition = this.lastCursorLine;
+        return { 
+          count: 1, 
+          isRepeated: false, 
+          linePosition: 0 
+        };
+      }
+    },
+    
+    // Update the last cursor line
+    updateCursorPosition(line) {
+      this.lastCursorLine = line;
+    },
+    
+    // Clean up old tracking data
+    cleanup() {
+      const now = Date.now();
+      const expireTime = 10 * 60 * 1000; // 10 minutes
+      
+      this.visitorActions.forEach((data, key) => {
+        if (now - data.timestamp > expireTime) {
+          this.visitorActions.delete(key);
+        }
+      });
+    }
+  },
   
   // Format timestamps consistently
   timestamp() {
@@ -24,56 +413,128 @@ const logger = {
     return chalk.dim(`[${now.toLocaleTimeString()}]`);
   },
   
+  // Central log function that respects the bottom area
+  log(message, options = {}) {
+    const { updateExisting = false, linePosition = 0 } = options;
+    
+    if (terminalManager.isInitialized && process.stdout.isTTY) {
+      // Ensure we're in the scrollable region
+      terminalManager.ensureLoggingRegion();
+      
+      if (updateExisting && linePosition > 0) {
+        // Save current position
+        process.stdout.write('\x1B7');
+        
+        // Move to the line that needs updating
+        process.stdout.write(`\x1B[${linePosition};0H`);
+        
+        // Clear the entire line
+        process.stdout.write('\x1B[2K');
+        
+        // Write the updated message
+        process.stdout.write(`${this.timestamp()} ${message}`);
+        
+        // Restore position
+        process.stdout.write('\x1B8');
+      } else {
+        // Regular new log message
+        console.log(`${this.timestamp()} ${message}`);
+        
+        // Store the line where this message was written
+        // This is approximate since we can't get the exact cursor position
+        if (process.stdout.rows) {
+          const currentLine = terminalManager.getCurrentCursorLine();
+          this.actionTracker.updateCursorPosition(currentLine);
+        }
+      }
+      
+      // Ensure the separator remains intact after logging
+      terminalManager.drawSeparator();
+    } else {
+      // Normal logging if not in TTY mode
+      console.log(`${this.timestamp()} ${message}`);
+    }
+  },
+  
   // Primary log levels
   info(message) {
-    console.log(`${this.timestamp()} ${chalk.blue('ℹ️ INFO')} ${message}`);
+    this.log(`${chalk.blue('ℹ️ INFO')} ${message}`);
   },
   
   success(message) {
-    console.log(`${this.timestamp()} ${chalk.green('✅ SUCCESS')} ${message}`);
+    this.log(`${chalk.green('✅ SUCCESS')} ${message}`);
   },
   
   warn(message) {
-    console.log(`${this.timestamp()} ${chalk.yellow('⚠️ WARNING')} ${message}`);
+    this.log(`${chalk.yellow('⚠️ WARNING')} ${message}`);
   },
   
   error(message) {
-    console.log(`${this.timestamp()} ${chalk.red('❌ ERROR')} ${message}`);
+    this.log(`${chalk.red('❌ ERROR')} ${message}`);
   },
   
   // Visitor tracking specific logs
   visitor: {
     new(visitorNum, path) {
-      console.log(`${logger.timestamp()} ${chalk.green('👋 NEW VISITOR')} #${visitorNum} requested: ${path}`);
+      const { count, isRepeated, linePosition } = logger.actionTracker.track(visitorNum, 'new', path);
+      const countSuffix = count > 1 ? chalk.cyan(` [repeated ${count} times]`) : '';
+      const message = `${chalk.green('👋 NEW VISITOR')} #${visitorNum} requested: ${path}${countSuffix}`;
+      
+      logger.log(message, { updateExisting: isRepeated, linePosition });
     },
     
     return(visitorNum, path) {
-      console.log(`${logger.timestamp()} ${chalk.magenta('🔄 RETURN VISITOR')} #${visitorNum} requested: ${path}`);
+      const { count, isRepeated, linePosition } = logger.actionTracker.track(visitorNum, 'return', path);
+      const countSuffix = count > 1 ? chalk.cyan(` [repeated ${count} times]`) : '';
+      const message = `${chalk.magenta('🔄 RETURN VISITOR')} #${visitorNum} requested: ${path}${countSuffix}`;
+      
+      logger.log(message, { updateExisting: isRepeated, linePosition });
     },
     
     navigation(visitorNum, path) {
-      console.log(`${logger.timestamp()} ${chalk.yellow('🧭 NAVIGATION')} Visitor #${visitorNum} navigated to: ${path}`);
+      const { count, isRepeated, linePosition } = logger.actionTracker.track(visitorNum, 'navigation', path);
+      const countSuffix = count > 1 ? chalk.cyan(` [repeated ${count} times]`) : '';
+      const message = `${chalk.yellow('🧭 NAVIGATION')} Visitor #${visitorNum} navigated to: ${path}${countSuffix}`;
+      
+      logger.log(message, { updateExisting: isRepeated, linePosition });
+    },
+    
+    navigationNewID(visitorNum, path) {
+      const { count, isRepeated, linePosition } = logger.actionTracker.track(visitorNum, 'navigationNewID', path);
+      const countSuffix = count > 1 ? chalk.cyan(` [repeated ${count} times]`) : '';
+      const message = `${chalk.yellow('🧭 NAVIGATION')} + ${chalk.green('👋 NEW ID')} #${visitorNum} navigated to: ${path}${countSuffix}`;
+      
+      logger.log(message, { updateExisting: isRepeated, linePosition });
     },
     
     developer(path) {
-      console.log(`${logger.timestamp()} ${chalk.cyan('👨‍💻 DEVELOPER')} accessed: ${path}`);
+      // No need to track developer actions as they're not typically repetitive
+      logger.log(`${chalk.cyan('👨‍💻 DEVELOPER')} accessed: ${path}`);
     }
   },
   
   // System events
   system: {
     startup() {
+      // For startup, we can use direct console since terminal manager isn't initialized yet
       console.log(`\n${chalk.bold.blue('='.repeat(50))}`);
       console.log(`${logger.timestamp()} ${chalk.bold.green('🚀 SERVER STARTING')}`);
       console.log(`${chalk.bold.blue('='.repeat(50))}\n`);
+      
+      // Initialize the terminal manager
+      terminalManager.init();
     },
     
     ready(protocol, port) {
-      console.log(`${logger.timestamp()} ${chalk.green('🌐 READY')} ${protocol} server running on port ${chalk.bold(port)}`);
+      logger.log(`${chalk.green('🌐 READY')} ${protocol} server running on port ${chalk.bold(port)}`);
+      
+      // Ensure the separator and visitor list are intact
+      terminalManager.drawSeparator();
+      terminalManager.renderVisitorList();
     },
     
     stats(totalVisitors, activeVisitors, uptimeHours) {
-      console.log(`${logger.timestamp()} ${chalk.blue('📊 STATISTICS')} ${totalVisitors} total visitors, ${activeVisitors} active (10m), Uptime: ${uptimeHours}h`);
+      logger.log(`${chalk.blue('📊 STATISTICS')} ${totalVisitors} total visitors, ${activeVisitors} active (10m), Uptime: ${uptimeHours}h`);
     }
   },
   
@@ -197,6 +658,9 @@ app.use((req, res, next) => {
   const lastVisit = visitorLog.get(ip) || 0;
   const isServerIP = serverIPs.includes(ip);
   
+  // Check if this IP had an ID before this request
+  const hadIDBeforeRequest = visitorNumbers.has(ip);
+  
   // Assign a visitor number if this IP doesn't have one yet
   if (!visitorNumbers.has(ip) && !isServerIP) {
     visitorCounter++;
@@ -223,7 +687,21 @@ app.use((req, res, next) => {
   } 
   else if (isInternalNavigation) {
     // Internal navigation - user navigating within the site
-    logger.visitor.navigation(visitorNum, displayPath);
+    
+    // Check for the edge case: navigation detected but ID was just assigned
+    if (!hadIDBeforeRequest) {
+      // This is the anomaly case - navigating between pages but no ID until now
+      logger.visitor.navigationNewID(visitorNum, displayPath);
+      
+      // Log this unusual event to the file
+      logger.fileLog(`ANOMALY - Visitor #${visitorNum} navigated without prior ID - IP: ${ip} - Path: ${req.path}`);
+      
+      // Set the last visit time since this is effectively a new visitor
+      visitorLog.set(ip, now);
+    } else {
+      // Normal navigation with existing ID
+      logger.visitor.navigation(visitorNum, displayPath);
+    }
   }
   else if (!lastVisit || (now - lastVisit > TEN_MINUTES)) {
     // Unique visit - first time or returning after 10+ minutes
@@ -287,6 +765,10 @@ setInterval(() => {
       requestLog.delete(key);
     }
   }
+  
+  // Always redraw separator and refresh the visitor list after stats update
+  terminalManager.drawSeparator();
+  terminalManager.renderVisitorList();
 }, 60 * 60 * 1000); // Log stats every hour
 
 if (config.challenge !== false) {
@@ -644,3 +1126,58 @@ serverHTTP.on("listening", () => {
 });
 
 serverHTTP.listen(HTTP_PORT);
+
+// Console error handling - override console.error to maintain terminal regions
+const originalConsoleError = console.error;
+console.error = function() {
+  // Ensure we're writing in the correct region
+  if (terminalManager.isInitialized && process.stdout.isTTY) {
+    terminalManager.ensureLoggingRegion();
+  }
+  originalConsoleError.apply(console, arguments);
+};
+
+// When exiting, restore normal terminal behavior
+process.on('exit', () => {
+  if (process.stdout.isTTY) {
+    // Disable scrolling region, reset terminal
+    process.stdout.write('\x1B[r');
+    
+    // Disable raw mode if it was enabled
+    if (process.stdin.setRawMode) {
+      process.stdin.setRawMode(false);
+    }
+  }
+});
+
+// Handle unexpected termination
+process.on('SIGINT', () => {
+  if (process.stdout.isTTY) {
+    // Disable scrolling region, reset terminal
+    process.stdout.write('\x1B[r');
+    process.stdout.write('\x1B[2J'); // Clear screen
+    process.stdout.write('\x1B[H');  // Move to home position
+    
+    // Disable raw mode if it was enabled
+    if (process.stdin.setRawMode) {
+      process.stdin.setRawMode(false);
+    }
+  }
+  process.exit(0);
+});
+
+// Add additional periodic separator maintenance
+setInterval(() => {
+  // Redraw the separator to ensure it remains intact
+  if (terminalManager.isInitialized) {
+    terminalManager.drawSeparator();
+  }
+}, 10000); // Check every 10 seconds
+
+// Add periodic cleanup to the existing interval
+setInterval(() => {
+  // Clean up expired tracking data
+  logger.actionTracker.cleanup();
+  
+  // ...existing cleanup code...
+}, 60 * 1000); // Check every minute
