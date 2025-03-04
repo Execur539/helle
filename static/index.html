@@ -202,17 +202,89 @@
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
     
+    // Mouse position tracking
+    const mouse = {
+      x: undefined,
+      y: undefined,
+      radius: 150 // Interaction radius
+    };
+    
+    // Update mouse position on mouse move
+    window.addEventListener('mousemove', function(event) {
+      mouse.x = event.clientX;
+      mouse.y = event.clientY;
+    });
+    
     // Particle system configuration
     const config = {
       connectionDistance: 150, // Maximum distance to draw connections
       connectionOpacityDivider: 3, // Controls connection opacity falloff
-      speedMultiplier: 1.5 // Increase speed (was 0.8 before)
+      speedMultiplier: 1.5, // Base speed multiplier
+      mouseForceStrength: 0.45, // Increased from 0.15 - Strength of mouse repulsion force
+      mouseGlowDistance: 100, // Distance at which particles start to glow
+      mouseGlowStrength: 0.5, // Maximum additional opacity from mouse glow
+      friction: 0.97, // Friction to make movement more natural (less than 1)
+      minSpeed: 0.1, // Minimum speed threshold
+      naturalForce: 0.02, // Natural force to keep particles moving
+      
+      // Click particle configuration
+      clickParticleCount: 8, // Number of particles to spawn on click
+      clickParticleSpeed: 3, // Initial speed of click particles
+      clickParticleBrightness: 0.8, // Initial brightness of click particles
+      clickFadeDistance: 150, // Distance over which brightness fades to normal
     };
     
     // Particle class
     class Particle {
-      constructor() {
-        this.reset(true);
+      constructor(isClickParticle = false, x = null, y = null, vx = null, vy = null) {
+        if (isClickParticle && x !== null && y !== null) {
+          this.initClickParticle(x, y, vx, vy);
+        } else {
+          this.reset(true);
+        }
+      }
+      
+      initClickParticle(x, y, vx, vy) {
+        // Position at click location
+        this.x = x;
+        this.y = y;
+        
+        // Set velocity direction outward
+        this.vx = vx;
+        this.vy = vy;
+        
+        // Add acceleration properties
+        this.ax = 0;
+        this.ay = 0;
+        
+        // Direction and timing for natural movement
+        this.direction = Math.random() * Math.PI * 2;
+        this.directionChangeTime = 0;
+        this.directionChangeDuration = Math.random() * 2000 + 1000;
+        
+        // Size and opacity
+        this.size = Math.random() * 2 + 1;
+        this.baseOpacity = Math.random() * 0.2 + 0.1;
+        this.opacity = config.clickParticleBrightness; // Start with high brightness
+        this.maxOpacity = this.baseOpacity;
+        this.currentGlow = 0;
+        
+        // Track distance traveled for fade effect
+        this.isClickParticle = true;
+        this.distanceFromOrigin = 0;
+        this.startX = x;
+        this.startY = y;
+        
+        // Mark as disposable (will be removed after lifecycle)
+        this.isDisposable = true;
+        
+        // Lifespan between 2-4 seconds
+        this.lifespan = Math.random() * 2000 + 2000;
+        this.life = 0;
+        
+        // Fade periods
+        this.fadeInPeriod = 0; // No fade in for click particles
+        this.fadeOutPeriod = 1000;
       }
       
       reset(initial = false) {
@@ -220,14 +292,30 @@
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
         
-        // Random velocity (increased speed)
+        // Random velocity
         this.vx = (Math.random() - 0.5) * config.speedMultiplier;
         this.vy = (Math.random() - 0.5) * config.speedMultiplier;
+        
+        // Add acceleration properties
+        this.ax = 0;
+        this.ay = 0;
+        
+        // Direction and timing for natural movement
+        this.direction = Math.random() * Math.PI * 2;
+        this.directionChangeTime = 0;
+        this.directionChangeDuration = Math.random() * 2000 + 1000;
         
         // Size and opacity
         this.size = Math.random() * 2 + 0.5;
         this.opacity = initial ? 0 : Math.random() * 0.2;
-        this.maxOpacity = Math.random() * 0.2 + 0.1;
+        this.baseOpacity = Math.random() * 0.2 + 0.1;
+        this.maxOpacity = this.baseOpacity;
+        this.currentGlow = 0;
+        
+        // Reset click particle properties
+        this.isClickParticle = false;
+        this.distanceFromOrigin = 0;
+        this.isDisposable = false;
         
         // Lifespan between 3-5 seconds
         this.lifespan = Math.random() * 2000 + 3000;
@@ -240,33 +328,145 @@
         this.fadeOutPeriod = 1000;
       }
       
+      // Apply force from mouse interaction
+      applyMouseForce() {
+        if (!mouse.x) return; // Skip if mouse position isn't defined yet
+        
+        const dx = this.x - mouse.x;
+        const dy = this.y - mouse.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        // Apply force if within interaction radius
+        if (distance < mouse.radius) {
+          // Calculate force with inverse square falloff (stronger closer to mouse)
+          const force = config.mouseForceStrength * (1 - distance/mouse.radius);
+          
+          // Normalize direction and apply force
+          const angle = Math.atan2(dy, dx);
+          this.ax += Math.cos(angle) * force;
+          this.ay += Math.sin(angle) * force;
+          
+          // Increase brightness based on proximity to mouse
+          if (distance < config.mouseGlowDistance) {
+            // Calculate glow intensity (1 at center, 0 at mouseGlowDistance)
+            const glowIntensity = 1 - (distance / config.mouseGlowDistance);
+            // Set current glow to be used in draw method
+            this.currentGlow = glowIntensity * config.mouseGlowStrength;
+          } else {
+            this.currentGlow = 0;
+          }
+        } else {
+          this.currentGlow = 0;
+        }
+      }
+      
+      // Apply natural movement force
+      applyNaturalForce(deltaTime) {
+        // Update direction change timing
+        this.directionChangeTime += deltaTime;
+        
+        // Change direction periodically with a smooth transition
+        if (this.directionChangeTime >= this.directionChangeDuration) {
+          this.directionChangeTime = 0;
+          this.directionChangeDuration = Math.random() * 2000 + 1000;
+          this.direction = Math.random() * Math.PI * 2;
+        }
+        
+        // Apply natural force in current direction
+        this.ax += Math.cos(this.direction) * config.naturalForce;
+        this.ay += Math.sin(this.direction) * config.naturalForce;
+      }
+      
       update(deltaTime) {
+        // Apply mouse force
+        this.applyMouseForce();
+        
+        // Apply natural movement force
+        this.applyNaturalForce(deltaTime);
+        
+        // Apply acceleration to velocity
+        this.vx += this.ax;
+        this.vy += this.ay;
+        
+        // Apply friction for more natural movement
+        this.vx *= config.friction;
+        this.vy *= config.friction;
+        
+        // Reset acceleration
+        this.ax = 0;
+        this.ay = 0;
+        
         // Update position
         this.x += this.vx;
         this.y += this.vy;
         
+        // Handle click particle brightness fade
+        if (this.isClickParticle) {
+          // Calculate distance from starting position
+          const dx = this.x - this.startX;
+          const dy = this.y - this.startY;
+          this.distanceFromOrigin = Math.sqrt(dx * dx + dy * dy);
+          
+          // Fade brightness back to normal over distance
+          if (this.distanceFromOrigin < config.clickFadeDistance) {
+            // Interpolate from bright to normal
+            const fadeFactor = this.distanceFromOrigin / config.clickFadeDistance;
+            this.opacity = config.clickParticleBrightness - 
+                          (config.clickParticleBrightness - this.baseOpacity) * fadeFactor;
+          } else {
+            this.opacity = this.baseOpacity;
+          }
+        }
+        
         // Update lifespan
         this.life += deltaTime;
         
+        // Calculate fade factor (1 = full opacity, 0 = fully transparent)
+        let fadeFactor = 1;
+        
         // Handle opacity based on life stage
         if (this.life < this.fadeInPeriod) {
-          // Fade in
-          this.opacity = (this.life / this.fadeInPeriod) * this.maxOpacity;
+          // Fade in phase
+          fadeFactor = this.life / this.fadeInPeriod;
         } else if (this.life > this.lifespan - this.fadeOutPeriod) {
-          // Fade out
-          const fadeOutProgress = (this.life - (this.lifespan - this.fadeOutPeriod)) / this.fadeOutPeriod;
-          this.opacity = this.maxOpacity * (1 - fadeOutProgress);
+          // Fade out phase
+          fadeFactor = 1 - (this.life - (this.lifespan - this.fadeOutPeriod)) / this.fadeOutPeriod;
+        }
+        
+        // Clamp fade factor between 0 and 1
+        fadeFactor = Math.max(0, Math.min(1, fadeFactor));
+        
+        // Only apply fade factor for normal particles (not click particles)
+        if (!this.isClickParticle) {
+          // Apply base opacity with fade factor
+          const lifecycleOpacity = this.baseOpacity * fadeFactor;
+          
+          // Scale glow effect with the same fade factor to ensure proper fadeout
+          const scaledGlow = this.currentGlow * fadeFactor;
+          
+          // Combine base opacity with glow effect, capped at reasonable limit
+          this.opacity = Math.min(0.8, lifecycleOpacity + scaledGlow);
         } else {
-          // Stable period
-          this.opacity = this.maxOpacity;
+          // For click particles, apply fade factor to current opacity during fade out
+          if (this.life > this.lifespan - this.fadeOutPeriod) {
+            this.opacity *= fadeFactor;
+          }
         }
         
         // Check if particle is dead or out of bounds
         if (this.life >= this.lifespan || 
-            this.x < 0 || this.x > canvas.width || 
-            this.y < 0 || this.y > canvas.height) {
-          this.reset();
+            this.x < -50 || this.x > canvas.width + 50 || 
+            this.y < -50 || this.y > canvas.height + 50) {
+          if (this.isDisposable) {
+            // For disposable particles, mark as ready to be removed
+            return true; // Signal that this particle should be removed
+          } else {
+            // For regular particles, reset them
+            this.reset();
+          }
         }
+        
+        return false; // Particle should stay in the array
       }
       
       draw() {
@@ -285,6 +485,27 @@
       particles.push(new Particle());
     }
     
+    // Create click particles
+    function createClickParticles(x, y) {
+      for (let i = 0; i < config.clickParticleCount; i++) {
+        // Calculate angle for this particle (distribute evenly in a circle)
+        const angle = (i / config.clickParticleCount) * Math.PI * 2;
+        
+        // Calculate velocity components based on angle
+        const vx = Math.cos(angle) * config.clickParticleSpeed;
+        const vy = Math.sin(angle) * config.clickParticleSpeed;
+        
+        // Create a new particle and add it to the array
+        particles.push(new Particle(true, x, y, vx, vy));
+      }
+    }
+    
+    // Add click event listener to the document (to catch clicks anywhere on the page)
+    document.addEventListener('click', function(event) {
+      // Create particles at click location
+      createClickParticles(event.clientX, event.clientY);
+    });
+    
     // Function to draw connections between particles
     function drawConnections() {
       for (let i = 0; i < particles.length; i++) {
@@ -302,9 +523,10 @@
             // Base opacity on distance (closer = more visible)
             const distanceOpacity = (config.connectionDistance - distance) / config.connectionDistance / config.connectionOpacityDivider;
             
-            // Consider the opacity of both particles
-            // Using the minimum of both particles' opacities ensures the line fades out with either particle
-            const particleOpacityFactor = Math.min(p1.opacity, p2.opacity) / Math.max(p1.maxOpacity, p2.maxOpacity);
+            // Consider the opacity of both particles (without glow effect for connections)
+            const p1BaseOpacity = p1.opacity - p1.currentGlow;
+            const p2BaseOpacity = p2.opacity - p2.currentGlow;
+            const particleOpacityFactor = Math.min(p1BaseOpacity, p2BaseOpacity) / Math.max(p1.baseOpacity, p2.baseOpacity);
             
             // Final opacity factors in both distance and particle opacity
             const opacity = distanceOpacity * particleOpacityFactor;
@@ -336,11 +558,17 @@
       // Draw connections between particles
       drawConnections();
       
-      // Update and draw particles
-      particles.forEach(particle => {
-        particle.update(deltaTime);
-        particle.draw();
-      });
+      // Update particles and remove disposable ones that are finished
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const shouldRemove = particles[i].update(deltaTime);
+        if (shouldRemove) {
+          // Remove the particle if it's marked for removal
+          particles.splice(i, 1);
+        } else {
+          // Draw the particle
+          particles[i].draw();
+        }
+      }
       
       // Continue animation
       requestAnimationFrame(animate);
