@@ -11,10 +11,55 @@
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
   <link href="https://fonts.cdnfonts.com/css/orbitron" rel="stylesheet">
   <script src="js/about.js"></script>
-</head>
-<body class="bg-gradient-to-bg-base-100 text-gray-500 flex flex-col min-h-screen" data-theme="dark">
+  <style>
+    @keyframes colorShift {
+      0% { color: #d946ef; } /* A purple color */
+      50% { color: #3b82f6; } /* A blue color */
+      100% { color: #d946ef; } /* Back to purple */
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    .animate-title {
+      animation: colorShift 5s infinite;
+    }
+    
+    .animate-float {
+      animation: float 4s ease-in-out infinite;
+    }
+    
+    .bg-grid {
+      background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+      background-size: 30px 30px;
+    }
 
-  <nav class="navbar bg-base-100 p-4 shadow-lg sticky top-0 z-10">
+    #particleCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+    
+    /* Custom tooltip positioning */
+    .tooltip-distance.tooltip-top:before {
+      --tooltip-tail: 0.1875rem;
+      --tooltip-offset: 1.25rem;
+      transform: translateX(-50%) translateY(calc(-100% - var(--tooltip-tail) - var(--tooltip-offset) - 0.5rem));
+    }
+  </style>
+</head>
+<body class="bg-grid bg-gradient-to-bg-base-100 text-gray-500 flex flex-col min-h-screen" data-theme="dark">
+  <!-- Add the canvas for our custom particles -->
+  <canvas id="particleCanvas"></canvas>
+
+  <nav class="navbar bg-base-100 p-4 shadow-lg sticky top-0 z-10" data-aos="fade-down" data-aos-duration="800">
     <div class="container mx-auto flex justify-between items-center">
       <div class="navbar-start flex items-left">
         <h1 class="text-primary font-orbitron text-2xl" style="font-family: 'Orbitron', sans-serif;">Void Games</h1>
@@ -51,31 +96,34 @@
     </div>
   </nav>
   
-<section class="flex-1 flex justify-center items-center bg-base-200 text-center">
-  <div class="flex flex-col items-center gap-6 max-w-lg" data-aos="fade-up">
-    <a class="btn btn-primary">
-      Make a Private Domain!
-      <i class="fa-solid fa-circle-arrow-right text-lg ml-2"></i>
-    </a>
-    <h1 class="font-bold text-6xl text-secondary" style="font-family: 'Orbitron', sans-serif;">
+<div id="particles-js" class="absolute inset-0 z-0"></div>
+<section class="flex-1 flex justify-center items-center bg-base-200 text-center relative z-2">
+  <div class="flex flex-col items-center gap-6 max-w-lg">
+    <div class="tooltip tooltip-top tooltip-distance" data-tip="This feature is not available yet" data-aos="fade-down" data-aos-delay="300">
+      <a class="btn btn-primary animate-float">
+        Make a Private Domain!
+        <i class="fa-solid fa-circle-arrow-right text-lg ml-2"></i>
+      </a>
+    </div>
+    <h1 class="font-bold text-6xl text-secondary animate-title" style="font-family: 'Orbitron', sans-serif;" data-aos="zoom-in" data-aos-duration="1000">
       Void <span class="text-accent">Games</span>
     </h1>
 
-    <p class="text-lg text-gray-300">
+    <p class="text-lg text-gray-300" data-aos="fade-up" data-aos-delay="200">
       We are a site that hosts a blazingly fast web proxy and a large library of games.
     </p>
 
     <div class="flex gap-4">
-      <a href = "/proxy.html" class="btn btn-secondary flex items-center gap-2">
+      <a href="/proxy.html" class="btn btn-secondary flex items-center gap-2" data-aos="fade-right" data-aos-delay="400">
         <i class="fa-solid fa-rocket"></i> Proxy
       </a>
 
-      <a href = "/pages/games.html" class="btn btn-accent flex items-center gap-2">
+      <a href="/pages/games.html" class="btn btn-accent flex items-center gap-2" data-aos="fade-left" data-aos-delay="600">
         <i class="fa-solid fa-gamepad"></i> Games
       </a>
     </div>
 
-    <a class="link link-secondary text-lg">
+    <a class="link link-secondary text-lg" data-aos="fade-up" data-aos-delay="800">
       About Us
       <i class="fa-solid fa-arrow-right ml-1 text-sm"></i>
     </a>
@@ -83,7 +131,224 @@
 </section>
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
-  AOS.init();
+  AOS.init({
+    once: false,
+    mirror: false,
+    duration: 800
+  });
+  
+  // Initialize particles.js
+  document.addEventListener('DOMContentLoaded', function() {
+    particlesJS('particles-js', {
+      "particles": {
+        "number": {
+          "value": 50,
+          "density": {
+            "enable": true,
+            "value_area": 800
+          }
+        },
+        "color": {
+          "value": "#ffffff"
+        },
+        "opacity": {
+          "value": 0.1,
+          "random": true
+        },
+        "size": {
+          "value": 3,
+          "random": true
+        },
+        "line_linked": {
+          "enable": true,
+          "distance": 150,
+          "color": "#ffffff",
+          "opacity": 0.1,
+          "width": 1
+        },
+        "move": {
+          "enable": true,
+          "speed": 1,
+          "direction": "none",
+          "random": true,
+          "out_mode": "out"
+        }
+      },
+      "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+          "onhover": {
+            "enable": false
+          },
+          "onclick": {
+            "enable": false
+          },
+          "resize": true
+        }
+      },
+      "retina_detect": true
+    });
+    
+    // Custom particle animation
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Set canvas size to window size
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    
+    // Particle system configuration
+    const config = {
+      connectionDistance: 150, // Maximum distance to draw connections
+      connectionOpacityDivider: 3, // Controls connection opacity falloff
+      speedMultiplier: 1.5 // Increase speed (was 0.8 before)
+    };
+    
+    // Particle class
+    class Particle {
+      constructor() {
+        this.reset(true);
+      }
+      
+      reset(initial = false) {
+        // Random position
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        
+        // Random velocity (increased speed)
+        this.vx = (Math.random() - 0.5) * config.speedMultiplier;
+        this.vy = (Math.random() - 0.5) * config.speedMultiplier;
+        
+        // Size and opacity
+        this.size = Math.random() * 2 + 0.5;
+        this.opacity = initial ? 0 : Math.random() * 0.2;
+        this.maxOpacity = Math.random() * 0.2 + 0.1;
+        
+        // Lifespan between 3-5 seconds
+        this.lifespan = Math.random() * 2000 + 3000;
+        this.life = 0;
+        
+        // Fade in period
+        this.fadeInPeriod = 500;
+        
+        // Fade out period
+        this.fadeOutPeriod = 1000;
+      }
+      
+      update(deltaTime) {
+        // Update position
+        this.x += this.vx;
+        this.y += this.vy;
+        
+        // Update lifespan
+        this.life += deltaTime;
+        
+        // Handle opacity based on life stage
+        if (this.life < this.fadeInPeriod) {
+          // Fade in
+          this.opacity = (this.life / this.fadeInPeriod) * this.maxOpacity;
+        } else if (this.life > this.lifespan - this.fadeOutPeriod) {
+          // Fade out
+          const fadeOutProgress = (this.life - (this.lifespan - this.fadeOutPeriod)) / this.fadeOutPeriod;
+          this.opacity = this.maxOpacity * (1 - fadeOutProgress);
+        } else {
+          // Stable period
+          this.opacity = this.maxOpacity;
+        }
+        
+        // Check if particle is dead or out of bounds
+        if (this.life >= this.lifespan || 
+            this.x < 0 || this.x > canvas.width || 
+            this.y < 0 || this.y > canvas.height) {
+          this.reset();
+        }
+      }
+      
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+        ctx.fill();
+      }
+    }
+    
+    // Create particles
+    const particles = [];
+    const particleCount = 50;
+    
+    for (let i = 0; i < particleCount; i++) {
+      particles.push(new Particle());
+    }
+    
+    // Function to draw connections between particles
+    function drawConnections() {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const p1 = particles[i];
+          const p2 = particles[j];
+          
+          // Calculate distance between particles
+          const dx = p1.x - p2.x;
+          const dy = p1.y - p2.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          // Draw line if particles are close enough
+          if (distance < config.connectionDistance) {
+            // Base opacity on distance (closer = more visible)
+            const distanceOpacity = (config.connectionDistance - distance) / config.connectionDistance / config.connectionOpacityDivider;
+            
+            // Consider the opacity of both particles
+            // Using the minimum of both particles' opacities ensures the line fades out with either particle
+            const particleOpacityFactor = Math.min(p1.opacity, p2.opacity) / Math.max(p1.maxOpacity, p2.maxOpacity);
+            
+            // Final opacity factors in both distance and particle opacity
+            const opacity = distanceOpacity * particleOpacityFactor;
+            
+            // Only draw if there's visible opacity
+            if (opacity > 0.01) {
+              ctx.beginPath();
+              ctx.moveTo(p1.x, p1.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+            }
+          }
+        }
+      }
+    }
+    
+    // Animation loop
+    let lastTime = 0;
+    
+    function animate(timestamp) {
+      const deltaTime = timestamp - lastTime;
+      lastTime = timestamp;
+      
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw connections between particles
+      drawConnections();
+      
+      // Update and draw particles
+      particles.forEach(particle => {
+        particle.update(deltaTime);
+        particle.draw();
+      });
+      
+      // Continue animation
+      requestAnimationFrame(animate);
+    }
+    
+    // Start animation
+    requestAnimationFrame(animate);
+  });
 </script>
 </body>
 </html>
