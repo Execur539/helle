@@ -3525,7 +3525,7 @@
         async function checkAIStatus() {
             const aiStatusElement = document.getElementById('ai-status');
             try {
-                const response = await fetch('/ai-proxy/v1/models', {
+                const response = await fetch('/ai-proxy/', {
                     method: 'HEAD'
                 });
                 if (response.ok) {
