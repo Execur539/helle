@@ -1,0 +1,1946 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realistic Water Physics Simulation</title>
+    <style>
+        :root {
+            /* Light theme variables */
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --background-color: #f8f9fa;
+            --text-color: #2c3e50;
+            --panel-color: #ffffff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --header-height: 60px;
+            --water-gradient-1: #66a5f5;
+            --water-gradient-2: #4295eb;
+            --water-blur-color: rgba(66, 149, 235, 0.2);
+            --water-core-color: rgba(86, 169, 255, 0.7);
+            --water-surface-color: rgba(200, 230, 255, 0.9);
+            --water-bg-color: #e3f2fd;
+            --header-gradient-1: #3498db;
+            --header-gradient-2: #2980b9;
+            --preset-btn-bg: #f1f1f1;
+            --preset-btn-text: #2c3e50;
+            --preset-btn-hover: #e0e0e0;
+            --info-panel-bg: rgba(255, 255, 255, 0.8);
+            --border-color: #ddd;
+        }
+        
+        [data-theme="dark"] {
+            /* Dark theme variables */
+            --primary-color: #2196f3;
+            --secondary-color: #1976d2;
+            --background-color: #121212;
+            --text-color: #e0e0e0;
+            --panel-color: #1e1e1e;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --water-gradient-1: #4fc3f7;
+            --water-gradient-2: #29b6f6;
+            --water-blur-color: rgba(79, 195, 247, 0.25);
+            --water-core-color: rgba(77, 208, 255, 0.8);
+            --water-surface-color: rgba(100, 220, 255, 0.95);
+            --water-bg-color: #0a1929;
+            --header-gradient-1: #2196f3;
+            --header-gradient-2: #1976d2;
+            --preset-btn-bg: #333333;
+            --preset-btn-text: #e0e0e0;
+            --preset-btn-hover: #444444;
+            --info-panel-bg: rgba(30, 30, 30, 0.8);
+            --border-color: #444;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--header-gradient-1), var(--header-gradient-2));
+            color: white;
+            padding: 0.5rem 1.5rem;
+            box-shadow: var(--shadow);
+            z-index: 10;
+            height: var(--header-height);
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.3rem 0.7rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        main {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - var(--header-height));
+            overflow: hidden;
+            position: relative;
+        }
+        
+        #simulation-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background-color: var(--water-bg-color);
+        }
+        
+        .control-panel {
+            width: 280px;
+            min-width: 200px;
+            max-width: 350px;
+            background-color: var(--panel-color);
+            box-shadow: var(--shadow);
+            padding: 0.8rem;
+            overflow-y: auto;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            flex: 0 0 auto;
+            height: 100%;
+        }
+        
+        .panel-section {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.8rem;
+        }
+        
+        .panel-section:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        h2 {
+            font-size: 1.1rem;
+            margin-bottom: 0.7rem;
+            color: var(--primary-color);
+        }
+        
+        .control-group {
+            margin-bottom: 0.7rem;
+        }
+        
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.2rem;
+            font-size: 0.85rem;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 4px;
+            background-color: var(--border-color);
+        }
+        
+        input[type="number"] {
+            width: 55px;
+            padding: 0.2rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            background-color: var(--panel-color);
+            color: var(--text-color);
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            font-size: 0.9rem;
+        }
+        
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .preset-btn {
+            background-color: var(--preset-btn-bg);
+            color: var(--preset-btn-text);
+            font-size: 0.8rem;
+            padding: 0.3rem 0.7rem;
+        }
+        
+        .preset-btn:hover {
+            background-color: var(--preset-btn-hover);
+        }
+        
+        .info-panel {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            background-color: var(--info-panel-bg);
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            box-shadow: var(--shadow);
+        }
+
+        select {
+            width: 100%;
+            padding: 0.4rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: var(--panel-color);
+            color: var(--text-color);
+        }
+
+        .performance-indicator {
+            margin-top: 0.5rem;
+            height: 4px;
+            width: 100%;
+            background-color: var(--border-color);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .performance-bar {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        /* Media queries for responsive design */
+        @media (max-width: 768px) {
+            main {
+                flex-direction: column;
+                height: calc(100vh - var(--header-height));
+            }
+            
+            .control-panel {
+                width: 100%;
+                max-width: none;
+                height: auto;
+                max-height: 40vh;
+            }
+            
+            #simulation-container {
+                height: 60vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="title">Realistic Water Physics Simulation</div>
+        <button class="theme-toggle">Toggle Theme</button>
+    </header>
+    
+    <main>
+        <div id="simulation-container">
+            <canvas id="simulation-canvas"></canvas>
+            <div class="info-panel">
+                <span id="particles-count">Particles: 0</span> |
+                <span id="fps">FPS: 0</span> |
+                <span id="optimization-level">Optimization: Auto</span>
+            </div>
+        </div>
+        
+        <div class="control-panel">
+            <div class="panel-section">
+                <h2>Simulation Controls</h2>
+                <div class="control-group">
+                    <button id="start-pause">Pause</button>
+                    <button id="reset">Reset</button>
+                </div>
+                <div class="control-group">
+                    <label for="particles">Number of Particles:</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="range" id="particles" min="100" max="2000" value="1000" step="100">
+                        <input type="number" id="particles-value" value="1000" min="100" max="2000" step="100">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="optimization">Performance Mode:</label>
+                    <select id="optimization">
+                        <option value="auto">Auto-Optimize</option>
+                        <option value="high">Maximum Quality</option>
+                        <option value="balanced">Balanced</option>
+                        <option value="performance">Performance</option>
+                    </select>
+                    <div class="performance-indicator">
+                        <div id="performance-bar" class="performance-bar"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel-section">
+                <h2>Physics Parameters</h2>
+                <div class="control-group">
+                    <label for="gravity">Gravity:</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="range" id="gravity" min="0" max="20" value="9.8" step="0.1">
+                        <input type="number" id="gravity-value" value="9.8" min="0" max="20" step="0.1">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="viscosity">Viscosity:</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="range" id="viscosity" min="0" max="1" value="0.12" step="0.01">
+                        <input type="number" id="viscosity-value" value="0.12" min="0" max="1" step="0.01">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="tension">Surface Tension:</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="range" id="tension" min="0" max="1" value="0.35" step="0.01">
+                        <input type="number" id="tension-value" value="0.35" min="0" max="1" step="0.01">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="stiffness">Pressure Stiffness:</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="range" id="stiffness" min="0" max="30" value="28" step="0.1">
+                        <input type="number" id="stiffness-value" value="28" min="0" max="30" step="0.1">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="damping">Damping:</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="range" id="damping" min="0" max="0.5" value="0.03" step="0.01">
+                        <input type="number" id="damping-value" value="0.03" min="0" max="0.5" step="0.01">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="repulsion">Repulsion Strength:</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="range" id="repulsion" min="0" max="100" value="45" step="1">
+                        <input type="number" id="repulsion-value" value="45" min="0" max="100" step="1">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="cohesion">Cohesion Strength:</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="range" id="cohesion" min="0" max="50" value="10" step="1">
+                        <input type="number" id="cohesion-value" value="10" min="0" max="50" step="1">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="leveling">Leveling Force:</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="range" id="leveling" min="0" max="0.5" value="0.2" step="0.01">
+                        <input type="number" id="leveling-value" value="0.2" min="0" max="0.5" step="0.01">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="speed">Simulation Speed:</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="range" id="speed" min="0.1" max="2" value="1.0" step="0.1">
+                        <input type="number" id="speed-value" value="1.0" min="0.1" max="2" step="0.1">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel-section">
+                <h2>Environment</h2>
+                <div class="control-group">
+                    <label for="obstacles">Obstacles:</label>
+                    <select id="obstacles">
+                        <option value="none">None</option>
+                        <option value="circle">Circle</option>
+                        <option value="rectangle">Rectangle</option>
+                        <option value="custom">Custom Shape</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <button id="add-water">Add Water</button>
+                </div>
+            </div>
+            
+            <div class="panel-section">
+                <h2>Presets</h2>
+                <div class="control-group">
+                    <div class="actions">
+                        <button class="preset-btn" data-preset="water">Default Water</button>
+                        <button class="preset-btn" data-preset="honey">Honey</button>
+                        <button class="preset-btn" data-preset="oil">Oil</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        // Constants for the simulation
+        const PARTICLE_RADIUS = 5;
+        const SMOOTHING_LENGTH = 25; 
+        const REST_DENSITY = 40;
+        const BOUNDARY_DAMPING = -0.5;
+        const GRAVITY = 9.8;
+        const MIN_PARTICLE_DISTANCE = PARTICLE_RADIUS * 0.7;
+        const HYDROSTATIC_FACTOR = 1.0;
+        const SURFACE_THRESHOLD = 5;
+        const GRAVITY_DOMINANCE = 1.0;
+        const MAX_LEVELING_DISTANCE = SMOOTHING_LENGTH * 0.9;
+        const FIXED_TIMESTEP = 1/90;
+        const MAX_DELTA_TIME = 0.05;
+        const VISCOSITY_SCALE = 0.1;
+        const SIMULATION_SPEED = 1.0;
+        const LEVELING_STRENGTH = 0.7;
+        const PRESSURE_EXPONENT = 2.5;
+
+        // New optimization constants
+        const PARTICLE_CULLING_MARGIN = 50; // Pixels beyond the viewport to still simulate
+        const SPATIAL_GRID_CELL_SIZE_FACTOR = 1.0; // Adjust cell size dynamically
+        const DYNAMIC_SMOOTHING_LENGTH = true; // Enable dynamic smoothing length
+        const ADAPTIVE_PHYSICS_ENABLED = true; // Enable adaptive physics timesteps
+        const PARTICLE_MERGE_DISTANCE = PARTICLE_RADIUS * 4; // Distance for merging distant particles
+        const PARTICLE_SPLIT_THRESHOLD = 5; // Number of particles needed to form a cluster for merging
+        const LOD_DISTANCE_THRESHOLD = 200; // Distance for Level-of-Detail simplification
+        const MAX_PARTICLES_PER_FRAME = 1000; // Maximum particles to process in one frame
+        const OFFSCREEN_SIMPLIFICATION = true; // Simplify physics for off-screen particles
+        const LOW_PERFORMANCE_THRESHOLD = 30; // FPS threshold for triggering optimization
+        const DORMANT_VELOCITY_THRESHOLD = 0.5; // Velocity below which particles can become dormant
+        const MAX_ACTIVE_PARTICLES_RATIO = 0.7; // Maximum ratio of active particles
+        
+        // Main simulation class with optimizations
+        class WaterSimulation {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.particles = [];
+                this.activeParticles = [];
+                this.dormantParticles = [];
+                this.mergedParticles = [];
+                this.clusters = [];
+                this.obstacles = [];
+                this.paused = false;
+                this.fps = 0;
+                this.frameCount = 0;
+                this.frameTime = 0;
+                this.spatialHash = {};
+                this.cellSize = SMOOTHING_LENGTH;
+                this.waterLevel = 0;
+                this.waterSurfaceParticles = [];
+                this.lastOptimizationTime = 0;
+                this.performanceHistory = [];
+                this.dynamicTimeStep = FIXED_TIMESTEP;
+                this.viewportMargin = PARTICLE_CULLING_MARGIN;
+                this.isLowPerformanceMode = false;
+                this.optimizationMode = "auto";
+                this.particleActivityMap = new Map(); // Track particle activity
+                this.framesSinceLastOptimization = 0;
+                this.visibleRect = {
+                    left: 0, 
+                    top: 0, 
+                    right: 0, 
+                    bottom: 0
+                };
+                
+                // Timing variables
+                this.timeAccumulator = 0;
+                this.previousPhysicsTime = 0;
+                this.previousWallTime = 0;
+                this.physicsTicks = 0;
+                this.physicsHz = 0;
+                this.physicsHzTime = 0;
+                
+                // Store previous and current states for interpolation
+                this.particleStates = {
+                    previous: [],
+                    current: []
+                };
+                
+                this.simulationQuality = {
+                    particleDetail: 1.0,    // Level of detail for particles (1.0 = full)
+                    physicsAccuracy: 1.0,   // Physics accuracy (1.0 = full)
+                    renderQuality: 1.0,     // Render quality (1.0 = full)
+                    maxActiveParticles: 1.0 // Ratio of particles that can be active
+                };
+                
+                // Improved parameters for faster leveling
+                this.params = {
+                    gravity: 9.8,
+                    viscosity: 0.12,
+                    surfaceTension: 0.35,
+                    pressureStiffness: 28,
+                    repulsionStrength: 45,
+                    cohesionStrength: 10,
+                    damping: 0.03,
+                    levelingForce: 0.2,
+                    particleCount: 1000,
+                    simulationSpeed: SIMULATION_SPEED
+                };
+                
+                // Optimization: Add pre-allocated arrays for better performance
+                this.cellVerified = {};
+                this.neighborCache = {};
+                this.neighborCacheFrame = 0;
+                this.performanceMode = true;
+                
+                // Initialize WebGL if supported (for faster rendering)
+                this.initWebGL();
+                
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+                
+                this.reset();
+                
+                // Initialize state arrays
+                this.initializeStates();
+
+                // Initialize optimization history
+                this.initOptimizationTracking();
+            }
+            
+            // Initialize WebGL renderer if supported
+            initWebGL() {
+                try {
+                    // Try to get WebGL context
+                    this.glCtx = this.canvas.getContext('webgl2') || this.canvas.getContext('webgl');
+                    
+                    if (this.glCtx) {
+                        this.hasWebGL = true;
+                        this.initShaders();
+                        console.log("WebGL rendering enabled");
+                    } else {
+                        this.hasWebGL = false;
+                        console.log("WebGL not supported, using Canvas 2D");
+                    }
+                } catch (e) {
+                    this.hasWebGL = false;
+                    console.error("WebGL initialization failed:", e);
+                }
+            }
+            
+            // Initialize WebGL shaders
+            initShaders() {
+                if (!this.hasWebGL) return;
+                
+                // Vertex shader program
+                const vsSource = `
+                    attribute vec2 aVertexPosition;
+                    attribute float aPointSize;
+                    attribute vec4 aColor;
+                    
+                    uniform mat4 uModelViewMatrix;
+                    uniform mat4 uProjectionMatrix;
+                    
+                    varying vec4 vColor;
+                    
+                    void main() {
+                        gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aVertexPosition, 0.0, 1.0);
+                        gl_PointSize = aPointSize;
+                        vColor = aColor;
+                    }
+                `;
+                
+                // Fragment shader program
+                const fsSource = `
+                    precision mediump float;
+                    varying vec4 vColor;
+                    
+                    void main() {
+                        float dist = length(gl_PointCoord - vec2(0.5, 0.5)) * 2.0;
+                        float alpha = 1.0 - smoothstep(0.8, 1.0, dist);
+                        gl_FragColor = vec4(vColor.rgb, vColor.a * alpha);
+                    }
+                `;
+                
+                // Create shader program
+                this.shaderProgram = this.createShaderProgram(vsSource, fsSource);
+                
+                if (this.shaderProgram) {
+                    // Get attribute and uniform locations
+                    this.programInfo = {
+                        program: this.shaderProgram,
+                        attribLocations: {
+                            vertexPosition: this.glCtx.getAttribLocation(this.shaderProgram, 'aVertexPosition'),
+                            pointSize: this.glCtx.getAttribLocation(this.shaderProgram, 'aPointSize'),
+                            color: this.glCtx.getAttribLocation(this.shaderProgram, 'aColor'),
+                        },
+                        uniformLocations: {
+                            projectionMatrix: this.glCtx.getUniformLocation(this.shaderProgram, 'uProjectionMatrix'),
+                            modelViewMatrix: this.glCtx.getUniformLocation(this.shaderProgram, 'uModelViewMatrix'),
+                        },
+                    };
+                    
+                    // Initialize buffers
+                    this.initBuffers();
+                }
+            }
+            
+            // Create a shader program
+            createShaderProgram(vsSource, fsSource) {
+                const gl = this.glCtx;
+                
+                const vertexShader = this.loadShader(gl.VERTEX_SHADER, vsSource);
+                const fragmentShader = this.loadShader(gl.FRAGMENT_SHADER, fsSource);
+                
+                if (!vertexShader || !fragmentShader) return null;
+                
+                // Create the shader program
+                const shaderProgram = gl.createProgram();
+                gl.attachShader(shaderProgram, vertexShader);
+                gl.attachShader(shaderProgram, fragmentShader);
+                gl.linkProgram(shaderProgram);
+                
+                // Check if program linked successfully
+                if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+                    console.error('Unable to initialize the shader program: ' + gl.getProgramInfoLog(shaderProgram));
+                    return null;
+                }
+                
+                return shaderProgram;
+            }
+            
+            // Load a shader
+            loadShader(type, source) {
+                const gl = this.glCtx;
+                const shader = gl.createShader(type);
+                
+                // Send the source to the shader object
+                gl.shaderSource(shader, source);
+                
+                // Compile the shader program
+                gl.compileShader(shader);
+                
+                // Check if it compiled successfully
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    console.error('An error occurred compiling the shaders: ' + gl.getShaderInfoLog(shader));
+                    gl.deleteShader(shader);
+                    return null;
+                }
+                
+                return shader;
+            }
+            
+            // Initialize WebGL buffers
+            initBuffers() {
+                const gl = this.glCtx;
+                
+                // Create buffers for particle positions, sizes and colors
+                this.buffers = {
+                    position: gl.createBuffer(),
+                    size: gl.createBuffer(),
+                    color: gl.createBuffer(),
+                };
+            }
+            
+            // Initialize optimization tracking
+            initOptimizationTracking() {
+                this.performanceHistory = new Array(10).fill(60); // Start with 60fps history
+                this.adaptiveSettings = {
+                    currentLevel: 0,
+                    levels: [
+                        // Level 0: Maximum quality
+                        {
+                            particleDetail: 1.0,
+                            physicsAccuracy: 1.0,
+                            renderQuality: 1.0,
+                            maxActiveParticles: 1.0
+                        },
+                        // Level 1: High quality
+                        {
+                            particleDetail: 0.9,
+                            physicsAccuracy: 0.9,
+                            renderQuality: 0.9,
+                            maxActiveParticles: 0.95
+                        },
+                        // Level 2: Medium quality
+                        {
+                            particleDetail: 0.7,
+                            physicsAccuracy: 0.8,
+                            renderQuality: 0.7,
+                            maxActiveParticles: 0.85
+                        },
+                        // Level 3: Low quality
+                        {
+                            particleDetail: 0.5,
+                            physicsAccuracy: 0.7,
+                            renderQuality: 0.6,
+                            maxActiveParticles: 0.7
+                        },
+                        // Level 4: Minimum quality
+                        {
+                            particleDetail: 0.4,
+                            physicsAccuracy: 0.6,
+                            renderQuality: 0.4,
+                            maxActiveParticles: 0.6
+                        },
+                    ]
+                };
+            }
+            
+            // Apply optimization level based on performance
+            applyOptimizationLevel(level) {
+                if (level >= 0 && level < this.adaptiveSettings.levels.length) {
+                    this.simulationQuality = { ...this.adaptiveSettings.levels[level] };
+                    this.adaptiveSettings.currentLevel = level;
+                    
+                    // Update UI
+                    const levelNames = ["Maximum", "High", "Balanced", "Low", "Minimum"];
+                    const levelName = levelNames[level] || "Custom";
+                    document.getElementById('optimization-level').textContent = `Optimization: ${levelName}`;
+                    
+                    // Update performance bar
+                    const perfBar = document.getElementById('performance-bar');
+                    if (perfBar) {
+                        perfBar.style.width = `${(1 - level / (this.adaptiveSettings.levels.length - 1)) * 100}%`;
+                    }
+                    
+                    return true;
+                }
+                return false;
+            }
+            
+            // Initialize state arrays for interpolation
+            initializeStates() {
+                this.particleStates.previous = [];
+                this.particleStates.current = [];
+                
+                // Copy particle states
+                for (const particle of this.particles) {
+                    this.particleStates.previous.push({
+                        x: particle.x,
+                        y: particle.y
+                    });
+                    
+                    this.particleStates.current.push({
+                        x: particle.x,
+                        y: particle.y
+                    });
+                }
+            }
+            
+            // Store current states as previous before physics update
+            updateStates() {
+                // Ensure arrays are the right size
+                while (this.particleStates.previous.length < this.particles.length) {
+                    this.particleStates.previous.push({x: 0, y: 0});
+                    this.particleStates.current.push({x: 0, y: 0});
+                }
+                
+                // Copy current to previous
+                for (let i = 0; i < this.particles.length; i++) {
+                    this.particleStates.previous[i].x = this.particleStates.current[i].x;
+                    this.particleStates.previous[i].y = this.particleStates.current[i].y;
+                    
+                    // Update current state
+                    this.particleStates.current[i].x = this.particles[i].x;
+                    this.particleStates.current[i].y = this.particles[i].y;
+                }
+            }
+            
+            resize() {
+                this.canvas.width = this.canvas.parentElement.clientWidth;
+                this.canvas.height = this.canvas.parentElement.clientHeight;
+                this.width = this.canvas.width;
+                this.height = this.canvas.height;
+            }
+            
+            reset() {
+                this.particles = [];
+                this.createParticles(this.params.particleCount);
+                document.getElementById('particles-count').textContent = `Particles: ${this.particles.length}`;
+                
+                // Reset timing variables
+                this.timeAccumulator = 0;
+                this.previousPhysicsTime = 0;
+                this.previousWallTime = 0;
+                
+                // Initialize states
+                this.initializeStates();
+            }
+            
+            createParticles(count) {
+                const containerWidth = this.width * 0.3;
+                const containerHeight = this.height * 0.4;
+                const startX = (this.width - containerWidth) / 2;
+                const startY = 50;
+                
+                for (let i = 0; i < count; i++) {
+                    const x = startX + Math.random() * containerWidth;
+                    const y = startY + Math.random() * containerHeight;
+                    
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: 0,
+                        vy: 0,
+                        fx: 0,
+                        fy: 0,
+                        density: 0,
+                        pressure: 0
+                    });
+                }
+            }
+            
+            addWater(amount = 100) {
+                const startX = Math.random() * (this.width - 100) + 50;
+                const startY = 20;
+                
+                for (let i = 0; i < amount; i++) {
+                    const x = startX + Math.random() * 50;
+                    const y = startY + Math.random() * 20;
+                    
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: 0,
+                        vy: 0,
+                        fx: 0,
+                        fy: 0,
+                        density: 0,
+                        pressure: 0
+                    });
+                }
+                
+                document.getElementById('particles-count').textContent = `Particles: ${this.particles.length}`;
+            }
+            
+            // Faster spatial hash building with direct array indexing
+            buildSpatialHash() {
+                // Reset spatial hash
+                this.spatialHash = {};
+                this.cellVerified = {};
+                
+                // Build spatial hash with array pre-allocation
+                for (let i = 0; i < this.particles.length; i++) {
+                    const p = this.particles[i];
+                    const cellX = Math.floor(p.x / this.cellSize);
+                    const cellY = Math.floor(p.y / this.cellSize);
+                    const cellKey = `${cellX},${cellY}`;
+                    
+                    if (!this.cellVerified[cellKey]) {
+                        this.spatialHash[cellKey] = [];
+                        this.cellVerified[cellKey] = true;
+                    }
+                    
+                    this.spatialHash[cellKey].push(i);
+                }
+                
+                // Increment neighbor cache frame to invalidate cache
+                this.neighborCacheFrame++;
+                
+                // Clear neighbor cache if it's too large (memory optimization)
+                if (Object.keys(this.neighborCache).length > 10000) {
+                    this.neighborCache = {};
+                }
+            }
+            
+            // Optimized neighbor finding with caching
+            getNeighbors(particle, particleIndex) {
+                // Try to use cached neighbors if available from this frame
+                const cacheKey = `${particleIndex}_${this.neighborCacheFrame}`;
+                if (this.neighborCache[cacheKey]) {
+                    return this.neighborCache[cacheKey];
+                }
+                
+                const neighbors = [];
+                const cellX = Math.floor(particle.x / this.cellSize);
+                const cellY = Math.floor(particle.y / this.cellSize);
+                
+                // Check surrounding cells
+                for (let i = -1; i <= 1; i++) {
+                    for (let j = -1; j <= 1; j++) {
+                        const cellKey = `${cellX + i},${cellY + j}`;
+                        const cellParticles = this.spatialHash[cellKey];
+                        
+                        if (cellParticles) {
+                            for (const idx of cellParticles) {
+                                const p = this.particles[idx];
+                                if (idx !== particleIndex) {
+                                    const dx = p.x - particle.x;
+                                    const dy = p.y - particle.y;
+                                    const r2 = dx * dx + dy * dy;
+                                    
+                                    // Optimization: Use squared distance check
+                                    if (r2 < SMOOTHING_LENGTH * SMOOTHING_LENGTH) {
+                                        const r = Math.sqrt(r2); // Only calculate sqrt when needed
+                                        neighbors.push({
+                                            particle: p,
+                                            dx: dx,
+                                            dy: dy,
+                                            r: r
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Cache the results
+                this.neighborCache[cacheKey] = neighbors;
+                
+                return neighbors;
+            }
+            
+            // Kernel function for SPH - using cubic spline kernel for better stability
+            kernel(r, h) {
+                if (r > h) return 0;
+                
+                const q = r / h;
+                const s = 8 / (Math.PI * Math.pow(h, 3));
+                
+                if (q <= 1) {
+                    return s * (1 - 1.5 * q * q + 0.75 * q * q * q);
+                } else {
+                    return s * 0.25 * Math.pow(2 - q, 3);
+                }
+            }
+            
+            gradKernel(r, h, dx, dy) {
+                if (r > h || r === 0) return { x: 0, y: 0 };
+                
+                const q = r / h;
+                const s = 8 / (Math.PI * Math.pow(h, 4));
+                let factor;
+                
+                if (q <= 1) {
+                    factor = s * (-3 * q + 2.25 * q * q) / r;
+                } else {
+                    factor = s * -0.75 * Math.pow(2 - q, 2) / r;
+                }
+                
+                return {
+                    x: factor * dx,
+                    y: factor * dy
+                };
+            }
+            
+            // Calculate color field for surface tension (more accurate model)
+            calculateColorField(particle, neighbors) {
+                // Color gradient calculation (magnitude and direction)
+                let colorGradX = 0;
+                let colorGradY = 0;
+                let colorLaplacian = 0;
+                
+                for (const n of neighbors) {
+                    if (n.r > 0) {
+                        // Unit direction from particle to neighbor
+                        const nx = n.dx / n.r;
+                        const ny = n.dy / n.r;
+                        
+                        // Contribution to color gradient
+                        const kernelGrad = this.gradKernel(n.r, SMOOTHING_LENGTH, n.dx, n.dy);
+                        colorGradX += kernelGrad.x;
+                        colorGradY += kernelGrad.y;
+                        
+                        // Contribution to color laplacian (for curvature)
+                        colorLaplacian += 2 * this.kernel(n.r, SMOOTHING_LENGTH) / n.r;
+                    }
+                }
+                
+                // Normalize color gradient
+                const colorGradMagnitude = Math.sqrt(colorGradX * colorGradX + colorGradY * colorGradY);
+                
+                return {
+                    gradientX: colorGradX,
+                    gradientY: colorGradY,
+                    magnitude: colorGradMagnitude,
+                    laplacian: colorLaplacian
+                };
+            }
+            
+            // More efficient water level calculation using sampling
+            calculateWaterLevel() {
+                if (this.particles.length === 0) return 0;
+                
+                // First do a quick rough pass to find approximate water top surface
+                // Sample only a subset of particles for better performance
+                const sampleCount = Math.min(this.particles.length, 200);
+                const sampleStep = Math.max(1, Math.floor(this.particles.length / sampleCount));
+                const sampledParticles = [];
+                
+                for (let i = 0; i < this.particles.length; i += sampleStep) {
+                    sampledParticles.push(this.particles[i]);
+                }
+                
+                // Sort by y-coordinate
+                sampledParticles.sort((a, b) => a.y - b.y);
+                
+                // Take approximately top 20% of particles
+                const topCount = Math.max(5, Math.floor(sampledParticles.length * 0.2));
+                const topParticles = sampledParticles.slice(0, topCount);
+                
+                // Calculate top height as a baseline
+                let roughTopLevel = 0;
+                for (const p of topParticles) {
+                    roughTopLevel += p.y;
+                }
+                roughTopLevel /= topCount;
+                
+                // Now find real surface particles
+                this.waterSurfaceParticles = [];
+                
+                // Use height threshold from the rough pass to find surface particles
+                for (let i = 0; i < this.particles.length; i++) {
+                    const particle = this.particles[i];
+                    
+                    // Only check particles near the rough top level
+                    if (particle.y > roughTopLevel + SMOOTHING_LENGTH * 0.5) continue;
+                    
+                    let neighborsAbove = 0;
+                    const neighbors = this.getNeighbors(particle, i);
+                    
+                    // Count particles above this one
+                    for (const n of neighbors) {
+                        if (n.dy < -PARTICLE_RADIUS) {
+                            neighborsAbove++;
+                        }
+                    }
+                    
+                    // If few neighbors above and enough total neighbors, it's a surface particle
+                    if (neighborsAbove <= 2 && neighbors.length >= 2) {
+                        this.waterSurfaceParticles.push(particle);
+                        particle.isSurface = true;
+                    } else {
+                        particle.isSurface = false;
+                    }
+                }
+                
+                // If we found surface particles, use them
+                if (this.waterSurfaceParticles.length > 0) {
+                    // Get median water level for better stability
+                    const heights = this.waterSurfaceParticles.map(p => p.y).sort((a, b) => a - b);
+                    const medianIndex = Math.floor(heights.length / 2);
+                    return heights[medianIndex];
+                }
+                
+                // Fallback to rough estimate
+                return roughTopLevel;
+            }
+            
+            computeDensityPressure() {
+                // Build spatial hash for neighbor finding
+                this.buildSpatialHash();
+                
+                // Compute density and pressure for all particles
+                for (let i = 0; i < this.particles.length; i++) {
+                    const particle = this.particles[i];
+                    
+                    // Reset properties
+                    particle.density = 0;
+                    particle.nearSurface = false;
+                    particle.neighbors = 0;
+                    particle.isSurface = false;
+                    
+                    // Self-density
+                    particle.density += this.kernel(0, SMOOTHING_LENGTH);
+                    
+                    // Contribution from neighbors
+                    const neighbors = this.getNeighbors(particle, i);
+                    particle.neighbors = neighbors.length;
+                    
+                    for (const n of neighbors) {
+                        particle.density += this.kernel(n.r, SMOOTHING_LENGTH);
+                    }
+                    
+                    // Identify particles near surface
+                    if (neighbors.length < SURFACE_THRESHOLD) {
+                        particle.nearSurface = true;
+                    }
+                    
+                    // Much stronger pressure response for better level surfaces
+                    particle.pressure = this.params.pressureStiffness * 
+                                      Math.max(0, Math.pow(particle.density / REST_DENSITY, PRESSURE_EXPONENT) - 1);
+                }
+                
+                // Calculate the average water level
+                this.waterLevel = this.calculateWaterLevel();
+                
+                // Store the water level in particles for consistent force application
+                for (let i = 0; i < this.particles.length; i++) {
+                    this.particles[i].waterLevel = this.waterLevel;
+                }
+            }
+            
+            computeForces() {
+                // Optimization: Pre-filter active particles 
+                // (those with neighbors - isolated particles can be skipped)
+                this.activeParticles = [];
+                for (let i = 0; i < this.particles.length; i++) {
+                    const particle = this.particles[i];
+                    
+                    // Reset forces first
+                    particle.fx = 0;
+                    particle.fy = this.params.gravity * GRAVITY_DOMINANCE;
+                    
+                    // Track particles with neighbors that need force calculation
+                    const neighbors = this.getNeighbors(particle, i);
+                    if (neighbors.length > 0 || particle.nearSurface) {
+                        this.activeParticles.push({particle, index: i});
+                    }
+                }
+                
+                // Calculate forces only for active particles
+                for (const {particle, index} of this.activeParticles) {
+                    const neighbors = this.getNeighbors(particle, index);
+                    const isInWater = particle.density > (REST_DENSITY * 0.3);
+                    
+                    // Standard forces: surface tension, repulsion, pressure, viscosity
+                    if (particle.isSurface || particle.nearSurface) {
+                        const colorField = this.calculateColorField(particle, neighbors);
+                        
+                        if (colorField.magnitude > 0.01) {
+                            const nx = colorField.gradientX / (colorField.magnitude || 1);
+                            const ny = colorField.gradientY / (colorField.magnitude || 1);
+                            
+                            const surfaceTensionCoeff = this.params.surfaceTension;
+                            const surfaceTensionForce = -surfaceTensionCoeff * colorField.laplacian;
+                            
+                            particle.fx += surfaceTensionForce * nx;
+                            particle.fy += surfaceTensionForce * ny;
+                        }
+                    }
+                    
+                    // Enhanced hydrostatic force for faster leveling
+                    // This is the key to creating level water surfaces
+                    const depthFromSurface = particle.y - particle.waterLevel;
+                    
+                    if (isInWater) {
+                        // Apply much stronger, faster-acting hydrostatic forces
+                        if (Math.abs(depthFromSurface) > PARTICLE_RADIUS * 0.5) {
+                            // Below water level: apply upward hydrostatic force
+                            if (depthFromSurface > 0) {
+                                const hydroFactor = Math.min(
+                                    depthFromSurface * HYDROSTATIC_FACTOR, 
+                                    this.params.gravity * 1.2  // Can exceed gravity for faster leveling
+                                );
+                                
+                                // Apply exponential force for faster convergence near surface
+                                particle.fy -= hydroFactor * (0.8 + 0.2 * Math.sqrt(particle.density / REST_DENSITY));
+                            }
+                            // Above water level: apply downward force
+                            else if (depthFromSurface < 0) {
+                                const hydroFactor = Math.min(
+                                    Math.abs(depthFromSurface) * HYDROSTATIC_FACTOR * 0.9,
+                                    this.params.gravity * 0.8
+                                );
+                                
+                                // Apply strong downward force
+                                particle.fy += hydroFactor;
+                            }
+                        }
+                    }
+                    
+                    // Direct water height leveling forces
+                    if (neighbors.length > 0) {
+                        // Compute average height of neighbors
+                        let localAvgHeight = 0;
+                        let weightSum = 0;
+                        
+                        // Find particles especially in horizontal neighborhood
+                        for (const n of neighbors) {
+                            // Prioritize horizontal neighbors for better leveling
+                            const horizontalness = Math.abs(n.dx) / (Math.abs(n.dy) + 0.01);
+                            const weight = Math.max(0, 1 - n.r / MAX_LEVELING_DISTANCE) * 
+                                         (1 + horizontalness * 0.5); // Boost horizontal neighbors
+                            
+                            localAvgHeight += n.particle.y * weight;
+                            weightSum += weight;
+                        }
+                        
+                        if (weightSum > 0) {
+                            localAvgHeight /= weightSum;
+                            const heightDiff = particle.y - localAvgHeight;
+                            
+                            // Apply a very strong leveling force based on local height difference
+                            if (Math.abs(heightDiff) > PARTICLE_RADIUS * 0.3) {
+                                // Scale leveling force by how close to surface
+                                const surfaceProximity = particle.isSurface ? 1.2 : 
+                                                      (particle.nearSurface ? 1.0 : 0.8);
+                                
+                                // Leveling force is proportional to height difference
+                                // and stronger closer to surface
+                                const levelForce = heightDiff * this.params.levelingForce * surfaceProximity;
+                                
+                                // Add a strong leveling force, capped relative to gravity
+                                const maxLevel = this.params.gravity * 0.9;
+                                const minLevel = -this.params.gravity * 0.9;
+                                particle.fy -= Math.max(Math.min(levelForce, maxLevel), minLevel);
+                            }
+                        }
+                    }
+                    
+                    // Apply standard SPH pressure and viscosity forces
+                    for (const n of neighbors) {
+                        const neighbor = n.particle;
+                        const r = n.r;
+                        const dx = n.dx;
+                        const dy = n.dy;
+                        
+                        if (r > 0) {
+                            const nx = -dx / r;
+                            const ny = -dy / r;
+                            
+                            // Short-range particle repulsion
+                            if (r < PARTICLE_RADIUS * 2) {
+                                const repulsionFactor = this.params.repulsionStrength * 
+                                                     Math.pow(1.0 - r / (PARTICLE_RADIUS * 2), 1.6);
+                                
+                                particle.fx += repulsionFactor * nx;
+                                particle.fy += repulsionFactor * ny;
+                            }
+                            
+                            // Pressure force with aggressive response curve for better leveling
+                            if (particle.density > 0 && neighbor.density > 0) {
+                                const pressureGrad = this.gradKernel(r, SMOOTHING_LENGTH, dx, dy);
+                                
+                                // Symmetric pressure formulation, enhanced response
+                                const pressureTerm = (particle.pressure / (particle.density * particle.density) + 
+                                                 neighbor.pressure / (neighbor.density * neighbor.density));
+                                
+                                particle.fx -= pressureTerm * pressureGrad.x;
+                                particle.fy -= pressureTerm * pressureGrad.y;
+                            }
+                            
+                            // Optimized viscosity calculation
+                            const dvx = neighbor.vx - particle.vx;
+                            const dvy = neighbor.vy - particle.vy;
+                            
+                            const viscosityFactor = this.params.viscosity * VISCOSITY_SCALE * 
+                                                 (1 - r / SMOOTHING_LENGTH);
+                            
+                            particle.fx += viscosityFactor * dvx;
+                            particle.fy += viscosityFactor * dvy;
+                            
+                            // Directional cohesion (mostly horizontal)
+                            const heightDiff = Math.abs(particle.y - neighbor.y);
+                            
+                            if (r > PARTICLE_RADIUS * 1.5 && heightDiff < SMOOTHING_LENGTH * 0.4) {
+                                // More horizontal cohesion, less vertical
+                                const horizontalFactor = Math.max(0, 1 - heightDiff / (SMOOTHING_LENGTH * 0.4));
+                                const cohesionFactor = this.params.cohesionStrength * 
+                                                    (1.0 - r / SMOOTHING_LENGTH) * 
+                                                    horizontalFactor;
+                                
+                                // Lateral cohesion helps create smoother surfaces
+                                particle.fx -= cohesionFactor * nx;
+                                
+                                // Minimal vertical cohesion
+                                const verticalFactor = 0.02;
+                                particle.fy -= cohesionFactor * ny * verticalFactor;
+                            }
+                        }
+                    }
+                    
+                    // Extra downward bias for non-surface particles
+                    if (!particle.isSurface) {
+                        particle.fy += 0.03; // Slight extra gravity for faster settling
+                    }
+                }
+                
+                // Limit maximum forces
+                const maxForce = 550; // Slightly higher to allow stronger leveling
+                for (const {particle} of this.activeParticles) {
+                    const fx = particle.fx;
+                    const fy = particle.fy;
+                    const forceMagnitude = Math.sqrt(fx * fx + fy * fy);
+                    
+                    if (forceMagnitude > maxForce) {
+                        const scaleFactor = maxForce / forceMagnitude;
+                        particle.fx *= scaleFactor;
+                        particle.fy *= scaleFactor;
+                    }
+                }
+            }
+            
+            // Main physics step - fixed timestep
+            step(dt) {
+                // Scale dt by simulation speed
+                const scaledDt = dt * this.params.simulationSpeed;
+                
+                // Update physics
+                this.computeDensityPressure();
+                this.computeForces();
+                this.integrate(scaledDt);
+            }
+            
+            integrate(dt) {
+                // Store current particle positions for interpolation
+                this.updateStates();
+                
+                // Update velocities and positions
+                for (const particle of this.particles) {
+                    // Apply forces
+                    particle.vx += particle.fx * dt;
+                    particle.vy += particle.fy * dt;
+                    
+                    // Apply consistent damping not tied to viscosity
+                    const dampingFactor = this.params.damping;
+                    
+                    particle.vx *= (1 - dampingFactor * dt);
+                    particle.vy *= (1 - dampingFactor * dt);
+                    
+                    // Extra damping only for extreme upward motion
+                    if (particle.vy < -5) { 
+                        particle.vy *= (1 - 0.03 * dt);
+                    }
+                    
+                    // Update position
+                    particle.x += particle.vx * dt;
+                    particle.y += particle.vy * dt;
+                    
+                    // Handle boundary conditions
+                    this.enforceBoundary(particle);
+                }
+                
+                // Resolve collisions
+                this.resolveCollisions();
+            }
+            
+            // Direct collision resolution between particles that may have interpenetrated
+            resolveCollisions() {
+                // Use spatial hash for efficient neighbor finding
+                for (let i = 0; i < this.particles.length; i++) {
+                    const p1 = this.particles[i];
+                    const cellX = Math.floor(p1.x / this.cellSize);
+                    const cellY = Math.floor(p1.y / this.cellSize);
+                    
+                    // Check surrounding cells for overlapping particles
+                    for (let dx = -1; dx <= 1; dx++) {
+                        for (let dy = -1; dy <= 1; dy++) {
+                            const cellKey = `${cellX + dx},${cellY + dy}`;
+                            const cellParticles = this.spatialHash[cellKey];
+                            
+                            if (cellParticles) {
+                                for (const idx of cellParticles) {
+                                    if (idx > i) { // Only check each pair once
+                                        const p2 = this.particles[idx];
+                                        
+                                        const dx = p2.x - p1.x;
+                                        const dy = p2.y - p1.y;
+                                        const distSq = dx * dx + dy * dy;
+                                        const minDist = PARTICLE_RADIUS * 2;
+                                        
+                                        // If particles are overlapping
+                                        if (distSq < minDist * minDist) {
+                                            const dist = Math.sqrt(distSq);
+                                            const overlap = minDist - dist;
+                                            
+                                            if (dist > 0) {
+                                                // Push particles apart based on overlap
+                                                const nx = dx / dist;
+                                                const ny = dy / dist;
+                                                
+                                                // Each particle moves half the distance
+                                                const moveX = nx * overlap * 0.5;
+                                                const moveY = ny * overlap * 0.5;
+                                                
+                                                p1.x -= moveX;
+                                                p1.y -= moveY;
+                                                p2.x += moveX;
+                                                p2.y += moveY;
+                                                
+                                                // Adjust velocities for realistic collision response
+                                                const relVelX = p2.vx - p1.vx;
+                                                const relVelY = p2.vy - p1.vy;
+                                                
+                                                const relVelDotNormal = relVelX * nx + relVelY * ny;
+                                                
+                                                // Only apply impulse if particles are moving toward each other
+                                                if (relVelDotNormal < 0) {
+                                                    const restitution = 0.3; // Coefficient of restitution
+                                                    const impulse = (-(1 + restitution) * relVelDotNormal) / 2;
+                                                    
+                                                    p1.vx -= impulse * nx;
+                                                    p1.vy -= impulse * ny;
+                                                    p2.vx += impulse * nx;
+                                                    p2.vy += impulse * ny;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            enforceBoundary(particle) {
+                // More bouncy walls for more dynamic behavior
+                const restitution = 0.5;
+                
+                // Left boundary
+                if (particle.x < PARTICLE_RADIUS) {
+                    particle.vx = Math.abs(particle.vx) * restitution;
+                    particle.x = PARTICLE_RADIUS;
+                }
+                
+                // Right boundary
+                if (particle.x > this.width - PARTICLE_RADIUS) {
+                    particle.vx = -Math.abs(particle.vx) * restitution;
+                    particle.x = this.width - PARTICLE_RADIUS;
+                }
+                
+                // Top boundary
+                if (particle.y < PARTICLE_RADIUS) {
+                    particle.vy = Math.abs(particle.vy) * restitution;
+                    particle.y = PARTICLE_RADIUS;
+                }
+                
+                // Bottom boundary
+                if (particle.y > this.height - PARTICLE_RADIUS) {
+                    particle.vy = -Math.abs(particle.vy) * restitution;
+                    particle.y = this.height - PARTICLE_RADIUS;
+                    
+                    // Add random velocity on bottom collision for more natural flow
+                    particle.vx += (Math.random() - 0.5) * 1.0;
+                }
+            }
+            
+            // Main update loop - called each animation frame
+            update(timestamp) {
+                // Convert timestamp to seconds
+                const timeInSeconds = timestamp / 1000;
+                
+                // First frame - initialize timing
+                if (this.previousWallTime === 0) {
+                    this.previousWallTime = timeInSeconds;
+                    this.previousPhysicsTime = timeInSeconds;
+                    requestAnimationFrame(t => this.update(t));
+                    return;
+                }
+                
+                // Calculate the elapsed time since last frame
+                const deltaTime = Math.min(timeInSeconds - this.previousWallTime, MAX_DELTA_TIME);
+                this.previousWallTime = timeInSeconds;
+                
+                // Only accumulate time and run physics if not paused
+                if (!this.paused) {
+                    // Accumulate time for fixed-step physics
+                    this.timeAccumulator += deltaTime;
+                    
+                    // Run physics simulation at fixed intervals
+                    // This ensures consistent behavior regardless of frame rate
+                    while (this.timeAccumulator >= FIXED_TIMESTEP) {
+                        this.step(FIXED_TIMESTEP);
+                        this.timeAccumulator -= FIXED_TIMESTEP;
+                        this.physicsTicks++;
+                    }
+                    
+                    // Track physics steps per second (for debug)
+                    this.physicsHzTime += deltaTime;
+                    if (this.physicsHzTime >= 1.0) {
+                        this.physicsHz = this.physicsTicks;
+                        this.physicsTicks = 0;
+                        this.physicsHzTime -= 1.0;
+                    }
+                }
+                
+                // Calculate interpolation alpha for rendering
+                // Alpha 0 = previous state, 1 = current state
+                const alpha = this.timeAccumulator / FIXED_TIMESTEP;
+                
+                // Update FPS counter
+                this.frameCount++;
+                this.frameTime += deltaTime;
+                if (this.frameTime >= 1.0) {
+                    this.fps = this.frameCount;
+                    // Update display with FPS and physics Hz for debugging
+                    document.getElementById('fps').textContent = `FPS: ${this.fps} | Physics: ${this.physicsHz}Hz`;
+                    this.frameCount = 0;
+                    this.frameTime = 0;
+                }
+                
+                // Render the scene with interpolation
+                this.render(alpha);
+                
+                // Request next frame
+                requestAnimationFrame(t => this.update(t));
+            }
+            
+            // Optimized rendering that uses batch processing and fewer gradients
+            render(interpolationAlpha) {
+                // Clear canvas with a single call
+                this.ctx.clearRect(0, 0, this.width, this.height);
+                
+                // Draw water background
+                this.ctx.fillStyle = 'rgba(225, 242, 254, 0.2)';
+                this.ctx.fillRect(0, 0, this.width, this.height);
+                
+                // Draw surface water level indicator (for debugging)
+                // this.ctx.strokeStyle = 'rgba(100, 200, 255, 0.3)';
+                // this.ctx.beginPath();
+                // this.ctx.moveTo(0, this.waterLevel);
+                // this.ctx.lineTo(this.width, this.waterLevel);
+                // this.ctx.stroke();
+                
+                // Create batches of particles for more efficient rendering
+                // Group by similar depth/color rather than drawing each particle individually
+                const depthBatches = new Map();
+                const batchSize = 0.1; // 10 depth batches
+                
+                // Group particles by depth for batch rendering
+                for (let i = 0; i < this.particles.length; i++) {
+                    const particle = this.particles[i];
+                    
+                    // Calculate interpolated position
+                    let renderX = particle.x;
+                    let renderY = particle.y;
+                    
+                    if (i < this.particleStates.previous.length && i < this.particleStates.current.length) {
+                        const prevState = this.particleStates.previous[i];
+                        const currState = this.particleStates.current[i];
+                        
+                        renderX = prevState.x + (currState.x - prevState.x) * interpolationAlpha;
+                        renderY = prevState.y + (currState.y - prevState.y) * interpolationAlpha;
+                    }
+                    
+                    // Determine depth batch
+                    const depth = Math.max(0, Math.min(1, (renderY / this.height) * 2));
+                    const batchKey = Math.floor(depth / batchSize) * batchSize;
+                    
+                    if (!depthBatches.has(batchKey)) {
+                        depthBatches.set(batchKey, {
+                            depth: depth,
+                            particles: []
+                        });
+                    }
+                    
+                    // Add position to appropriate batch
+                    const batch = depthBatches.get(batchKey);
+                    batch.particles.push({
+                        x: renderX,
+                        y: renderY,
+                        isSurface: particle.isSurface
+                    });
+                }
+                
+                // Render particles in batches by depth
+                depthBatches.forEach((batch, batchKey) => {
+                    const depth = batch.depth;
+                    
+                    // Calculate single color for this depth batch
+                    const r = Math.floor(66 + depth * 20);
+                    const g = Math.floor(165 + depth * 30);
+                    const b = Math.floor(245 - depth * 50);
+                    
+                    // Draw blur circles first (use one gradient per batch)
+                    const blurRadius = PARTICLE_RADIUS * 2.8;
+                    this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.2)`;
+                    
+                    // Draw all particle blurs in this batch
+                    for (const p of batch.particles) {
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x, p.y, blurRadius, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                    
+                    // Draw core circles next (same color but more opaque)
+                    this.ctx.fillStyle = `rgba(${r + 20}, ${g + 20}, ${b}, 0.7)`;
+                    
+                    // Draw all particle cores in this batch
+                    for (const p of batch.particles) {
+                        // Use different radius for surface particles
+                        const coreRadius = p.isSurface ? PARTICLE_RADIUS * 0.8 : PARTICLE_RADIUS * 0.7;
+                        
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x, p.y, coreRadius, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                });
+            }
+            
+            togglePause() {
+                this.paused = !this.paused;
+                return this.paused;
+            }
+            
+            applyPreset(presetName) {
+                switch(presetName) {
+                    case 'water':
+                        this.params = {
+                            gravity: 9.8,
+                            viscosity: 0.12,      // Fixed viscosity scaled value
+                            surfaceTension: 0.35, 
+                            pressureStiffness: 35,       // Higher for better level surfaces
+                            repulsionStrength: 45,
+                            cohesionStrength: 10,
+                            damping: 0.03,
+                            levelingForce: LEVELING_STRENGTH,
+                            particleCount: this.params.particleCount,
+                            simulationSpeed: SIMULATION_SPEED
+                        };
+                        break;
+                    case 'honey':
+                        this.params = {
+                            gravity: 9.8,
+                            viscosity: 0.9,       // Very high viscosity for honey
+                            surfaceTension: 0.8,
+                            pressureStiffness: 20,
+                            repulsionStrength: 40,
+                            cohesionStrength: 25,
+                            damping: 0.4,
+                            levelingForce: 0.08,
+                            particleCount: this.params.particleCount,
+                            simulationSpeed: SIMULATION_SPEED * 0.4 // Honey simulates at 40% speed
+                        };
+                        break;
+                    case 'oil':
+                        this.params = {
+                            gravity: 9.8,
+                            viscosity: 0.35,
+                            surfaceTension: 0.25,
+                            pressureStiffness: 18,
+                            repulsionStrength: 35,
+                            cohesionStrength: 7,
+                            damping: 0.06,
+                            levelingForce: 0.1,
+                            particleCount: this.params.particleCount,
+                            simulationSpeed: SIMULATION_SPEED * 0.7 // Oil simulates at 70% speed
+                        };
+                        break;
+                }
+                
+                // Update UI to reflect new parameters
+                updateControlsFromParams();
+            }
+        }
+        
+        // Initialize the simulation when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('simulation-canvas');
+            const simulation = new WaterSimulation(canvas);
+            
+            // Handle window resize to keep canvas dimensions correct
+            function handleResize() {
+                // Force a resize of the canvas when window dimensions change
+                simulation.resize();
+                
+                // Calculate correct dimensions for canvas based on container
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+            }
+            
+            // Set initial size
+            handleResize();
+            
+            // Add resize event listener
+            window.addEventListener('resize', handleResize);
+            
+            // Start the animation loop
+            requestAnimationFrame(timestamp => simulation.update(timestamp));
+            
+            // Control event listeners
+            document.getElementById('start-pause').addEventListener('click', (e) => {
+                const isPaused = simulation.togglePause();
+                e.target.textContent = isPaused ? 'Resume' : 'Pause';
+            });
+            
+            document.getElementById('reset').addEventListener('click', () => {
+                simulation.reset();
+            });
+            
+            document.getElementById('add-water').addEventListener('click', () => {
+                simulation.addWater(100);
+            });
+            
+            // Preset buttons
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const preset = e.target.dataset.preset;
+                    simulation.applyPreset(preset);
+                });
+            });
+            
+            // Sync sliders with number inputs
+            function syncInputs(sliderId, valueId) {
+                const slider = document.getElementById(sliderId);
+                const value = document.getElementById(valueId);
+                
+                slider.addEventListener('input', () => {
+                    value.value = slider.value;
+                    updateSimulationParams();
+                });
+                
+                value.addEventListener('input', () => {
+                    slider.value = value.value;
+                    updateSimulationParams();
+                });
+            }
+            
+            // Setup all control syncs
+            syncInputs('particles', 'particles-value');
+            syncInputs('gravity', 'gravity-value');
+            syncInputs('viscosity', 'viscosity-value');
+            syncInputs('tension', 'tension-value');
+            syncInputs('stiffness', 'stiffness-value');
+            syncInputs('damping', 'damping-value');
+            
+            // Add UI control for new repulsion parameter
+            const physicsSection = document.querySelector('.panel-section:nth-child(2)');
+            
+            const repulsionGroup = document.createElement('div');
+            repulsionGroup.className = 'control-group';
+            
+            repulsionGroup.innerHTML = `
+                <label for="repulsion">Repulsion Strength:</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <input type="range" id="repulsion" min="0" max="100" value="50" step="1">
+                    <input type="number" id="repulsion-value" value="50" min="0" max="100" step="1">
+                </div>
+            `;
+            
+            physicsSection.appendChild(repulsionGroup);
+            
+            // Setup sync for new control
+            syncInputs('repulsion', 'repulsion-value');
+            
+            // Add UI control for cohesion strength
+            const cohesionGroup = document.createElement('div');
+            cohesionGroup.className = 'control-group';
+            
+            cohesionGroup.innerHTML = `
+                <label for="cohesion">Cohesion Strength:</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <input type="range" id="cohesion" min="0" max="50" value="25" step="1">
+                    <input type="number" id="cohesion-value" value="25" min="0" max="50" step="1">
+                </div>
+            `;
+            
+            physicsSection.appendChild(cohesionGroup);
+            
+            // Setup sync for new control
+            syncInputs('cohesion', 'cohesion-value');
+            
+            // Add UI control for new leveling force parameter
+            const levelingGroup = document.createElement('div');
+            levelingGroup.className = 'control-group';
+            
+            levelingGroup.innerHTML = `
+                <label for="leveling">Leveling Force:</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <input type="range" id="leveling" min="0" max="0.5" value="0.15" step="0.01">
+                    <input type="number" id="leveling-value" value="0.15" min="0" max="0.5" step="0.01">
+                </div>
+            `;
+            
+            physicsSection.appendChild(levelingGroup);
+            
+            // Setup sync for new control
+            syncInputs('leveling', 'leveling-value');
+            
+            // Add simulation speed slider
+            const speedGroup = document.createElement('div');
+            speedGroup.className = 'control-group';
+            
+            speedGroup.innerHTML = `
+                <label for="speed">Simulation Speed:</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <input type="range" id="speed" min="0.1" max="2" value="${SIMULATION_SPEED}" step="0.1">
+                    <input type="number" id="speed-value" value="${SIMULATION_SPEED}" min="0.1" max="2" step="0.1">
+                </div>
+            `;
+            
+            physicsSection.appendChild(speedGroup);
+            
+            // Setup sync for simulation speed
+            syncInputs('speed', 'speed-value');
+            
+            // Update updateSimulationParams function to include simulation speed
+            const originalUpdateSimulationParams = updateSimulationParams;
+            updateSimulationParams = function() {
+                originalUpdateSimulationParams();
+                simulation.params.simulationSpeed = parseFloat(document.getElementById('speed-value').value);
+            };
+            
+            // Update updateControlsFromParams function to include simulation speed
+            const originalUpdateControlsFromParams = updateControlsFromParams;
+            updateControlsFromParams = function() {
+                originalUpdateControlsFromParams();
+                document.getElementById('speed').value = simulation.params.simulationSpeed;
+                document.getElementById('speed-value').value = simulation.params.simulationSpeed;
+            };
+            
+            // Update simulation parameters function to include repulsion, cohesion, and leveling force
+            function updateSimulationParams() {
+                simulation.params.particleCount = parseInt(document.getElementById('particles-value').value);
+                simulation.params.gravity = parseFloat(document.getElementById('gravity-value').value);
+                simulation.params.viscosity = parseFloat(document.getElementById('viscosity-value').value);
+                simulation.params.surfaceTension = parseFloat(document.getElementById('tension-value').value);
+                simulation.params.pressureStiffness = parseFloat(document.getElementById('stiffness-value').value);
+                simulation.params.damping = parseFloat(document.getElementById('damping-value').value);
+                simulation.params.repulsionStrength = parseFloat(document.getElementById('repulsion-value').value);
+                simulation.params.cohesionStrength = parseFloat(document.getElementById('cohesion-value').value);
+                simulation.params.levelingForce = parseFloat(document.getElementById('leveling-value').value);
+                simulation.params.simulationSpeed = parseFloat(document.getElementById('speed-value').value);
+            }
+            
+            // Update UI controls from simulation parameters
+            function updateControlsFromParams() {
+                document.getElementById('gravity').value = simulation.params.gravity;
+                document.getElementById('gravity-value').value = simulation.params.gravity;
+                
+                document.getElementById('viscosity').value = simulation.params.viscosity;
+                document.getElementById('viscosity-value').value = simulation.params.viscosity;
+                
+                document.getElementById('tension').value = simulation.params.surfaceTension;
+                document.getElementById('tension-value').value = simulation.params.surfaceTension;
+                
+                document.getElementById('stiffness').value = simulation.params.pressureStiffness;
+                document.getElementById('stiffness-value').value = simulation.params.pressureStiffness;
+                
+                document.getElementById('damping').value = simulation.params.damping;
+                document.getElementById('damping-value').value = simulation.params.damping;
+                
+                document.getElementById('repulsion').value = simulation.params.repulsionStrength;
+                document.getElementById('repulsion-value').value = simulation.params.repulsionStrength;
+                
+                document.getElementById('cohesion').value = simulation.params.cohesionStrength;
+                document.getElementById('cohesion-value').value = simulation.params.cohesionStrength;
+                
+                document.getElementById('leveling').value = simulation.params.levelingForce;
+                document.getElementById('leveling-value').value = simulation.params.levelingForce;
+                
+                document.getElementById('speed').value = simulation.params.simulationSpeed;
+                document.getElementById('speed-value').value = simulation.params.simulationSpeed;
+                
+                // Update simulation
+                updateSimulationParams();
+            }
+            
+            // Update default values for the damping slider
+            document.getElementById('damping').min = "0";
+            document.getElementById('damping').max = "0.5";
+            document.getElementById('damping').value = "0.02";
+            document.getElementById('damping-value').value = "0.02";
+            
+            // Set gravity to realistic value
+            document.getElementById('gravity').min = "0";
+            document.getElementById('gravity').max = "20";
+            document.getElementById('gravity').value = "9.8";
+            document.getElementById('gravity-value').value = "9.8";
+            
+            // Update slider ranges and defaults for water-like behavior
+            document.getElementById('stiffness').max = "30";
+            
+            document.getElementById('tension').value = "0.8";
+            document.getElementById('tension-value').value = "0.8";
+            
+            document.getElementById('viscosity').value = "0.3";
+            document.getElementById('viscosity-value').value = "0.3";
+            
+            document.getElementById('stiffness').value = "15";
+            document.getElementById('stiffness-value').value = "15";
+            
+            document.getElementById('repulsion').value = "30";
+            document.getElementById('repulsion-value').value = "30";
+            
+            document.getElementById('damping').value = "0.05";
+            document.getElementById('damping-value').value = "0.05";
+            
+            // Update slider defaults for better flow
+            document.getElementById('viscosity').value = "0.05";
+            document.getElementById('viscosity-value').value = "0.05";
+            
+            document.getElementById('tension').value = "0.2";
+            document.getElementById('tension-value').value = "0.2";
+            
+            document.getElementById('stiffness').value = "25";
+            document.getElementById('stiffness-value').value = "25";
+            
+            document.getElementById('repulsion').value = "50";
+            document.getElementById('repulsion-value').value = "50";
+            
+            document.getElementById('cohesion').value = "5";
+            document.getElementById('cohesion-value').value = "5";
+            
+            document.getElementById('damping').value = "0.01";
+            document.getElementById('damping-value').value = "0.01";
+            
+            // Update slider defaults for water that doesn't float
+            document.getElementById('viscosity').value = "0.1";
+            document.getElementById('viscosity-value').value = "0.1";
+            
+            document.getElementById('tension').value = "0.3";
+            document.getElementById('tension-value').value = "0.3";
+            
+            document.getElementById('stiffness').value = "25";
+            document.getElementById('stiffness-value').value = "25";
+            
+            document.getElementById('repulsion').value = "45";
+            document.getElementById('repulsion-value').value = "45";
+            
+            document.getElementById('cohesion').value = "8";
+            document.getElementById('cohesion-value').value = "8";
+            
+            document.getElementById('damping').value = "0.03";
+            document.getElementById('damping-value').value = "0.03";
+            
+            document.getElementById('leveling').value = "0.08";
+            document.getElementById('leveling-value').value = "0.08";
+            
+            // Update slider defaults for better water behavior
+            document.getElementById('viscosity').value = "0.12";
+            document.getElementById('viscosity-value').value = "0.12";
+            
+            document.getElementById('tension').value = "0.35";
+            document.getElementById('tension-value').value = "0.35";
+            
+            document.getElementById('stiffness').value = "28";
+            document.getElementById('stiffness-value').value = "28";
+            
+            document.getElementById('repulsion').value = "45";
+            document.getElementById('repulsion-value').value = "45";
+            
+            document.getElementById('cohesion').value = "10";
+            document.getElementById('cohesion-value').value = "10";
+            
+            document.getElementById('damping').value = "0.03";
+            document.getElementById('damping-value').value = "0.03";
+            
+            document.getElementById('leveling').value = "0.2";
+            document.getElementById('leveling-value').value = "0.2";
+        });
+    </script>
+</body>
+</html>

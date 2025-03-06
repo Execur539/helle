@@ -273,7 +273,7 @@
             backdrop-filter: blur(10px);
             box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
             position: relative;
-            padding-top: 1.2rem; /* Increased to accommodate attachment preview */
+            padding-top: 1.2rem;
         }
 
         #user-input {
@@ -403,7 +403,7 @@
             border-radius: 0.5rem;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
             font-size: 0.9rem;
-            visibility: hidden;  /* Changed from display: none */
+            visibility: hidden;
             opacity: 0;
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
@@ -419,7 +419,7 @@
             padding: 1rem;
             margin: 1rem 0;
             position: relative;
-            text-align: left;  /* Add this line */
+            text-align: left; 
             line-height: 1.2;
         }
 
@@ -662,7 +662,7 @@
             background-color: #203142;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: max-height 0.5s ease, background-color 0.3s, box-shadow 0.3s;
-            max-height: 3.5em; /* Adjusted to fit the text */
+            max-height: 3.5em;
             overflow: hidden;
             cursor: pointer;
         }
@@ -737,7 +737,6 @@
         }
 
         .edit-icon {
-            /* Similar styling to delete-icon */
             opacity: 0;
             transform: scale(0.8);
             transition: opacity 0.3s ease, transform 0.3s ease, color 0.3s ease;
@@ -763,7 +762,6 @@
             margin-left: 0.5rem;
             cursor: pointer;
         }
-        /* NEW: Chat control buttons styling */
         .chat-controls button {
             background-color: var(--primary-color);
             border: none;
@@ -778,18 +776,15 @@
             background-color: #2980b9;
             transform: scale(1.05);
         }
-        /* NEW: Cancel edit button styling */
         #cancel-edit-btn {
             background-color: #e74c3c;
             margin-left: 0.5rem;
             display: none;
         }
-        /* NEW: Send button editing state */
         #send-btn.editing {
             background-color: #f1c40f;
         }
 
-        /* Enhanced Cancel Edit Button Styling */
         #cancel-edit-btn {
             background: linear-gradient(145deg, #e74c3c, #c0392b);
             border: none;
@@ -859,7 +854,6 @@
             }
         }
 
-        /* Ripple effect */
         #cancel-edit-btn .ripple {
             position: absolute;
             border-radius: 50%;
@@ -883,7 +877,7 @@
             display: block;
             position: absolute;
             top: 5px;
-            right: 60px; /* Positioned left of delete/edit icons */
+            right: 60px;
             cursor: pointer;
             color: #27ae60;
             font-size: 1rem;
@@ -897,31 +891,30 @@
             transform: scale(1.1);
         }
 
-        /* NEW: Style for AI code blocks (similar to ChatGPT) */
         .ai-code-block {
             background-color: #2d2d2d;
             border: 1px solid #444;
             border-radius: 8px;
-            padding: 0.5rem;  /* Reduced padding */
-            margin: 0.5rem 0; /* Reduced margin */
+            padding: 0.5rem; 
+            margin: 0.5rem 0;
             font-family: monospace;
             font-size: 0.9rem;
             overflow-x: auto;
             position: relative;
-            text-align: left !important;  /* Add this line */
+            text-align: left !important;
         }
 
         .ai-code-block pre {
-            margin: 0;  /* Remove default margin */
-            padding: 0.3rem 0; /* Remove default padding */
-            text-align: left;  /* Add this line */
+            margin: 0;
+            padding: 0.3rem 0;
+            text-align: left;
         }
 
         .ai-code-block code {
             display: block;
-            padding: 0; /* Remove default padding */
-            text-align: left;  /* Add this line */
-            direction: ltr;    /* Add this line to ensure left-to-right text */
+            padding: 0;
+            text-align: left;
+            direction: ltr;
         }
 
         .code-controls {
@@ -2108,6 +2101,7 @@
             font-size: 0.9rem;
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }

@@ -523,6 +523,12 @@
       "image": "/img/vex7.webp"
     },
     {
+      "text": "Water Physics Simulation",
+      "link": "/pages/game_page.html?game=Water%20Physics%20Simulation",
+      "link2": "/pages/games/waterphysics/water.html",
+      "image": "/img/water-icon.jpg"
+    },
+    {
       "text": "Webretro",
       "link": "/pages/game_page.html?game=Webretro",
       "link2": "/pages/games/webretro/index.html",
