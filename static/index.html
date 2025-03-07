@@ -11,6 +11,10 @@
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
   <link href="https://fonts.cdnfonts.com/css/orbitron" rel="stylesheet">
   <script src="js/about.js"></script>
+  <script>
+    // MAINTENANCE CONFIG - Easy to find and update
+    const nextMaintenanceTime = "No scheduled maintenance"; // Put any text or date here
+  </script>
   <style>
     @keyframes colorShift {
       0% { color: #d946ef; } /* A purple color */
@@ -52,6 +56,15 @@
       --tooltip-tail: 0.1875rem;
       --tooltip-offset: 1.25rem;
       transform: translateX(-50%) translateY(calc(-100% - var(--tooltip-tail) - var(--tooltip-offset) - 0.5rem));
+    }
+
+    .maintenance-banner {
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid #d946ef;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      margin-top: 1rem;
+      backdrop-filter: blur(5px);
     }
   </style>
 </head>
@@ -127,6 +140,12 @@
       About Us
       <i class="fa-solid fa-arrow-right ml-1 text-sm"></i>
     </a>
+
+    <div class="maintenance-banner" data-aos="fade-up" data-aos-delay="1000">
+      <p class="text-sm text-gray-300">Next Scheduled Maintenance:</p>
+      <p id="maintenance-time" class="text-primary font-bold"></p>
+      <p class="text-xs text-gray-400 mt-1">During maintenance, the site may be temporarily inaccessible<br>(usually less than 5 minutes for small updates)</p>
+    </div>
   </div>
 </section>
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
@@ -577,6 +596,32 @@
     // Start animation
     requestAnimationFrame(animate);
   });
+
+  function updateMaintenanceTime() {
+    const timeDisplay = document.getElementById('maintenance-time');
+    
+    // Check if nextMaintenanceTime is a valid date
+    const date = new Date(nextMaintenanceTime);
+    
+    if (date instanceof Date && !isNaN(date)) {
+      // If it's a valid date, format it
+      const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        timeZoneName: 'short' 
+      };
+      timeDisplay.textContent = date.toLocaleDateString(undefined, options);
+    } else {
+      // If it's not a valid date, display the text as-is
+      timeDisplay.textContent = nextMaintenanceTime;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', updateMaintenanceTime);
 </script>
 </body>
 </html>

@@ -422,31 +422,45 @@
         const BOUNDARY_DAMPING = -0.5;
         const GRAVITY = 9.8;
         const MIN_PARTICLE_DISTANCE = PARTICLE_RADIUS * 0.7;
-        const HYDROSTATIC_FACTOR = 1.0;
+        const HYDROSTATIC_FACTOR = 1.5; // Increased from 1.0 for faster water leveling
         const SURFACE_THRESHOLD = 5;
-        const GRAVITY_DOMINANCE = 1.0;
+        const GRAVITY_DOMINANCE = 1.5; // Increased from 1.0 for faster movement
         const MAX_LEVELING_DISTANCE = SMOOTHING_LENGTH * 0.9;
-        const FIXED_TIMESTEP = 1/90;
+        const FIXED_TIMESTEP = 1/60; // Changed from 1/90 for better performance
         const MAX_DELTA_TIME = 0.05;
-        const VISCOSITY_SCALE = 0.1;
-        const SIMULATION_SPEED = 1.0;
-        const LEVELING_STRENGTH = 0.7;
-        const PRESSURE_EXPONENT = 2.5;
-
-        // New optimization constants
-        const PARTICLE_CULLING_MARGIN = 50; // Pixels beyond the viewport to still simulate
-        const SPATIAL_GRID_CELL_SIZE_FACTOR = 1.0; // Adjust cell size dynamically
-        const DYNAMIC_SMOOTHING_LENGTH = true; // Enable dynamic smoothing length
-        const ADAPTIVE_PHYSICS_ENABLED = true; // Enable adaptive physics timesteps
-        const PARTICLE_MERGE_DISTANCE = PARTICLE_RADIUS * 4; // Distance for merging distant particles
-        const PARTICLE_SPLIT_THRESHOLD = 5; // Number of particles needed to form a cluster for merging
-        const LOD_DISTANCE_THRESHOLD = 200; // Distance for Level-of-Detail simplification
-        const MAX_PARTICLES_PER_FRAME = 1000; // Maximum particles to process in one frame
-        const OFFSCREEN_SIMPLIFICATION = true; // Simplify physics for off-screen particles
-        const LOW_PERFORMANCE_THRESHOLD = 30; // FPS threshold for triggering optimization
-        const DORMANT_VELOCITY_THRESHOLD = 0.5; // Velocity below which particles can become dormant
-        const MAX_ACTIVE_PARTICLES_RATIO = 0.7; // Maximum ratio of active particles
+        const VISCOSITY_SCALE = 0.2; // Doubled for more responsive movement
+        const SIMULATION_SPEED = 1.5; // Base speed increased
+        const LEVELING_STRENGTH = 1.0; // Increased from 0.7
+        const PRESSURE_EXPONENT = 2.0; // Reduced from 2.5 for faster stabilization
         
+        // New optimization constants
+        const PARTICLE_CULLING_MARGIN = 50;
+        const SPATIAL_GRID_CELL_SIZE_FACTOR = 1.0;
+        const DYNAMIC_SMOOTHING_LENGTH = true;
+        const ADAPTIVE_PHYSICS_ENABLED = true;
+        const PARTICLE_MERGE_DISTANCE = PARTICLE_RADIUS * 4;
+        const PARTICLE_SPLIT_THRESHOLD = 5;
+        const LOD_DISTANCE_THRESHOLD = 200;
+        const MAX_PARTICLES_PER_FRAME = 1000;
+        const OFFSCREEN_SIMPLIFICATION = true;
+        const LOW_PERFORMANCE_THRESHOLD = 30;
+        const DORMANT_VELOCITY_THRESHOLD = 0.5;
+        const MAX_ACTIVE_PARTICLES_RATIO = 0.7;
+        const AUTO_ADJUST_QUALITY = true; // New flag to enable auto quality adjustment
+        const PERFORMANCE_CHECK_INTERVAL = 500; // Check performance more frequently (ms)
+
+        // Modify optimization constants
+        const SPATIAL_GRID_SIZE = SMOOTHING_LENGTH; // Use smoothing length as grid size
+        const ACTIVE_RANGE = SMOOTHING_LENGTH * 4; // Only process particles within this range of active areas
+        const MERGE_THRESHOLD = 0.8; // Merge particles when velocity difference is below this
+        const SPLIT_THRESHOLD = 3.0; // Split merged particles above this velocity
+        const MAX_PARTICLES_PER_CELL = 12; // Limit particles per spatial grid cell
+        const CULLING_MARGIN = 100; // Pixels beyond viewport to simulate
+        const BATCH_SIZE = 250; // Process physics in batches
+
+        // Add worker pool size based on CPU cores
+        const WORKER_COUNT = Math.max(2, navigator.hardwareConcurrency || 4);
+
         // Main simulation class with optimizations
         class WaterSimulation {
             constructor(canvas) {
@@ -502,6 +516,10 @@
                     maxActiveParticles: 1.0 // Ratio of particles that can be active
                 };
                 
+                // Add optimization state tracking
+                this.lastPerformanceCheck = 0;
+                this.performanceCheckInterval = 1000; // Check performance every 1 second
+                
                 // Improved parameters for faster leveling
                 this.params = {
                     gravity: 9.8,
@@ -530,11 +548,618 @@
                 
                 this.reset();
                 
+                // Add device performance detection
+                this.devicePerformanceRating = this.detectDevicePerformance();
+                console.log(`Device performance rating: ${this.devicePerformanceRating}`);
+                
                 // Initialize state arrays
                 this.initializeStates();
 
                 // Initialize optimization history
                 this.initOptimizationTracking();
+                
+                // Initialize Web Workers if supported
+                this.initWebWorkers();
+                
+                // Initialize GPU compute if supported
+                this.initGPUCompute();
+                
+                // Apply initial device-specific adjustments
+                this.applyDeviceSpecificSettings();
+
+                // Add spatial grid
+                this.spatialGrid = new Map();
+                this.activeCells = new Set();
+                
+                // Add worker pool
+                this.workers = [];
+                this.initializeWorkers();
+            }
+            
+            // Detect device performance capabilities
+            detectDevicePerformance() {
+                let performanceScore = 1.0; // Default medium performance
+                
+                // Check processor cores
+                const cores = navigator.hardwareConcurrency || 2;
+                if (cores >= 8) performanceScore += 0.5;
+                else if (cores <= 2) performanceScore -= 0.3;
+                
+                // Check if device is mobile
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                if (isMobile) performanceScore -= 0.5;
+                
+                // Check GPU/WebGL capabilities
+                try {
+                    const canvas = document.createElement('canvas');
+                    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                    if (!gl) {
+                        performanceScore -= 0.3;
+                    } else {
+                        // Check WebGL capabilities
+                        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                        if (debugInfo) {
+                            const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                            if (renderer) {
+                                if (/(nvidia|rtx|gtx)/i.test(renderer)) performanceScore += 0.4;
+                                else if (/(intel)/i.test(renderer)) performanceScore += 0.1;
+                                else if (/(adreno|mali|apple)/i.test(renderer)) performanceScore -= 0.2;
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Error detecting GPU capabilities", e);
+                    performanceScore -= 0.2;
+                }
+                
+                // Clamp score between 0.5 and 2.0
+                return Math.max(0.5, Math.min(2.0, performanceScore));
+            }
+            
+            // Apply device-specific adjustments based on performance rating
+            applyDeviceSpecificSettings() {
+                // Adjust simulation speed based on performance rating
+                const baseSpeed = this.params.simulationSpeed;
+                const adjustedSpeed = baseSpeed * (1.2 / this.devicePerformanceRating);
+                this.params.simulationSpeed = Math.min(adjustedSpeed, 2.0); // Cap at 2x
+                
+                console.log(`Applied device-specific speed adjustment: ${this.params.simulationSpeed}x`);
+                
+                // Update UI control
+                const speedControl = document.getElementById('speed-value');
+                if (speedControl) {
+                    speedControl.value = this.params.simulationSpeed.toFixed(1);
+                    document.getElementById('speed').value = this.params.simulationSpeed;
+                }
+                
+                // Set initial optimization level based on device performance
+                if (this.devicePerformanceRating < 0.8) {
+                    // Low-end device: use performance mode
+                    this.setOptimizationMode("performance");
+                } else if (this.devicePerformanceRating > 1.5) {
+                    // High-end device: use quality mode
+                    this.setOptimizationMode("high");
+                } else {
+                    // Mid-range device: use balanced mode
+                    this.setOptimizationMode("balanced");
+                }
+            }
+            
+            // Initialize Web Workers for parallel processing
+            initWebWorkers() {
+                this.useWorkers = window.Worker !== undefined;
+                this.workers = [];
+                this.workerCount = Math.max(2, navigator.hardwareConcurrency || 4);
+                this.workerCount = Math.min(this.workerCount, 8); // Cap at 8 workers
+                this.workerTasks = [];
+                this.workerResults = [];
+                this.workerBusy = false;
+                this.workerEnabled = true; // Flag to actually use workers
+                
+                if (this.useWorkers) {
+                    try {
+                        // Create worker blob for inline definition
+                        const workerScript = `
+                            // Physics worker
+                            self.onmessage = function(e) {
+                                const { taskType, taskData, taskId } = e.data;
+                                
+                                if (taskType === 'computeDensityPressure') {
+                                    const result = computeDensityPressure(taskData);
+                                    self.postMessage({taskId, result});
+                                } else if (taskType === 'computeForces') {
+                                    const result = computeForces(taskData);
+                                    self.postMessage({taskId, result});
+                                } else if (taskType === 'integrate') {
+                                    const result = integrate(taskData);
+                                    self.postMessage({taskId, result});
+                                }
+                            };
+                            
+                            // SPH kernel functions
+                            function kernel(r, h) {
+                                if (r > h) return 0;
+                                
+                                const q = r / h;
+                                const s = 8 / (Math.PI * Math.pow(h, 3));
+                                
+                                if (q <= 1) {
+                                    return s * (1 - 1.5 * q * q + 0.75 * q * q * q);
+                                } else {
+                                    return s * 0.25 * Math.pow(2 - q, 3);
+                                }
+                            }
+                            
+                            function gradKernel(r, h, dx, dy) {
+                                if (r > h || r === 0) return { x: 0, y: 0 };
+                                
+                                const q = r / h;
+                                const s = 8 / (Math.PI * Math.pow(h, 4));
+                                let factor;
+                                
+                                if (q <= 1) {
+                                    factor = s * (-3 * q + 2.25 * q * q) / r;
+                                } else {
+                                    factor = s * -0.75 * Math.pow(2 - q, 2) / r;
+                                }
+                                
+                                return {
+                                    x: factor * dx,
+                                    y: factor * dy
+                                };
+                            }
+                            
+                            // Process a chunk of particles for density & pressure
+                            function computeDensityPressure(data) {
+                                const { particles, spatialHash, cellSize, smoothingLength, restDensity, pressureStiffness, pressureExp } = data;
+                                const results = [];
+                                
+                                for (const particleIndex of data.indices) {
+                                    const particle = particles[particleIndex];
+                                    let density = 0;
+                                    let neighbors = 0;
+                                    let nearSurface = false;
+                                    
+                                    // Self-density
+                                    density += kernel(0, smoothingLength);
+                                    
+                                    // Get neighbors using spatial hash
+                                    const cellX = Math.floor(particle.x / cellSize);
+                                    const cellY = Math.floor(particle.y / cellSize);
+                                    
+                                    for (let i = -1; i <= 1; i++) {
+                                        for (let j = -1; j <= 1; j++) {
+                                            const cellKey = \`\${cellX + i},\${cellY + j}\`;
+                                            const cellParticles = spatialHash[cellKey];
+                                            
+                                            if (cellParticles) {
+                                                for (const idx of cellParticles) {
+                                                    if (idx !== particleIndex) {
+                                                        const p2 = particles[idx];
+                                                        const dx = p2.x - particle.x;
+                                                        const dy = p2.y - particle.y;
+                                                        const r2 = dx * dx + dy * dy;
+                                                        
+                                                        if (r2 < smoothingLength * smoothingLength) {
+                                                            const r = Math.sqrt(r2);
+                                                            density += kernel(r, smoothingLength);
+                                                            neighbors++;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    // Identify particles near surface
+                                    if (neighbors < data.surfaceThreshold) {
+                                        nearSurface = true;
+                                    }
+                                    
+                                    // Calculate pressure
+                                    const pressure = pressureStiffness * 
+                                        Math.max(0, Math.pow(density / restDensity, pressureExp) - 1);
+                                        
+                                    results.push({
+                                        index: particleIndex,
+                                        density,
+                                        pressure,
+                                        neighbors,
+                                        nearSurface
+                                    });
+                                }
+                                
+                                return results;
+                            }
+                            
+                            // Process a chunk of particles for force calculation
+                            function computeForces(data) {
+                                const { particles, spatialHash, cellSize, smoothingLength, particleRadius, params, waterLevel } = data;
+                                const results = [];
+                                
+                                for (const particleIndex of data.indices) {
+                                    const particle = particles[particleIndex];
+                                    let fx = 0;
+                                    let fy = params.gravity;
+                                    
+                                    // Get neighbors using spatial hash
+                                    const cellX = Math.floor(particle.x / cellSize);
+                                    const cellY = Math.floor(particle.y / cellSize);
+                                    const neighbors = [];
+                                    
+                                    for (let i = -1; i <= 1; i++) {
+                                        for (let j = -1; j <= 1; j++) {
+                                            const cellKey = \`\${cellX + i},\${cellY + j}\`;
+                                            const cellParticles = spatialHash[cellKey];
+                                            
+                                            if (cellParticles) {
+                                                for (const idx of cellParticles) {
+                                                    if (idx !== particleIndex) {
+                                                        const p2 = particles[idx];
+                                                        const dx = p2.x - particle.x;
+                                                        const dy = p2.y - particle.y;
+                                                        const r2 = dx * dx + dy * dy;
+                                                        
+                                                        if (r2 < smoothingLength * smoothingLength) {
+                                                            const r = Math.sqrt(r2);
+                                                            neighbors.push({
+                                                                particle: p2,
+                                                                index: idx,
+                                                                dx: dx,
+                                                                dy: dy,
+                                                                r: r
+                                                            });
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    // Apply standard forces only if we have neighbors
+                                    if (neighbors.length > 0) {
+                                        // Process forces - only the important calculations, simplified for worker
+                                        
+                                        // Surface tension
+                                        if (particle.nearSurface) {
+                                            let colorGradX = 0;
+                                            let colorGradY = 0;
+                                            let colorLaplacian = 0;
+                                            
+                                            for (const n of neighbors) {
+                                                if (n.r > 0) {
+                                                    const kernelGrad = gradKernel(n.r, smoothingLength, n.dx, n.dy);
+                                                    colorGradX += kernelGrad.x;
+                                                    colorGradY += kernelGrad.y;
+                                                    colorLaplacian += 2 * kernel(n.r, smoothingLength) / n.r;
+                                                }
+                                            }
+                                            
+                                            const colorGradMagnitude = Math.sqrt(colorGradX * colorGradX + colorGradY * colorGradY);
+                                            
+                                            if (colorGradMagnitude > 0.01) {
+                                                const nx = colorGradX / (colorGradMagnitude || 1);
+                                                const ny = colorGradY / (colorGradMagnitude || 1);
+                                                
+                                                const surfaceTensionForce = -params.surfaceTension * colorLaplacian;
+                                                
+                                                fx += surfaceTensionForce * nx;
+                                                fy += surfaceTensionForce * ny;
+                                            }
+                                        }
+                                        
+                                        // Apply hydrostatic force
+                                        const depthFromSurface = particle.y - waterLevel;
+                                        if (Math.abs(depthFromSurface) > particleRadius * 0.5) {
+                                            if (depthFromSurface > 0) {
+                                                const hydroFactor = Math.min(depthFromSurface, params.gravity * 1.2);
+                                                fy -= hydroFactor;
+                                            } else if (depthFromSurface < 0) {
+                                                const hydroFactor = Math.min(Math.abs(depthFromSurface), params.gravity * 0.8);
+                                                fy += hydroFactor;
+                                            }
+                                        }
+                                        
+                                        // Pressure and viscosity forces
+                                        for (const n of neighbors) {
+                                            const neighbor = n.particle;
+                                            const r = n.r;
+                                            const dx = n.dx;
+                                            const dy = n.dy;
+                                            
+                                            if (r > 0) {
+                                                const nx = -dx / r;
+                                                const ny = -dy / r;
+                                                
+                                                // Repulsion
+                                                if (r < particleRadius * 2) {
+                                                    const repulsionFactor = params.repulsionStrength * 
+                                                        Math.pow(1.0 - r / (particleRadius * 2), 1.6);
+                                                    
+                                                    fx += repulsionFactor * nx;
+                                                    fy += repulsionFactor * ny;
+                                                }
+                                                
+                                                // Pressure
+                                                if (particle.density > 0 && neighbor.density > 0) {
+                                                    const pressureGrad = gradKernel(r, smoothingLength, dx, dy);
+                                                    const pressureTerm = (particle.pressure / (particle.density * particle.density) + 
+                                                        neighbor.pressure / (neighbor.density * neighbor.density));
+                                                    
+                                                    fx -= pressureTerm * pressureGrad.x;
+                                                    fy -= pressureTerm * pressureGrad.y;
+                                                }
+                                                
+                                                // Viscosity
+                                                const dvx = neighbor.vx - particle.vx;
+                                                const dvy = neighbor.vy - particle.vy;
+                                                
+                                                const viscosityFactor = params.viscosity * 0.1 * 
+                                                    (1 - r / smoothingLength);
+                                                
+                                                fx += viscosityFactor * dvx;
+                                                fy += viscosityFactor * dvy;
+                                            }
+                                        }
+                                    }
+                                    
+                                    results.push({
+                                        index: particleIndex,
+                                        fx: fx,
+                                        fy: fy
+                                    });
+                                }
+                                
+                                return results;
+                            }
+                            
+                            function integrate(data) {
+                                const { particles, boundaries, dt, dampingFactor } = data;
+                                const results = [];
+                                
+                                for (const particleIndex of data.indices) {
+                                    const p = particles[particleIndex];
+                                    
+                                    // Apply forces
+                                    let vx = p.vx + p.fx * dt;
+                                    let vy = p.vy + p.fy * dt;
+                                    
+                                    // Apply damping
+                                    vx *= (1 - dampingFactor * dt);
+                                    vy *= (1 - dampingFactor * dt);
+                                    
+                                    // Extra damping for extreme motion
+                                    if (vy < -5) {
+                                        vy *= (1 - 0.03 * dt);
+                                    }
+                                    
+                                    // Update position
+                                    let x = p.x + vx * dt;
+                                    let y = p.y + vy * dt;
+                                    
+                                    // Handle boundaries
+                                    const restitution = 0.5;
+                                    
+                                    // Left boundary
+                                    if (x < boundaries.left) {
+                                        vx = Math.abs(vx) * restitution;
+                                        x = boundaries.left;
+                                    }
+                                    
+                                    // Right boundary
+                                    if (x > boundaries.right) {
+                                        vx = -Math.abs(vx) * restitution;
+                                        x = boundaries.right;
+                                    }
+                                    
+                                    // Top boundary
+                                    if (y < boundaries.top) {
+                                        vy = Math.abs(vy) * restitution;
+                                        y = boundaries.top;
+                                    }
+                                    
+                                    // Bottom boundary
+                                    if (y > boundaries.bottom) {
+                                        vy = -Math.abs(vy) * restitution;
+                                        y = boundaries.bottom;
+                                        
+                                        // Add random velocity on bottom collision
+                                        vx += (Math.random() - 0.5) * 1.0;
+                                    }
+                                    
+                                    results.push({
+                                        index: particleIndex,
+                                        x: x,
+                                        y: y,
+                                        vx: vx,
+                                        vy: vy
+                                    });
+                                }
+                                
+                                return results;
+                            }
+                        `;
+                        
+                        const blob = new Blob([workerScript], {type: 'application/javascript'});
+                        const workerURL = URL.createObjectURL(blob);
+                        
+                        // Create specified number of workers
+                        for (let i = 0; i < this.workerCount; i++) {
+                            this.workers.push(new Worker(workerURL));
+                            
+                            // Setup message handler for this worker
+                            this.workers[i].onmessage = (e) => {
+                                this.handleWorkerMessage(e.data);
+                            };
+                        }
+                        
+                        console.log(`Initialized ${this.workerCount} Web Workers for physics calculations`);
+                    } catch (e) {
+                        console.error("Failed to initialize Web Workers:", e);
+                        this.useWorkers = false;
+                    }
+                }
+            }
+            
+            // Initialize GPU computing using GPU.js if available
+            initGPUCompute() {
+                this.useGPU = false;
+                
+                // Check if GPU.js might be available (we'll load it dynamically)
+                if (typeof WebGLRenderingContext !== 'undefined') {
+                    this.loadGPUjs().then(gpuAvailable => {
+                        if (gpuAvailable) {
+                            try {
+                                // Create GPU instance
+                                this.gpu = new GPU.GPU();
+                                
+                                // Create density kernel
+                                this.densityKernel = this.gpu.createKernel(function(positions, particleCount, smoothingLength) {
+                                    const i = this.thread.x;
+                                    let density = 0;
+                                    
+                                    // Self-density
+                                    const selfKernel = 8.0 / (Math.PI * Math.pow(smoothingLength, 3));
+                                    density += selfKernel;
+                                    
+                                    // Neighbor contributions (brute force approach for simplicity)
+                                    const px = positions[i*2];
+                                    const py = positions[i*2+1];
+                                    
+                                    for (let j = 0; j < particleCount; j++) {
+                                        if (j !== i) {
+                                            const nx = positions[j*2];
+                                            const ny = positions[j*2+1];
+                                            
+                                            const dx = nx - px;
+                                            const dy = ny - py;
+                                            const r2 = dx*dx + dy*dy;
+                                            
+                                            if (r2 < smoothingLength*smoothingLength) {
+                                                const r = Math.sqrt(r2);
+                                                const q = r / smoothingLength;
+                                                
+                                                if (q <= 1) {
+                                                    density += selfKernel * (1 - 1.5*q*q + 0.75*q*q*q);
+                                                } else if (q <= 2) {
+                                                    density += selfKernel * 0.25 * Math.pow(2-q, 3);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    return density;
+                                })
+                                .setOutput([2048]) // Max particles we'll compute in one batch
+                                .setLoopMaxIterations(4000); // Increased loop limit
+                                
+                                this.useGPU = true;
+                                console.log("GPU computing initialized successfully");
+                            } catch (e) {
+                                console.error("GPU computing initialization failed:", e);
+                                this.useGPU = false;
+                            }
+                        }
+                    });
+                }
+            }
+            
+            // Dynamically load GPU.js
+            async loadGPUjs() {
+                if (typeof GPU !== 'undefined') {
+                    return true;
+                }
+                
+                try {
+                    // Create script element to load GPU.js from CDN
+                    return new Promise((resolve) => {
+                        const script = document.createElement('script');
+                        script.src = 'https://cdn.jsdelivr.net/npm/gpu.js@latest/dist/gpu-browser.min.js';
+                        script.onload = () => resolve(true);
+                        script.onerror = () => resolve(false);
+                        document.head.appendChild(script);
+                    });
+                } catch (e) {
+                    console.error("Failed to load GPU.js:", e);
+                    return false;
+                }
+            }
+            
+            // Handle worker messages
+            handleWorkerMessage(data) {
+                const { taskId, result } = data;
+                
+                // Find the corresponding task
+                const taskIndex = this.workerTasks.findIndex(task => task.id === taskId);
+                
+                if (taskIndex !== -1) {
+                    const task = this.workerTasks[taskIndex];
+                    
+                    // Add result to results list
+                    this.workerResults.push({
+                        taskType: task.type,
+                        result: result
+                    });
+                    
+                    // Remove task from pending list
+                    this.workerTasks.splice(taskIndex, 1);
+                    
+                    // If all tasks are complete, finalize the results
+                    if (this.workerTasks.length === 0 && this.workerResults.length > 0) {
+                        this.finalizeWorkerResults();
+                    }
+                }
+            }
+            
+            // Apply all the results received from workers
+            finalizeWorkerResults() {
+                for (const resultItem of this.workerResults) {
+                    if (resultItem.taskType === 'computeDensityPressure') {
+                        // Apply density and pressure results
+                        for (const particleResult of resultItem.result) {
+                            const particle = this.particles[particleResult.index];
+                            particle.density = particleResult.density;
+                            particle.pressure = particleResult.pressure;
+                            particle.neighbors = particleResult.neighbors;
+                            particle.nearSurface = particleResult.nearSurface;
+                        }
+                    } else if (resultItem.taskType === 'computeForces') {
+                        // Apply force results
+                        for (const particleResult of resultItem.result) {
+                            const particle = this.particles[particleResult.index];
+                            particle.fx = particleResult.fx;
+                            particle.fy = particleResult.fy;
+                        }
+                    } else if (resultItem.taskType === 'integrate') {
+                        // Apply integration results
+                        for (const particleResult of resultItem.result) {
+                            const particle = this.particles[particleResult.index];
+                            particle.x = particleResult.x;
+                            particle.y = particleResult.y;
+                            particle.vx = particleResult.vx;
+                            particle.vy = particleResult.vy;
+                        }
+                    }
+                }
+                
+                // Clear results list
+                this.workerResults = [];
+                this.workerBusy = false;
+                
+                // Signal that worker processing is complete
+                this.workerProcessingComplete();
+            }
+            
+            // Add the missing workerProcessingComplete method
+            workerProcessingComplete() {
+                // All worker tasks are complete, continue with the next physics step
+                this.workerBusy = false;
+                
+                // If we're in a sequence of steps, continue with the next one
+                if (this.pendingPhysicsSteps && this.pendingPhysicsSteps > 0) {
+                    this.pendingPhysicsSteps--;
+                    this.processPhysicsStep();
+                }
             }
             
             // Initialize WebGL renderer if supported
@@ -733,9 +1358,87 @@
                         perfBar.style.width = `${(1 - level / (this.adaptiveSettings.levels.length - 1)) * 100}%`;
                     }
                     
+                    console.log(`Applied optimization level ${level}: ${levelName}`);
                     return true;
                 }
                 return false;
+            }
+            
+            // Auto-optimize based on performance
+            checkAndOptimize() {
+                const now = performance.now();
+                if (now - this.lastPerformanceCheck < PERFORMANCE_CHECK_INTERVAL) {
+                    return;
+                }
+                
+                this.lastPerformanceCheck = now;
+                
+                // Only auto-optimize if in auto mode
+                if (this.optimizationMode !== "auto" || !AUTO_ADJUST_QUALITY) {
+                    return;
+                }
+                
+                // Calculate average fps
+                const avgFps = this.performanceHistory.reduce((a, b) => a + b, 0) / this.performanceHistory.length;
+                
+                // Adjust optimization level based on performance thresholds
+                if (avgFps < 20) {
+                    // Very poor performance - apply maximum optimization
+                    if (this.adaptiveSettings.currentLevel < this.adaptiveSettings.levels.length - 1) {
+                        this.applyOptimizationLevel(this.adaptiveSettings.levels.length - 1);
+                        console.log(`Auto-optimizing: Performance critical (${avgFps.toFixed(1)} FPS) -> Maximum optimization`);
+                        
+                        // Toggle WebGL and Workers based on performance
+                        if (this.particles.length > 500) {
+                            this.workerEnabled = true; // Enable workers for many particles
+                        } else {
+                            this.workerEnabled = false; // Disable workers for few particles (overhead)
+                        }
+                    }
+                } else if (avgFps < 30) {
+                    // Poor performance - increase optimization
+                    if (this.adaptiveSettings.currentLevel < this.adaptiveSettings.levels.length - 2) {
+                        this.applyOptimizationLevel(this.adaptiveSettings.currentLevel + 1);
+                        console.log(`Auto-optimizing: Performance low (${avgFps.toFixed(1)} FPS) -> Increasing optimization`);
+                    }
+                } else if (avgFps > 55 && this.particles.length > 300) {
+                    // Good performance - consider decreasing optimization
+                    if (this.adaptiveSettings.currentLevel > 0) {
+                        this.applyOptimizationLevel(this.adaptiveSettings.currentLevel - 1);
+                        console.log(`Auto-optimizing: Performance good (${avgFps.toFixed(1)} FPS) -> Decreasing optimization`);
+                    }
+                }
+                
+                // Update performance bar
+                const perfBar = document.getElementById('performance-bar');
+                if (perfBar) {
+                    perfBar.style.width = `${Math.min(100, Math.max(0, avgFps / 60 * 100))}%`;
+                }
+            }
+            
+            // Update the simulation's optimization mode
+            setOptimizationMode(mode) {
+                this.optimizationMode = mode;
+                
+                // Apply appropriate optimization level based on mode
+                switch (mode) {
+                    case "high":
+                        this.applyOptimizationLevel(0); // Maximum quality
+                        break;
+                    case "balanced":
+                        this.applyOptimizationLevel(2); // Medium quality
+                        break;
+                    case "performance":
+                        this.applyOptimizationLevel(4); // Minimum quality
+                        break;
+                    case "auto":
+                    default:
+                        // Start with balanced and let auto-optimizer adjust
+                        this.applyOptimizationLevel(2);
+                        break;
+                }
+                
+                console.log(`Set optimization mode to: ${mode}`);
             }
             
             // Initialize state arrays for interpolation
@@ -1101,6 +1804,84 @@
                 }
             }
             
+            // Main physics step - fixed timestep
+            step(dt) {
+                // Scale dt by simulation speed
+                const scaledDt = dt * this.params.simulationSpeed;
+                
+                if (this.useWorkers && this.workerEnabled && !this.workerBusy) {
+                    // Use web workers for physics
+                    this.pendingPhysicsSteps = 1;
+                    this.processPhysicsStep();
+                } else {
+                    // Use regular physics processing
+                    this.computeDensityPressure();
+                    this.computeForces();
+                }
+                
+                // Always integrate locally (not using workers for this)
+                this.integrate(scaledDt);
+            }
+            
+            // Modified to actually use Web Workers for physics
+            processPhysicsStep() {
+                if (!this.useWorkers || !this.workerEnabled || this.workerBusy) {
+                    // Fall back to regular processing if workers aren't available
+                    this.computeDensityPressure();
+                    this.computeForces();
+                    return;
+                }
+                
+                this.workerBusy = true;
+                
+                // Build spatial hash for use by workers
+                this.buildSpatialHash();
+                
+                // Prepare particle data
+                const particleData = this.particles.map(p => ({
+                    x: p.x, y: p.y, vx: p.vx, vy: p.vy,
+                    density: p.density, pressure: p.pressure,
+                    nearSurface: p.nearSurface
+                }));
+                
+                // Split particles into chunks for workers
+                const chunkSize = Math.ceil(this.particles.length / this.workerCount);
+                const taskId = Date.now().toString() + Math.random().toString().slice(2);
+                
+                for (let i = 0; i < this.workerCount; i++) {
+                    const startIdx = i * chunkSize;
+                    const endIdx = Math.min(startIdx + chunkSize, this.particles.length);
+                    
+                    if (startIdx >= this.particles.length) break;
+                    
+                    const indices = Array.from({length: endIdx - startIdx}, (_, j) => startIdx + j);
+                    
+                    // Create and queue the worker task
+                    const taskData = {
+                        taskId: taskId + '_' + i,
+                        taskType: 'computeDensityPressure',
+                        taskData: {
+                            particles: particleData,
+                            indices: indices,
+                            spatialHash: this.spatialHash,
+                            cellSize: this.cellSize,
+                            smoothingLength: SMOOTHING_LENGTH,
+                            restDensity: REST_DENSITY,
+                            pressureStiffness: this.params.pressureStiffness,
+                            pressureExp: PRESSURE_EXPONENT,
+                            surfaceThreshold: SURFACE_THRESHOLD
+                        }
+                    };
+                    
+                    this.workerTasks.push({
+                        id: taskData.taskId,
+                        type: taskData.taskType
+                    });
+                    
+                    this.workers[i].postMessage(taskData);
+                }
+            }
+            
             computeForces() {
                 // Optimization: Pre-filter active particles 
                 // (those with neighbors - isolated particles can be skipped)
@@ -1147,41 +1928,41 @@
                     if (isInWater) {
                         // Apply much stronger, faster-acting hydrostatic forces
                         if (Math.abs(depthFromSurface) > PARTICLE_RADIUS * 0.5) {
-                            // Below water level: apply upward hydrostatic force
+                            // Below water level: apply upward hydrostatic force - INCREASED STRENGTH
                             if (depthFromSurface > 0) {
                                 const hydroFactor = Math.min(
-                                    depthFromSurface * HYDROSTATIC_FACTOR, 
-                                    this.params.gravity * 1.2  // Can exceed gravity for faster leveling
+                                    depthFromSurface * HYDROSTATIC_FACTOR * 1.5, // Increased by 50%
+                                    this.params.gravity * 1.8  // Can exceed gravity by more for faster leveling
                                 );
                                 
-                                // Apply exponential force for faster convergence near surface
-                                particle.fy -= hydroFactor * (0.8 + 0.2 * Math.sqrt(particle.density / REST_DENSITY));
+                                // Apply stronger exponential force for faster convergence near surface
+                                particle.fy -= hydroFactor * (1.0 + 0.4 * Math.sqrt(particle.density / REST_DENSITY));
                             }
-                            // Above water level: apply downward force
+                            // Above water level: apply stronger downward force
                             else if (depthFromSurface < 0) {
                                 const hydroFactor = Math.min(
-                                    Math.abs(depthFromSurface) * HYDROSTATIC_FACTOR * 0.9,
-                                    this.params.gravity * 0.8
+                                    Math.abs(depthFromSurface) * HYDROSTATIC_FACTOR * 1.2, // Increased by 30%
+                                    this.params.gravity * 1.2  // Allow stronger downward force
                                 );
                                 
-                                // Apply strong downward force
-                                particle.fy += hydroFactor;
+                                // Apply stronger downward force
+                                particle.fy += hydroFactor * 1.25;
                             }
                         }
                     }
                     
-                    // Direct water height leveling forces
+                    // Direct water height leveling forces - ENHANCED IMPLEMENTATION
                     if (neighbors.length > 0) {
-                        // Compute average height of neighbors
+                        // Compute average height of neighbors with improved weighting
                         let localAvgHeight = 0;
                         let weightSum = 0;
                         
-                        // Find particles especially in horizontal neighborhood
+                        // Find particles especially in horizontal neighborhood with stronger influence
                         for (const n of neighbors) {
-                            // Prioritize horizontal neighbors for better leveling
+                            // Prioritize horizontal neighbors even more for better leveling
                             const horizontalness = Math.abs(n.dx) / (Math.abs(n.dy) + 0.01);
                             const weight = Math.max(0, 1 - n.r / MAX_LEVELING_DISTANCE) * 
-                                         (1 + horizontalness * 0.5); // Boost horizontal neighbors
+                                         (1 + horizontalness * 0.8); // Increased horizontal influence
                             
                             localAvgHeight += n.particle.y * weight;
                             weightSum += weight;
@@ -1191,19 +1972,19 @@
                             localAvgHeight /= weightSum;
                             const heightDiff = particle.y - localAvgHeight;
                             
-                            // Apply a very strong leveling force based on local height difference
-                            if (Math.abs(heightDiff) > PARTICLE_RADIUS * 0.3) {
+                            // Apply a much stronger leveling force based on local height difference
+                            if (Math.abs(heightDiff) > PARTICLE_RADIUS * 0.2) { // Reduced threshold
                                 // Scale leveling force by how close to surface
-                                const surfaceProximity = particle.isSurface ? 1.2 : 
-                                                      (particle.nearSurface ? 1.0 : 0.8);
+                                const surfaceProximity = particle.isSurface ? 1.5 : // Increased surface influence
+                                                      (particle.nearSurface ? 1.2 : 0.9);
                                 
                                 // Leveling force is proportional to height difference
                                 // and stronger closer to surface
-                                const levelForce = heightDiff * this.params.levelingForce * surfaceProximity;
+                                const levelForce = heightDiff * this.params.levelingForce * 1.5 * surfaceProximity;
                                 
-                                // Add a strong leveling force, capped relative to gravity
-                                const maxLevel = this.params.gravity * 0.9;
-                                const minLevel = -this.params.gravity * 0.9;
+                                // Add a stronger leveling force, less capped relative to gravity
+                                const maxLevel = this.params.gravity * 1.2; // Increased cap
+                                const minLevel = -this.params.gravity * 1.2;
                                 particle.fy -= Math.max(Math.min(levelForce, maxLevel), minLevel);
                             }
                         }
@@ -1290,17 +2071,6 @@
                         particle.fy *= scaleFactor;
                     }
                 }
-            }
-            
-            // Main physics step - fixed timestep
-            step(dt) {
-                // Scale dt by simulation speed
-                const scaledDt = dt * this.params.simulationSpeed;
-                
-                // Update physics
-                this.computeDensityPressure();
-                this.computeForces();
-                this.integrate(scaledDt);
             }
             
             integrate(dt) {
@@ -1480,13 +2250,23 @@
                 // Alpha 0 = previous state, 1 = current state
                 const alpha = this.timeAccumulator / FIXED_TIMESTEP;
                 
-                // Update FPS counter
+                // Update FPS counter and performance tracking
                 this.frameCount++;
                 this.frameTime += deltaTime;
                 if (this.frameTime >= 1.0) {
                     this.fps = this.frameCount;
                     // Update display with FPS and physics Hz for debugging
                     document.getElementById('fps').textContent = `FPS: ${this.fps} | Physics: ${this.physicsHz}Hz`;
+                    
+                    // Update performance history for optimization
+                    this.performanceHistory.push(this.fps);
+                    if (this.performanceHistory.length > 10) {
+                        this.performanceHistory.shift(); // Keep only the last 10 measurements
+                    }
+                    
+                    // Check and adjust optimization if needed
+                    this.checkAndOptimize();
+                    
                     this.frameCount = 0;
                     this.frameTime = 0;
                 }
@@ -1500,6 +2280,114 @@
             
             // Optimized rendering that uses batch processing and fewer gradients
             render(interpolationAlpha) {
+                if (this.hasWebGL && this.shaderProgram) {
+                    this.renderWithWebGL(interpolationAlpha);
+                } else {
+                    this.renderWithCanvas2D(interpolationAlpha);
+                }
+            }
+            
+            // New WebGL rendering method that actually uses WebGL
+            renderWithWebGL(interpolationAlpha) {
+                const gl = this.glCtx;
+                
+                // Clear the canvas
+                gl.clearColor(0.9, 0.95, 1.0, 0.2);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+                
+                // Don't try to render if we have no particles
+                if (this.particles.length === 0) return;
+                
+                // Setup viewport and projection matrix
+                gl.viewport(0, 0, this.width, this.height);
+                
+                // Create orthographic projection matrix
+                const projectionMatrix = [
+                    2 / this.width, 0, 0, 0,
+                    0, -2 / this.height, 0, 0,
+                    0, 0, 1, 0,
+                    -1, 1, 0, 1
+                ];
+                
+                // Simple model-view matrix (identity)
+                const modelViewMatrix = [
+                    1, 0, 0, 0,
+                    0, 1, 0, 0,
+                    0, 0, 1, 0,
+                    0, 0, 0, 1
+                ];
+                
+                // Set the shader program and matrices
+                gl.useProgram(this.shaderProgram);
+                gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
+                gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
+                
+                // Create arrays for particle data
+                const positions = new Float32Array(this.particles.length * 2);
+                const sizes = new Float32Array(this.particles.length);
+                const colors = new Float32Array(this.particles.length * 4);
+                
+                // Fill arrays with particle data
+                for (let i = 0; i < this.particles.length; i++) {
+                    const particle = this.particles[i];
+                    
+                    // Calculate interpolated position
+                    let renderX = particle.x;
+                    let renderY = particle.y;
+                    
+                    if (i < this.particleStates.previous.length && i < this.particleStates.current.length) {
+                        const prevState = this.particleStates.previous[i];
+                        const currState = this.particleStates.current[i];
+                        
+                        renderX = prevState.x + (currState.x - prevState.x) * interpolationAlpha;
+                        renderY = prevState.y + (currState.y - prevState.y) * interpolationAlpha;
+                    }
+                    
+                    positions[i * 2] = renderX;
+                    positions[i * 2 + 1] = renderY;
+                    
+                    // Set size based on whether it's a surface particle
+                    sizes[i] = particle.isSurface ? PARTICLE_RADIUS * 2.2 : PARTICLE_RADIUS * 2;
+                    
+                    // Set color based on depth
+                    const depth = Math.max(0, Math.min(1, (renderY / this.height) * 2));
+                    colors[i * 4] = (66 + depth * 20) / 255; // r
+                    colors[i * 4 + 1] = (165 + depth * 30) / 255; // g
+                    colors[i * 4 + 2] = (245 - depth * 50) / 255; // b
+                    colors[i * 4 + 3] = particle.isSurface ? 0.95 : 0.8; // alpha
+                }
+                
+                // Update buffer data
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.position);
+                gl.bufferData(gl.ARRAY_BUFFER, positions, gl.DYNAMIC_DRAW);
+                gl.vertexAttribPointer(this.programInfo.attribLocations.vertexPosition, 2, gl.FLOAT, false, 0, 0);
+                gl.enableVertexAttribArray(this.programInfo.attribLocations.vertexPosition);
+                
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.size);
+                gl.bufferData(gl.ARRAY_BUFFER, sizes, gl.DYNAMIC_DRAW);
+                gl.vertexAttribPointer(this.programInfo.attribLocations.pointSize, 1, gl.FLOAT, false, 0, 0);
+                gl.enableVertexAttribArray(this.programInfo.attribLocations.pointSize);
+                
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.color);
+                gl.bufferData(gl.ARRAY_BUFFER, colors, gl.DYNAMIC_DRAW);
+                gl.vertexAttribPointer(this.programInfo.attribLocations.color, 4, gl.FLOAT, false, 0, 0);
+                gl.enableVertexAttribArray(this.programInfo.attribLocations.color);
+                
+                // Enable blending for transparent particles
+                gl.enable(gl.BLEND);
+                gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+                
+                // Draw particles
+                gl.drawArrays(gl.POINTS, 0, this.particles.length);
+                
+                // Disable attributes
+                gl.disableVertexAttribArray(this.programInfo.attribLocations.vertexPosition);
+                gl.disableVertexAttribArray(this.programInfo.attribLocations.pointSize);
+                gl.disableVertexAttribArray(this.programInfo.attribLocations.color);
+            }
+            
+            // Existing Canvas2D rendering as fallback
+            renderWithCanvas2D(interpolationAlpha) {
                 // Clear canvas with a single call
                 this.ctx.clearRect(0, 0, this.width, this.height);
                 
@@ -1644,6 +2532,155 @@
                 // Update UI to reflect new parameters
                 updateControlsFromParams();
             }
+
+            initializeWorkers() {
+                if (typeof Worker !== 'undefined') {
+                    for (let i = 0; i < WORKER_COUNT; i++) {
+                        const worker = new Worker(URL.createObjectURL(new Blob([`
+                            onmessage = function(e) {
+                                const { particles, start, end, dt } = e.data;
+                                const results = [];
+                                
+                                for (let i = start; i < end; i++) {
+                                    const p = particles[i];
+                                    // Physics calculations
+                                    // ... (implement particle physics here)
+                                    results.push({
+                                        index: i,
+                                        x: p.x + p.vx * dt,
+                                        y: p.y + p.vy * dt,
+                                        vx: p.vx,
+                                        vy: p.vy
+                                    });
+                                }
+                                
+                                postMessage(results);
+                            };
+                        `])));
+                        this.workers.push(worker);
+                    }
+                }
+            }
+
+            updateSpatialGrid() {
+                this.spatialGrid.clear();
+                this.activeCells.clear();
+        
+                for (let i = 0; i < this.particles.length; i++) {
+                    const p = this.particles[i];
+                    const cellX = Math.floor(p.x / SPATIAL_GRID_SIZE);
+                    const cellY = Math.floor(p.y / SPATIAL_GRID_SIZE);
+                    const key = `${cellX},${cellY}`;
+                    
+                    if (!this.spatialGrid.has(key)) {
+                        this.spatialGrid.set(key, []);
+                    }
+                    
+                    const cell = this.spatialGrid.get(key);
+                    if (cell.length < MAX_PARTICLES_PER_CELL) {
+                        cell.push(i);
+                        
+                        // Mark cells within active range
+                        if (this.isParticleActive(p)) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                for (let dy = -1; dy <= 1; dy++) {
+                                    this.activeCells.add(`${cellX + dx},${cellY + dy}`);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        
+            isParticleActive(particle) {
+                // Check if particle is on screen or moving significantly
+                const onScreen = particle.x >= -CULLING_MARGIN && 
+                                particle.x <= this.width + CULLING_MARGIN &&
+                                particle.y >= -CULLING_MARGIN && 
+                                particle.y <= this.height + CULLING_MARGIN;
+                                
+                const moving = Math.abs(particle.vx) > 0.1 || Math.abs(particle.vy) > 0.1;
+                return onScreen || moving;
+            }
+        
+            processPhysicsInBatches() {
+                const batchCount = Math.ceil(this.particles.length / BATCH_SIZE);
+                let completed = 0;
+        
+                for (let i = 0; i < batchCount; i++) {
+                    const start = i * BATCH_SIZE;
+                    const end = Math.min(start + BATCH_SIZE, this.particles.length);
+                    
+                    if (this.workers.length > 0) {
+                        // Use worker from pool
+                        const worker = this.workers[i % this.workers.length];
+                        worker.postMessage({
+                            particles: this.particles.slice(start, end),
+                            start,
+                            end,
+                            dt: this.timeStep
+                        });
+                        
+                        worker.onmessage = (e) => {
+                            this.updateParticlesBatch(e.data);
+                            completed++;
+                            if (completed === batchCount) {
+                                this.finalizePhysicsUpdate();
+                            }
+                        };
+                    } else {
+                        // Fallback to synchronous processing
+                        this.updateParticlesBatch(this.processParticleBatch(start, end));
+                        completed++;
+                    }
+                }
+            }
+
+            // Override the existing particle merging logic
+            handleParticleMerging() {
+                // Only check cells with active particles
+                for (const cellKey of this.activeCells) {
+                    const particles = this.spatialGrid.get(cellKey) || [];
+                    if (particles.length < 2) continue;
+        
+                    // Check for potential merges in this cell
+                    for (let i = 0; i < particles.length; i++) {
+                        const p1 = this.particles[particles[i]];
+                        if (p1.merged) continue;
+        
+                        for (let j = i + 1; j < particles.length; j++) {
+                            const p2 = this.particles[particles[j]];
+                            if (p2.merged) continue;
+        
+                            const dx = p2.x - p1.x;
+                            const dy = p2.y - p1.y;
+                            const distSq = dx * dx + dy * dy;
+        
+                            if (distSq < PARTICLE_RADIUS * PARTICLE_RADIUS * 4) {
+                                const velDiff = Math.abs(p1.vx - p2.vx) + Math.abs(p1.vy - p2.vy);
+                                
+                                if (velDiff < MERGE_THRESHOLD) {
+                                    this.mergeParticles(p1, p2);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Add this new method
+            mergeParticles(p1, p2) {
+                // Average positions and velocities
+                p1.x = (p1.x + p2.x) * 0.5;
+                p1.y = (p1.y + p2.y) * 0.5;
+                p1.vx = (p1.vx + p2.vx) * 0.5;
+                p1.vy = (p1.vy + p2.vy) * 0.5;
+                p1.mass = (p1.mass || 1) + (p2.mass || 1);
+                
+                // Mark second particle as merged
+                p2.merged = true;
+                p2.mergedInto = p1;
+            }
         }
         
         // Initialize the simulation when the page loads
@@ -1684,6 +2721,11 @@
                 simulation.addWater(100);
             });
             
+            // Optimization selector
+            document.getElementById('optimization').addEventListener('change', (e) => {
+                simulation.setOptimizationMode(e.target.value);
+            });
+            
             // Preset buttons
             document.querySelectorAll('.preset-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
@@ -1715,93 +2757,12 @@
             syncInputs('tension', 'tension-value');
             syncInputs('stiffness', 'stiffness-value');
             syncInputs('damping', 'damping-value');
-            
-            // Add UI control for new repulsion parameter
-            const physicsSection = document.querySelector('.panel-section:nth-child(2)');
-            
-            const repulsionGroup = document.createElement('div');
-            repulsionGroup.className = 'control-group';
-            
-            repulsionGroup.innerHTML = `
-                <label for="repulsion">Repulsion Strength:</label>
-                <div style="display: flex; gap: 0.5rem; align-items: center;">
-                    <input type="range" id="repulsion" min="0" max="100" value="50" step="1">
-                    <input type="number" id="repulsion-value" value="50" min="0" max="100" step="1">
-                </div>
-            `;
-            
-            physicsSection.appendChild(repulsionGroup);
-            
-            // Setup sync for new control
             syncInputs('repulsion', 'repulsion-value');
-            
-            // Add UI control for cohesion strength
-            const cohesionGroup = document.createElement('div');
-            cohesionGroup.className = 'control-group';
-            
-            cohesionGroup.innerHTML = `
-                <label for="cohesion">Cohesion Strength:</label>
-                <div style="display: flex; gap: 0.5rem; align-items: center;">
-                    <input type="range" id="cohesion" min="0" max="50" value="25" step="1">
-                    <input type="number" id="cohesion-value" value="25" min="0" max="50" step="1">
-                </div>
-            `;
-            
-            physicsSection.appendChild(cohesionGroup);
-            
-            // Setup sync for new control
             syncInputs('cohesion', 'cohesion-value');
-            
-            // Add UI control for new leveling force parameter
-            const levelingGroup = document.createElement('div');
-            levelingGroup.className = 'control-group';
-            
-            levelingGroup.innerHTML = `
-                <label for="leveling">Leveling Force:</label>
-                <div style="display: flex; gap: 0.5rem; align-items: center;">
-                    <input type="range" id="leveling" min="0" max="0.5" value="0.15" step="0.01">
-                    <input type="number" id="leveling-value" value="0.15" min="0" max="0.5" step="0.01">
-                </div>
-            `;
-            
-            physicsSection.appendChild(levelingGroup);
-            
-            // Setup sync for new control
             syncInputs('leveling', 'leveling-value');
-            
-            // Add simulation speed slider
-            const speedGroup = document.createElement('div');
-            speedGroup.className = 'control-group';
-            
-            speedGroup.innerHTML = `
-                <label for="speed">Simulation Speed:</label>
-                <div style="display: flex; gap: 0.5rem; align-items: center;">
-                    <input type="range" id="speed" min="0.1" max="2" value="${SIMULATION_SPEED}" step="0.1">
-                    <input type="number" id="speed-value" value="${SIMULATION_SPEED}" min="0.1" max="2" step="0.1">
-                </div>
-            `;
-            
-            physicsSection.appendChild(speedGroup);
-            
-            // Setup sync for simulation speed
             syncInputs('speed', 'speed-value');
             
-            // Update updateSimulationParams function to include simulation speed
-            const originalUpdateSimulationParams = updateSimulationParams;
-            updateSimulationParams = function() {
-                originalUpdateSimulationParams();
-                simulation.params.simulationSpeed = parseFloat(document.getElementById('speed-value').value);
-            };
-            
-            // Update updateControlsFromParams function to include simulation speed
-            const originalUpdateControlsFromParams = updateControlsFromParams;
-            updateControlsFromParams = function() {
-                originalUpdateControlsFromParams();
-                document.getElementById('speed').value = simulation.params.simulationSpeed;
-                document.getElementById('speed-value').value = simulation.params.simulationSpeed;
-            };
-            
-            // Update simulation parameters function to include repulsion, cohesion, and leveling force
+            // Update simulation parameters function
             function updateSimulationParams() {
                 simulation.params.particleCount = parseInt(document.getElementById('particles-value').value);
                 simulation.params.gravity = parseFloat(document.getElementById('gravity-value').value);
@@ -1813,10 +2774,22 @@
                 simulation.params.cohesionStrength = parseFloat(document.getElementById('cohesion-value').value);
                 simulation.params.levelingForce = parseFloat(document.getElementById('leveling-value').value);
                 simulation.params.simulationSpeed = parseFloat(document.getElementById('speed-value').value);
+                
+                // Apply device-specific adjustments when manual values are changed
+                const newCount = parseInt(document.getElementById('particles-value').value);
+                if (newCount !== simulation.params.particleCount) {
+                    // Update worker optimization based on particle count
+                    if (simulation.useWorkers) {
+                        simulation.workerEnabled = newCount > 300; // Only use workers for larger particle counts
+                    }
+                }
             }
             
             // Update UI controls from simulation parameters
             function updateControlsFromParams() {
+                document.getElementById('particles').value = simulation.params.particleCount;
+                document.getElementById('particles-value').value = simulation.params.particleCount;
+                
                 document.getElementById('gravity').value = simulation.params.gravity;
                 document.getElementById('gravity-value').value = simulation.params.gravity;
                 
@@ -1843,103 +2816,13 @@
                 
                 document.getElementById('speed').value = simulation.params.simulationSpeed;
                 document.getElementById('speed-value').value = simulation.params.simulationSpeed;
-                
-                // Update simulation
-                updateSimulationParams();
             }
             
-            // Update default values for the damping slider
-            document.getElementById('damping').min = "0";
-            document.getElementById('damping').max = "0.5";
-            document.getElementById('damping').value = "0.02";
-            document.getElementById('damping-value').value = "0.02";
+            // Initialize parameters
+            updateSimulationParams();
             
-            // Set gravity to realistic value
-            document.getElementById('gravity').min = "0";
-            document.getElementById('gravity').max = "20";
-            document.getElementById('gravity').value = "9.8";
-            document.getElementById('gravity-value').value = "9.8";
-            
-            // Update slider ranges and defaults for water-like behavior
-            document.getElementById('stiffness').max = "30";
-            
-            document.getElementById('tension').value = "0.8";
-            document.getElementById('tension-value').value = "0.8";
-            
-            document.getElementById('viscosity').value = "0.3";
-            document.getElementById('viscosity-value').value = "0.3";
-            
-            document.getElementById('stiffness').value = "15";
-            document.getElementById('stiffness-value').value = "15";
-            
-            document.getElementById('repulsion').value = "30";
-            document.getElementById('repulsion-value').value = "30";
-            
-            document.getElementById('damping').value = "0.05";
-            document.getElementById('damping-value').value = "0.05";
-            
-            // Update slider defaults for better flow
-            document.getElementById('viscosity').value = "0.05";
-            document.getElementById('viscosity-value').value = "0.05";
-            
-            document.getElementById('tension').value = "0.2";
-            document.getElementById('tension-value').value = "0.2";
-            
-            document.getElementById('stiffness').value = "25";
-            document.getElementById('stiffness-value').value = "25";
-            
-            document.getElementById('repulsion').value = "50";
-            document.getElementById('repulsion-value').value = "50";
-            
-            document.getElementById('cohesion').value = "5";
-            document.getElementById('cohesion-value').value = "5";
-            
-            document.getElementById('damping').value = "0.01";
-            document.getElementById('damping-value').value = "0.01";
-            
-            // Update slider defaults for water that doesn't float
-            document.getElementById('viscosity').value = "0.1";
-            document.getElementById('viscosity-value').value = "0.1";
-            
-            document.getElementById('tension').value = "0.3";
-            document.getElementById('tension-value').value = "0.3";
-            
-            document.getElementById('stiffness').value = "25";
-            document.getElementById('stiffness-value').value = "25";
-            
-            document.getElementById('repulsion').value = "45";
-            document.getElementById('repulsion-value').value = "45";
-            
-            document.getElementById('cohesion').value = "8";
-            document.getElementById('cohesion-value').value = "8";
-            
-            document.getElementById('damping').value = "0.03";
-            document.getElementById('damping-value').value = "0.03";
-            
-            document.getElementById('leveling').value = "0.08";
-            document.getElementById('leveling-value').value = "0.08";
-            
-            // Update slider defaults for better water behavior
-            document.getElementById('viscosity').value = "0.12";
-            document.getElementById('viscosity-value').value = "0.12";
-            
-            document.getElementById('tension').value = "0.35";
-            document.getElementById('tension-value').value = "0.35";
-            
-            document.getElementById('stiffness').value = "28";
-            document.getElementById('stiffness-value').value = "28";
-            
-            document.getElementById('repulsion').value = "45";
-            document.getElementById('repulsion-value').value = "45";
-            
-            document.getElementById('cohesion').value = "10";
-            document.getElementById('cohesion-value').value = "10";
-            
-            document.getElementById('damping').value = "0.03";
-            document.getElementById('damping-value').value = "0.03";
-            
-            document.getElementById('leveling').value = "0.2";
-            document.getElementById('leveling-value').value = "0.2";
+            // Apply initial optimization mode
+            simulation.setOptimizationMode(document.getElementById('optimization').value);
         });
     </script>
 </body>
